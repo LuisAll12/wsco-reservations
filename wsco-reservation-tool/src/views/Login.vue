@@ -4,6 +4,8 @@ import { useRouter } from "vue-router";
 import axios from "axios";
 import emailjs from 'emailjs-com';
 
+import setSessionKey from '../services/sessionKeyService.js';
+
 const baseId = "appzBNlFfIJC6865x";
 const tableName = "tblalxalwt9C0cFxl";
 
@@ -22,6 +24,8 @@ const generateVerificationCode = () => {
   verificationCode.value = Math.floor(100000 + Math.random() * 900000).toString();
 };
 
+
+
 const sendVerificationEmail = async (email) => {
   generateVerificationCode();
 
@@ -35,11 +39,11 @@ const sendVerificationEmail = async (email) => {
 
   try {
     await emailjs.send(serviceID, templateID, templateParams, userID);
-    successMessage.value = "Verification code sent successfully!";
+    successMessage.value = "Verifizierungscode erfolgreich gesendet!";
     errorMessage.value = "";
     VerifyCodeSent.value = true;
   } catch (error) {
-    errorMessage.value = "Failed to send verification code. Please try again.";
+    errorMessage.value = "Überprüfungscode konnte nicht gesendet werden. Bitte versuchen Sie es erneut.";
     successMessage.value = "";
     console.error(error);
   }
@@ -63,16 +67,19 @@ const Login = async () => {
       ErrorMessage.value = "";
       sendVerificationEmail(LoginEmail.value);
     } else {
-      ErrorMessage.value = "Invalid email.";
+      ErrorMessage.value = "Ungültige E-Mail.";
     }
   } catch (error) {
     console.error("Error during login:", error.response ? error.response.data : error.message);
-    ErrorMessage.value = "An error occurred. Please try again later.";
+    ErrorMessage.value = "Es ist ein Fehler aufgetreten. Bitte versuchen Sie es später noch einmal.";
   }
 };
 
 const EnterVerifyCode = () => {
     if (inputcode.value.toString().trim() === verificationCode.value.trim()) {
+        //Set session key
+        setSessionKey(LoginEmail);
+
         successMessage.value = "Verification successful!";
         VerifyCodeSent.value = false;
         router.push("/meine-reservationen");
@@ -82,7 +89,7 @@ const EnterVerifyCode = () => {
     }
 
     if (VerifyTry.value <= 0) {
-        errorMessage.value = "Wrong verification code. No more tries left.";
+        errorMessage.value = "Falscher Verifizierungscode. Keine weiteren Versuche mehr möglich.";
         VerifyCodeSent.value = false;
     }
 };
