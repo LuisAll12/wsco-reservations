@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 const HomeView = () => import(/* webpackChunkName: "Home" */ '../views/Home.vue');
 const Login = () => import(/* webpackChunkName: "Login" */ '../views/Login.vue');
 const MyRes = () => import(/* webpackChunkName: "Login" */ '../views/MyRes.vue');
-
+const Dashboard = () => import(/* webpackChunkName: "Dashboard" */ '../views/DashboardView.vue');
 
 
 const routes = [
@@ -22,6 +22,11 @@ const routes = [
         name: 'MyRes',
         component: MyRes
     },
+    {
+        path: '/dashboard',
+        name: 'Dashboard',
+        component: Dashboard
+    }
 ];
 
 const router = createRouter({

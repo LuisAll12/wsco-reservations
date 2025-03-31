@@ -1,0 +1,78 @@
+<!-- src/components/Sidebar.vue -->
+<script setup>
+import SidebarCalendar from './SidebarCalendar.vue'
+
+defineProps({
+  user: Object,
+  currentWeek: Date,
+  currentDate: Date
+})
+</script>
+
+<template>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h1>WSCO Reservationen</h1>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <ul>
+        <li v-for="page in ['Dashboard', 'Calendar', 'Settings', 'Help']" 
+            :key="page"
+            class="nav-item">
+          {{ page }}
+        </li>
+      </ul>
+    </nav>
+
+    <section class="reservation-actions">
+      <div class="action-item">
+        <span>Siehe hier</span>
+        <span>></span>
+      </div>
+      <div class="action-item">
+        <span>Schaden melden</span>
+      </div>
+    </section>
+    <!-- <SidebarCalendar 
+      :current-week="currentWeek"
+      :current-date="currentDate"
+    /> -->
+  </aside>
+</template>
+
+<style scoped>
+.sidebar {
+  background: #2c3e50;
+  color: white;
+  padding: 1.5rem;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+}
+
+.nav-item {
+  padding: 12px;
+  border-radius: 8px;
+  margin: 4px 0;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.nav-item:hover {
+  background: #34495e;
+}
+
+.reservation-actions {
+  margin-top: 2rem;
+}
+
+.action-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  background: #34495e;
+  margin: 8px 0;
+  border-radius: 8px;
+}
+</style>
