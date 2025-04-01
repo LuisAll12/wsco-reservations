@@ -7,7 +7,8 @@ const props = defineProps({
   days: Array,
   reservations: Array,
   selectedBoat: [String, Number],
-  boats: Array
+  boats: Array,
+  currentUserId: String
 })
 
 // Time slots computation remains the same
@@ -45,6 +46,8 @@ const positionedEvents = computed(() => {
       const dayIndex = props.days.findIndex(day => 
         format(day, 'yyyy-MM-dd') === format(fromDate, 'yyyy-MM-dd')
       )
+      const isCurrentUser = reservation.fields.FK_Member?.[0] === props.currentUserId
+      const color = isCurrentUser ? '#FFD700' : '#ff6b6b' 
 
       const startHour = fromDate.getHours()
       const startMin = fromDate.getMinutes()
@@ -66,7 +69,8 @@ const positionedEvents = computed(() => {
         top: startPosition,
         height: height,
         dayIndex,
-        color: '#FFD700',
+        color: color,
+        isCurrentUser: isCurrentUser,
         boat: boat
       }
     })
@@ -108,14 +112,17 @@ const positionedEvents = computed(() => {
           :style="{
             top: `${event.top}px`,
             height: `${event.height}px`,
-            backgroundColor: event.boat?.fields?.Availability === false ? '#ff6b6b' : '#FFD700'
+            backgroundColor: event.color
           }"
         >
-          <div class="event-content">
+        <div class="event-content">
             <div class="event-time">{{ event.start }} - {{ event.end }}</div>
-            <div class="event-title">{{ event.title }}</div>
+            <div class="event-title">
+              {{ event.title }}
+              <span v-if="!event.isCurrentUser" class="other-user-label">(Anderer Benutzer)</span>
+            </div>
             <div class="event-details" v-if="event.boat">
-              Boat: {{ event.boat.Name || 'Unknown' }}
+              Boat: {{ event.boat.fields.Name || 'Unknown' }}
             </div>
           </div>
         </div>
@@ -130,6 +137,12 @@ const positionedEvents = computed(() => {
   grid-template-columns: 80px repeat(7, 1fr);
   grid-auto-rows: minmax(40px, auto);
   position: relative;
+}
+
+.other-user-label {
+  font-size: 0.8em;
+  opacity: 0.8;
+  margin-left: 4px;
 }
 
 .time-scale {

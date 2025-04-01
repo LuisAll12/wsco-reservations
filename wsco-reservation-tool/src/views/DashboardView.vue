@@ -8,7 +8,8 @@ import { startOfWeek, addDays } from 'date-fns'
 import { useRouter } from "vue-router";
 import getReservations from '../services/GetAllRes';
 import getBoats from '../services/GetAllBoats'
-import getUserInfo from '../services/GetUserInfo'
+import getUserBySessionKey from '../services/GetUserInfo'
+import Cookies from 'js-cookie'
 
 const isValidSession = ref(false); // Initialize as false
 const router = useRouter();
@@ -63,26 +64,21 @@ function nextWeek() {
 
 onMounted(async () => {
   try {
-    // User-Daten laden
-    const userData = await getUserInfo();
-    if (userData) {
-      currentUser.value = userData;
-      user.name = userData.FirstName || userData.Email.split('@')[0];
-      user.id = userData.FK_Member?.[0];
-      user.email = userData.Email;
-      user.isAdmin = userData.IsAdmin === true;
+    const sessionKey = Cookies.get('sessionKey')
+    if (sessionKey) {
+      currentUser.value = await getUserBySessionKey(sessionKey)
     }
     
-    // Reservations und Boats laden
-    reservations.value = await getReservations();
-    boats.value = await getBoats();
-    
+    reservations.value = await getReservations()
+    boats.value = await getBoats()
   } catch (error) {
-    console.error('Initialization error:', error);
-    router.push("/login");
+    console.error('Failed to load data:', error)
   }
-});
+})
 
+function handleNewReservation() {
+  // Logic to handle new reservation
+}
 </script>
 
 <template>
@@ -106,6 +102,7 @@ onMounted(async () => {
         :reservations="reservations"
         :selected-boat="selectedBoat"
         :boats="boats"
+        :current-user-id="currentUser?.id"
       />
     </main>
   </div>

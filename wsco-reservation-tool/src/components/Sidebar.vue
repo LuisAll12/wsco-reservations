@@ -4,6 +4,7 @@ import SidebarCalendar from './SidebarCalendar.vue'
 
 defineProps({
   user: Object,
+  currentUser: Object,
   currentWeek: Date,
   currentDate: Date
 })
@@ -38,6 +39,11 @@ defineProps({
       :current-week="currentWeek"
       :current-date="currentDate"
     /> -->
+    <div class="user-info">
+      <h3>{{ currentUser?.fields?.FirstName }} {{ currentUser?.fields?.LastName }}</h3>
+      <p>{{ currentUser?.fields?.Email }}</p>
+      <p>Role: {{ currentUser?.fields?.Role }}</p>
+    </div>
   </aside>
 </template>
 

@@ -1,15 +1,11 @@
-// src/services/GetUserInfo.js
+// src/services/getUserBySessionKey.js
 import axios from "axios";
-import Cookies from "js-cookie";
 
 const baseId = "appzBNlFfIJC6865x";
-const tableName = "tblalxalwt9C0cFxl"; // Your users table name
+const tableName = "Member";
 
-const getUserInfo = async () => {
+const getUserBySessionKey = async (sessionKey) => {
   try {
-    const sessionKey = Cookies.get("sessionKey");
-    if (!sessionKey) return null;
-
     const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
     const headers = {
       Authorization: `Bearer ${import.meta.env.VITE_APP_API_KEY}`,
@@ -23,11 +19,14 @@ const getUserInfo = async () => {
       }
     });
 
-    return response.data.records[0]?.fields || null;
-  } catch (error) {
-    console.error("Error fetching user info:", error);
+    if (response.data.records.length > 0) {
+      return response.data.records[0]; // Return the first matching user
+    }
     return null;
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    throw error;
   }
 };
 
-export default getUserInfo;
+export default getUserBySessionKey;
