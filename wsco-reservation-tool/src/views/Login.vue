@@ -4,7 +4,7 @@ import { useRouter } from "vue-router";
 import axios from "axios";
 import emailjs from 'emailjs-com';
 
-import setSessionKey from '../services/sessionKeyService.js';
+import {setSessionKey} from '../services/sessionKeyService.js';
 
 const baseId = "appzBNlFfIJC6865x";
 const tableName = "tblalxalwt9C0cFxl";
@@ -82,7 +82,7 @@ const EnterVerifyCode = () => {
 
         successMessage.value = "Verification successful!";
         VerifyCodeSent.value = false;
-        router.push("/meine-reservationen");
+        router.push("/dashboard");
     } else {
         VerifyTry.value -= 1;
         errorMessage.value = `Wrong verification code. ${VerifyTry.value} tries left.`;

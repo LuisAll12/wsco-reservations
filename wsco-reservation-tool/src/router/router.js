@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import Cookies from 'js-cookie';
+
 
 const HomeView = () => import(/* webpackChunkName: "Home" */ '../views/Home.vue');
 const Login = () => import(/* webpackChunkName: "Login" */ '../views/Login.vue');
@@ -34,5 +36,18 @@ const router = createRouter({
     routes,
 });
 
+router.beforeEach(async (to, from, next) => {
+    const isAuthenticated = Cookies.get("sessionKey") !== undefined;
+    const isLoginPage = to.name === 'Login';
+
+    if (isAuthenticated && isLoginPage) {
+        next({ name: 'Dashboard' });
+    } else if (!isAuthenticated && !isLoginPage) {
+        next({ name: 'Login' });
+    } else {
+        next();
+    }
+}
+);
 
 export default router;

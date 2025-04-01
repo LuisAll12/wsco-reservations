@@ -1,11 +1,15 @@
 <!-- src/App.vue -->
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'  
 import Sidebar from '../components/Sidebar.vue'
 import CalendarHeader from '../components/CalendarHeader.vue'
 import WeekGrid from '../components/WeekGrid.vue'
 import { startOfWeek, addDays } from 'date-fns'
+import { checkSessionKey } from '../services/sessionKeyService';
+import { useRouter } from "vue-router";
 
+const isValidSession = ref(false); // Initialize as false
+const router = useRouter();
 
 // Mock-Daten
 const user = reactive({
@@ -86,6 +90,15 @@ function nextWeek() {
   currentDate.value = newDate // 👈 Korrekte Zuweisung
   currentWeek.value = startOfWeek(newDate, { weekStartsOn: 1 })
 }
+
+// onMounted(async () => {
+//   const sessionValid = await checkSessionKey();
+//   if (!sessionValid) {
+//     router.push("/login");
+//     console.error('Session is invalid. Redirecting to login...');
+//   }
+//   isValidSession.value = sessionValid;
+// });
 
 </script>
 
