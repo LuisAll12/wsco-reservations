@@ -5,12 +5,12 @@ import Sidebar from '../components/Sidebar.vue'
 import CalendarHeader from '../components/CalendarHeader.vue'
 import WeekGrid from '../components/WeekGrid.vue'
 import { startOfWeek, addDays } from 'date-fns'
-import { checkSessionKey } from '../services/sessionKeyService';
 import { useRouter } from "vue-router";
+import getReservations from '../services/GetAllRes';
 
 const isValidSession = ref(false); // Initialize as false
 const router = useRouter();
-
+const reservations = ref([]);
 // Mock-Daten
 const user = reactive({
   name: "Amy",
@@ -23,7 +23,7 @@ const boats = ref([
   { id: 3, name: "Festival bunch" }
 ])
 
-const reservations = ref([
+const reservation = ref([
 {
     id: 1,
     title: "Speaking club",
@@ -91,14 +91,14 @@ function nextWeek() {
   currentWeek.value = startOfWeek(newDate, { weekStartsOn: 1 })
 }
 
-// onMounted(async () => {
-//   const sessionValid = await checkSessionKey();
-//   if (!sessionValid) {
-//     router.push("/login");
-//     console.error('Session is invalid. Redirecting to login...');
-//   }
-//   isValidSession.value = sessionValid;
-// });
+onMounted(async () => {
+  try {
+    reservations.value = await getReservations();
+    console.log('Fetched reservations:', reservations.value);
+  } catch (error) {
+    console.error('Failed to load reservations:', error);
+  }
+});
 
 </script>
 

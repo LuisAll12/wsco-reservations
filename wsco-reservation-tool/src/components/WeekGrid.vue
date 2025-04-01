@@ -1,7 +1,8 @@
 <!-- src/components/WeekGrid.vue -->
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { isSameWeek, parseISO, startOfWeek, format } from 'date-fns'
+
 
 const props = defineProps({
   days: Array,
