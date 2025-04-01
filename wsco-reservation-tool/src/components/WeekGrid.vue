@@ -1,16 +1,16 @@
 <!-- src/components/WeekGrid.vue -->
 <script setup>
-import { computed, ref, onMounted } from 'vue'
+import { computed } from 'vue'
 import { isSameWeek, parseISO, startOfWeek, format } from 'date-fns'
-
 
 const props = defineProps({
   days: Array,
   reservations: Array,
-  selectedBoat: Number
+  selectedBoat: [String, Number],
+  boats: Array
 })
 
-// Zeitachse von 6:00 bis 22:00 mit 15-Minuten-Intervallen
+// Time slots computation remains the same
 const timeSlots = computed(() => {
   const slots = []
   for (let hour = 6; hour <= 22; hour++) {
@@ -21,30 +21,53 @@ const timeSlots = computed(() => {
   return slots
 })
 
-// Korrigierte Event-Positionierung
 const positionedEvents = computed(() => {
   return props.reservations
-    .filter(event => {
-      const eventDate = parseISO(event.date)
-      return isSameWeek(eventDate, props.days[0], { weekStartsOn: 1 })
+    .filter(reservation => {
+      // Filter by week
+      const reservationDate = new Date(reservation.fields.From)
+      const isSameWeekCheck = isSameWeek(reservationDate, props.days[0], { weekStartsOn: 1 })
+      
+      // Filter by boat if selected
+      const boatMatch = !props.selectedBoat || 
+        (reservation.fields.FK_Boat && 
+          reservation.fields.FK_Boat[0] === props.selectedBoat)
+      return isSameWeekCheck && boatMatch
     })
-    .map(event => {
-      const eventDate = parseISO(event.date)
-      const dayIndex = props.days.findIndex(d => 
-        format(d, 'yyyy-MM-dd') === format(eventDate, 'yyyy-MM-dd')
+    .map(reservation => {
+      const fromDate = reservation.fields.From ? new Date(reservation.fields.From) : null
+      const toDate = reservation.fields.To ? new Date(reservation.fields.To) : null
+
+      if (!fromDate || !toDate || isNaN(fromDate) || isNaN(toDate)) {
+        return null // Skip invalid dates
+      }
+      
+      const dayIndex = props.days.findIndex(day => 
+        format(day, 'yyyy-MM-dd') === format(fromDate, 'yyyy-MM-dd')
       )
 
-      const [startHour, startMin] = event.start.split(':').map(Number)
-      const [endHour, endMin] = event.end.split(':').map(Number)
+      const startHour = fromDate.getHours()
+      const startMin = fromDate.getMinutes()
+      const endHour = toDate.getHours()
+      const endMin = toDate.getMinutes()
       
       const startPosition = (startHour - 6) * 60 + startMin
       const height = (endHour - startHour) * 60 + (endMin - startMin)
 
+      // Get boat details if available
+      const boat = props.boats.find(b => b.id === reservation.fields.FK_Boat?.[0])
+
       return {
-        ...event,
+        id: reservation.id,
+        title: boat ? `${boat.fields.Name} (${boat.fields.Numberplate})` : 'Reservation',
+        start: format(fromDate, 'HH:mm'),
+        end: format(toDate, 'HH:mm'),
+        date: fromDate,
         top: startPosition,
         height: height,
-        dayIndex
+        dayIndex,
+        color: '#FFD700',
+        boat: boat
       }
     })
 })
@@ -52,7 +75,7 @@ const positionedEvents = computed(() => {
 
 <template>
   <div class="calendar-grid">
-    <!-- Zeitachse -->
+    <!-- Time scale -->
     <div class="time-scale">
       <div 
         v-for="(time, index) in timeSlots" 
@@ -64,7 +87,7 @@ const positionedEvents = computed(() => {
       </div>
     </div>
 
-    <!-- Tages-Spalten -->
+    <!-- Day columns -->
     <div 
       v-for="(day, dayIndex) in days" 
       :key="dayIndex"
@@ -72,7 +95,7 @@ const positionedEvents = computed(() => {
       :style="{ gridColumn: dayIndex + 2 }"
     >
       <div class="day-header">
-        <div class="weekday">{{ format(day, 'EEE', { locale: deLocale }) }}</div>
+        <div class="weekday">{{ format(day, 'EEE') }}</div>
         <div class="date">{{ format(day, 'd') }}</div>
       </div>
 
@@ -81,15 +104,19 @@ const positionedEvents = computed(() => {
           v-for="event in positionedEvents.filter(e => e.dayIndex === dayIndex)"
           :key="event.id"
           class="calendar-event"
+          :class="{ 'unavailable': event.boat?.fields?.Availability === false }"
           :style="{
             top: `${event.top}px`,
             height: `${event.height}px`,
-            backgroundColor: event.color
+            backgroundColor: event.boat?.fields?.Availability === false ? '#ff6b6b' : '#FFD700'
           }"
         >
           <div class="event-content">
             <div class="event-time">{{ event.start }} - {{ event.end }}</div>
             <div class="event-title">{{ event.title }}</div>
+            <div class="event-details" v-if="event.boat">
+              Boat: {{ event.boat.Name || 'Unknown' }}
+            </div>
           </div>
         </div>
       </div>

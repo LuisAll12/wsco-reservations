@@ -1,22 +1,48 @@
 <!-- src/components/CalendarHeader.vue -->
 <script setup>
-defineProps({
+import { ref, watch } from 'vue'
+
+const props = defineProps({
   user: Object,
   boats: Array,
-  currentDate: Date
+  currentDate: Date,
+  selectedBoat: [String, Number]
 })
 
-defineEmits(['prev-week', 'next-week', 'new-reservation'])
+const emit = defineEmits(['prev-week', 'next-week', 'new-reservation', 'boat-change'])
+
+const selectedBoatId = ref(props.selectedBoat || '')
+
+watch(selectedBoatId, (newVal) => {
+  emit('boat-change', newVal)
+})
 </script>
 
 <template>
-  <header class="calendar-header">
+<header class="calendar-header">
     <div class="header-top">
       <h2>Hi, {{ user.name }}</h2>
       <div class="controls">
-        <select>
-          <option v-for="boat in boats" :key="boat.id" :value="boat.id">
-            {{ boat.name }}
+        <div class="filter-display" v-if="selectedBoatId">
+          <span class="filter-value">
+            {{
+              selectedBoatId ? 
+              boats.find(b => b.id === selectedBoatId)?.fields?.Name + 
+              ` (${boats.find(b => b.id === selectedBoatId)?.fields?.Numberplate})` : 
+              'All Boats'
+            }}
+          </span>
+        </div>
+        <select v-model="selectedBoatId">
+          <option value="">All Boats</option>
+          <option 
+            v-for="boat in boats" 
+            :key="boat.id" 
+            :value="boat.id"
+            :disabled="boat.fields.Availability === false"
+          >
+            {{ boat.fields.Name }} ({{ boat.fields.Numberplate }})
+            <span v-if="boat.fields.Availability === false"> - Not Available</span>
           </option>
         </select>
         <button @click="$emit('new-reservation')">
@@ -34,6 +60,13 @@ defineEmits(['prev-week', 'next-week', 'new-reservation'])
 </template>
 
 <style scoped>
+.filter-display {
+  padding: 8px 12px;
+  background: #f0f0f0;
+  border-radius: 6px;
+  margin-right: 1rem;
+  font-size: 0.9em;
+}
 .calendar-header {
   margin-bottom: 2rem;
 }
@@ -70,5 +103,23 @@ button {
   border: none;
   border-radius: 6px;
   cursor: pointer;
+}
+.filter-status {
+  display: flex;
+  align-items: center;
+  margin-right: 1rem;
+  background: #f8f9fa;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.filter-label {
+  font-weight: 600;
+  margin-right: 8px;
+  color: #555;
+}
+
+.filter-value {
+  color: #2c3e50;
 }
 </style>

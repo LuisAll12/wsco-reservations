@@ -7,68 +7,38 @@ import WeekGrid from '../components/WeekGrid.vue'
 import { startOfWeek, addDays } from 'date-fns'
 import { useRouter } from "vue-router";
 import getReservations from '../services/GetAllRes';
+import getBoats from '../services/GetAllBoats'
+import getUserInfo from '../services/GetUserInfo'
 
 const isValidSession = ref(false); // Initialize as false
 const router = useRouter();
 const reservations = ref([]);
+const boats = ref([])
+const currentUser = ref(null);
+
+
+
 // Mock-Daten
 const user = reactive({
-  name: "Amy",
-  timezone: "GMT +2"
+  name: "Gast",
+  timezone: "GMT +2",
+  id: null,
+  email: null,
+  isAdmin: false
 })
 
-const boats = ref([
-  { id: 1, name: "Globa kitchen" },
-  { id: 2, name: "Bronze house" },
-  { id: 3, name: "Festival bunch" }
-])
-
-const reservation = ref([
-{
-    id: 1,
-    title: "Speaking club",
-    start: "07:45",
-    end: "08:20",
-    date: "2024-08-12T00:00:00", // Datum hinzufügen
-    boat: 1,
-    location: "Globa kitchen",
-    color: "#FFD700"
-  },
-  {
-    id: 1,
-    title: "Speaking club",
-    start: "07:45",
-    end: "08:20",
-    date: "2025-03-31T08:00:00", // Datum hinzufügen
-    boat: 1,
-    location: "Globa kitchen",
-    color: "#FFD700"
-  },
-  {
-    id: 1,
-    title: "Speaking club",
-    start: "07:45",
-    end: "08:20",
-    date: "2024-08-12T00:00:00", // Datum hinzufügen
-    boat: 1,
-    location: "Globa kitchen",
-    color: "#FFD700"
-  },
-  {
-    id: 1,
-    title: "Speaking club",
-    start: "10:45",
-    end: "08:20",
-    date: "2024-08-12T00:00:00", // Datum hinzufügen
-    boat: 1,
-    location: "Globa kitchen",
-    color: "#FFD700"
-  },
-])
+// const boats = ref([
+//   { id: 1, name: "Globa kitchen" },
+//   { id: 2, name: "Bronze house" },
+//   { id: 3, name: "Festival bunch" }
+// ])
 
 const currentDate = ref(new Date())
 const selectedBoat = ref(null)
 
+const handleBoatChange = (boatId) => {
+  selectedBoat.value = boatId || null
+}
 // Update weekDays calculation
 const weekDays = computed(() => {
   const start = startOfWeek(currentDate.value, { weekStartsOn: 1 })
@@ -93,10 +63,23 @@ function nextWeek() {
 
 onMounted(async () => {
   try {
+    // User-Daten laden
+    const userData = await getUserInfo();
+    if (userData) {
+      currentUser.value = userData;
+      user.name = userData.FirstName || userData.Email.split('@')[0];
+      user.id = userData.FK_Member?.[0];
+      user.email = userData.Email;
+      user.isAdmin = userData.IsAdmin === true;
+    }
+    
+    // Reservations und Boats laden
     reservations.value = await getReservations();
-    console.log('Fetched reservations:', reservations.value);
+    boats.value = await getBoats();
+    
   } catch (error) {
-    console.error('Failed to load reservations:', error);
+    console.error('Initialization error:', error);
+    router.push("/login");
   }
 });
 
@@ -111,15 +94,18 @@ onMounted(async () => {
         :user="user"
         :boats="boats"
         :current-date="currentDate"
+        :selected-boat="selectedBoat"
         @prev-week="prevWeek"
         @next-week="nextWeek"
         @new-reservation="handleNewReservation"
+        @boat-change="handleBoatChange"
       />
       
       <WeekGrid 
         :days="weekDays"
         :reservations="reservations"
         :selected-boat="selectedBoat"
+        :boats="boats"
       />
     </main>
   </div>

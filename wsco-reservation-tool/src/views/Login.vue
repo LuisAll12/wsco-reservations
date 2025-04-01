@@ -10,7 +10,7 @@ const baseId = "appzBNlFfIJC6865x";
 const tableName = "tblalxalwt9C0cFxl";
 
 const router = useRouter();
-const LoginEmail = ref("");
+const LoginEmail = ref('');
 const ErrorMessage = ref("");
 const successMessage = ref("");
 const errorMessage = ref("");
@@ -78,11 +78,12 @@ const Login = async () => {
 const EnterVerifyCode = () => {
     if (inputcode.value.toString().trim() === verificationCode.value.trim()) {
         //Set session key
-        setSessionKey(LoginEmail);
-
-        successMessage.value = "Verification successful!";
-        VerifyCodeSent.value = false;
-        router.push("/dashboard");
+        const Loginvalid = setSessionKey(LoginEmail.value);
+          if (Loginvalid) {
+            successMessage.value = "Verification successful!";
+            VerifyCodeSent.value = false;
+            router.push("/dashboard");
+          }
     } else {
         VerifyTry.value -= 1;
         errorMessage.value = `Wrong verification code. ${VerifyTry.value} tries left.`;
