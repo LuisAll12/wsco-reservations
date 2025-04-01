@@ -1,65 +1,129 @@
-<!-- src/components/NewReservationModal.vue -->
 <script setup>
-import { ref, computed } from 'vue'
-// Ändern Sie die Imports zu:
-import { XMarkIcon, CheckIcon } from '@heroicons/vue/24/solid' // Statt 'outline'
+import { ref, computed, watch, onBeforeUnmount } from "vue";
+import { debounce } from 'lodash'
+import { XMarkIcon, CheckIcon } from "@heroicons/vue/24/solid"; 
+import checkBoatAvailability from '../services/CheckBoatAvailability';
 
+// 1. First declare all reactive variables
+const availabilityError = ref("");
+const isCheckingAvailability = ref(false);
+const form = ref({
+  title: "",
+  from: "",
+  to: "",
+  boatId: "",
+  checklist: [
+    { text: "I agree to the boat usage rules", checked: false },
+    { text: "I confirm I have the required license", checked: false },
+    { text: "I will report any damages immediately", checked: false },
+  ],
+  notes: "",
+});
+
+// 2. Then declare props and emits
 const props = defineProps({
   boats: Array,
   currentUser: Object,
-  show: Boolean
-})
+  show: Boolean,
+});
 
-const emit = defineEmits(['close', 'submit'])
+const emit = defineEmits(["close", "submit"]);
 
-const form = ref({
-  title: '',
-  from: '',
-  to: '',
-  boatId: '',
-  checklist: [
-    { text: 'I agree to the boat usage rules', checked: false },
-    { text: 'I confirm I have the required license', checked: false },
-    { text: 'I will report any damages immediately', checked: false }
-  ],
-  notes: ''
-})
-
+// 3. Then computed properties
 const totalPrice = computed(() => {
-  if (!form.value.boatId || !form.value.from || !form.value.to) return 0
-  
-  const boat = props.boats.find(b => b.id === form.value.boatId)
-  if (!boat || !boat.fields.Price) return 0
-  
-  const hours = (new Date(form.value.to) - new Date(form.value.from)) / (1000 * 60 * 60)
-  return (hours * boat.fields.Price).toFixed(2)
-})
+  if (!form.value.boatId || !form.value.from || !form.value.to) return 0;
+
+  const boat = props.boats.find((b) => b.id === form.value.boatId);
+  if (!boat || !boat.fields.Price) return 0;
+
+  const hours =
+    (new Date(form.value.to) - new Date(form.value.from)) / (1000 * 60 * 60);
+  return (hours * boat.fields.Price).toFixed(2);
+});
 
 const canSubmit = computed(() => {
-  return form.value.title &&
-        form.value.from &&
-        form.value.to &&
-        form.value.boatId &&
-        form.value.checklist.every(item => item.checked)
-})
+  return (
+    form.value.title &&
+    form.value.from &&
+    form.value.to &&
+    form.value.boatId &&
+    form.value.checklist.every((item) => item.checked)
+  );
+});
 
+// 4. Then utility functions
+const debouncedCheckAvailability = debounce(async ([boatId, from, to]) => {
+  if (!boatId || !from || !to) {
+    availabilityError.value = '';
+    return;
+  }
+
+  if (new Date(from) >= new Date(to)) {
+    availabilityError.value = 'Endzeit muss nach Startzeit liegen';
+    return;
+  }
+
+  const boat = props.boats.find(b => b.id === boatId);
+  if (!boat?.fields.Availability) {
+    availabilityError.value = 'Dieses Boot ist nicht verfügbar';
+    return;
+  }
+
+  isCheckingAvailability.value = true;
+  try {
+    const { available, conflictingReservations, error } = 
+      await checkBoatAvailability(boatId, from, to);
+    
+    if (error) {
+      availabilityError.value = error;
+    } else if (!available) {
+      const conflictTime = format(new Date(conflictingReservations[0].fields.From), 'HH:mm');
+      availabilityError.value = `Boot bereits von ${conflictTime} Uhr gebucht`;
+    } else {
+      availabilityError.value = '';
+    }
+  } catch (error) {
+    availabilityError.value = 'Verfügbarkeit konnte nicht geprüft werden';
+  } finally {
+    isCheckingAvailability.value = false;
+  }
+}, 500);
+
+// 5. Then watchers (now form is defined)
+watch(
+  [() => form.value.boatId, () => form.value.from, () => form.value.to],
+  (newValues) => {
+    debouncedCheckAvailability(newValues);
+  },
+  { deep: true }
+);
+
+// 6. Finally component methods
 function handleSubmit() {
-    const fromDate = new Date(form.value.from)
-    const toDate = new Date(form.value.to)
+    const fromDate = new Date(form.value.from);
+    const toDate = new Date(form.value.to);
+
+    if (availabilityError.value) {
+        alert('Bitte beheben Sie die angezeigten Fehler');
+        return;
+    }
+
     const reservationData = {
         fields: {
-            // Title: form.value.title,
-            From: fromDate.toISOString(),
-            To: toDate.toISOString(),
-            FK_Boat: [form.value.boatId],
-            FK_Member: [props.currentUser.id],
-            // Notes: form.value.notes,
-            TotalPrice: parseFloat(totalPrice.value),
-            State: 'Pending'
-        }
-    }
-    emit('submit', reservationData)
+        From: fromDate.toISOString(),
+        To: toDate.toISOString(),
+        FK_Boat: [form.value.boatId],
+        FK_Member: [props.currentUser.id],
+        TotalPrice: parseFloat(totalPrice.value),
+        State: "Pending",
+        },
+    };
+    emit("submit", reservationData);
 }
+
+onBeforeUnmount(() => {
+  debouncedCheckAvailability.cancel();
+});
 </script>
 
 <template>
@@ -71,70 +135,98 @@ function handleSubmit() {
           <XMarkIcon class="icon" />
         </button>
       </div>
-      
+
       <div class="modal-body">
         <div class="form-group">
           <label>Title</label>
-          <input v-model="form.title" placeholder="Reservation title">
+          <input v-model="form.title" placeholder="Reservation title" />
         </div>
-        
+
         <div class="form-row">
-          <div class="form-group">
-            <label>From</label>
-            <input type="datetime-local" v-model="form.from">
-          </div>
-          <div class="form-group">
-            <label>To</label>
-            <input type="datetime-local" v-model="form.to">
-          </div>
+            <div class="form-group">
+                <label>From</label>
+                <input 
+                type="datetime-local" 
+                v-model="form.from"
+                :min="new Date().toISOString().slice(0, 16)"
+                @change="checkAvailability"
+                >
+            </div>
+            <div class="form-group">
+                <label>To</label>
+                <input 
+                type="datetime-local" 
+                v-model="form.to"
+                :min="form.from || new Date().toISOString().slice(0, 16)"
+                @change="checkAvailability"
+                >
+            </div>
         </div>
-        
+        <div v-if="isCheckingAvailability" class="loading-message">
+            <span class="loader"></span> Überprüfe Verfügbarkeit...
+        </div>
+            
+        <div v-if="availabilityError" class="error-message">
+            {{ availabilityError }}
+        </div>
+
+        <div v-else-if="form.boatId && form.from && form.to" class="success-message">
+            <CheckIcon class="icon" /> Boot ist verfügbar
+        </div>
         <div class="form-group">
-          <label>Boat</label>
-          <select v-model="form.boatId">
-            <option value="">Select a boat</option>
-            <option 
-              v-for="boat in boats" 
-              :key="boat.id" 
-              :value="boat.id"
-              :disabled="!boat.fields.Availability"
-            >
-              {{ boat.fields.Name }} ({{ boat.fields.Numberplate }})
-              <span v-if="!boat.fields.Availability"> - Not Available</span>
-            </option>
-          </select>
+            <label>Boat</label>
+            <select v-model="form.boatId" @change="availabilityError = ''">
+                <option value="">Select a boat</option>
+                <option
+                v-for="boat in boats"
+                :key="boat.id"
+                :value="boat.id"
+                :disabled="!boat.fields.Availability"
+                >
+                {{ boat.fields.Name }} ({{ boat.fields.Numberplate }})
+                <span v-if="!boat.fields.Availability"> - Not Available</span>
+                </option>
+            </select>
         </div>
-        
+
         <div class="form-group">
-          <label>Total Price</label>
-          <div class="price-display">CHF {{ totalPrice }}</div>
+            <label>Total Price</label>
+            <div class="price-display">CHF {{ totalPrice }}</div>
         </div>
-        
+
         <div class="checklist">
-          <h4>Requirements</h4>
-          <div 
-            v-for="(item, index) in form.checklist" 
-            :key="index" 
-            class="checklist-item"
-            @click="item.checked = !item.checked"
-          >
+            <h4>Requirements</h4>
+            <div
+                v-for="(item, index) in form.checklist"
+                :key="index"
+                class="checklist-item"
+                @click="item.checked = !item.checked"
+            >
             <div class="checkbox" :class="{ checked: item.checked }">
-              <CheckIcon v-if="item.checked" class="check-icon" />
+                <CheckIcon v-if="item.checked" class="check-icon" />
             </div>
             <span>{{ item.text }}</span>
-          </div>
+            </div>
         </div>
-        
+
         <div class="form-group">
-          <label>Notes</label>
-          <textarea v-model="form.notes" placeholder="Additional information"></textarea>
+            <label>Notes</label>
+            <textarea
+                v-model="form.notes"
+                placeholder="Additional information"
+            ></textarea>
         </div>
-      </div>
+    </div>
       
       <div class="modal-footer">
         <button @click="$emit('close')" class="btn secondary">Cancel</button>
-        <button @click="handleSubmit" :disabled="!canSubmit" class="btn primary">
-          Submit Reservation
+        <button
+          @click="handleSubmit"
+          :disabled="!canSubmit || isSubmitting"
+          class="btn primary"
+        >
+            <span v-if="isSubmitting">Buchen...</span>
+            <span v-else>Submit Reservation</span>
         </button>
       </div>
     </div>
@@ -210,7 +302,9 @@ label {
   font-weight: 500;
 }
 
-input, select, textarea {
+input,
+select,
+textarea {
   width: 100%;
   padding: 8px 12px;
   border: 1px solid #ddd;
@@ -246,8 +340,8 @@ input, select, textarea {
 }
 
 .checkbox.checked {
-  background: #4CAF50;
-  border-color: #4CAF50;
+  background: #4caf50;
+  border-color: #4caf50;
 }
 
 .check-icon {
@@ -284,5 +378,62 @@ input, select, textarea {
 .btn.secondary {
   background: white;
   border: 1px solid #ddd;
+}
+
+.error-message {
+  color: #ff4444;
+  margin: 10px 0;
+  padding: 10px;
+  background: #ffeeee;
+  border-radius: 4px;
+}
+
+.loading-message {
+  color: #666;
+  margin: 10px 0;
+  padding: 10px;
+  background: #f8f8f8;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.loader {
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #3498db;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.success-message {
+  color: #4CAF50;
+  margin: 10px 0;
+  padding: 10px;
+  background: #f0fff0;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.success-message .icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+}
+
+.error-message {
+  color: #ff4444;
+  margin: 10px 0;
+  padding: 10px;
+  background: #ffeeee;
+  border-radius: 4px;
 }
 </style>

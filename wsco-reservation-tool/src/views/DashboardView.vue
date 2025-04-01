@@ -18,6 +18,7 @@ const router = useRouter();
 const reservations = ref([]);
 const boats = ref([])
 const currentUser = ref(null);
+const isSubmitting = ref(false);
 
 const baseId = "appzBNlFfIJC6865x";
 
@@ -85,20 +86,48 @@ function handleNewReservation() {
 }
 
 async function submitReservation(reservationData) {
+  isSubmitting.value = true;
   try {
-    const url = `https://api.airtable.com/v0/${baseId}/Reservation`
+    const url = `https://api.airtable.com/v0/${baseId}/Reservation`;
     const headers = {
       Authorization: `Bearer ${import.meta.env.VITE_APP_API_KEY}`,
       "Content-Type": "application/json"
-    }
+    };
     
-    await axios.post(url, reservationData, { headers })
-    showReservationModal.value = false
-    reservations.value = await getReservations()
+    // Direkter API-Aufruf ohne lokale Prüfung
+    await axios.post(url, reservationData, { headers });
+    showReservationModal.value = false;
+    reservations.value = await getReservations();
   } catch (error) {
-    console.error('Error creating reservation:', error)
+    console.error('Error creating reservation:', error);
+    if (error.response?.status === 422) {
+      alert('Das Boot ist in diesem Zeitraum bereits gebucht!');
+    } else {
+      alert('Fehler bei der Buchung: ' + error.message);
+    }
+  } finally {
+    isSubmitting.value = false;
   }
 }
+
+
+
+function validateReservation(boatId, from, to) {
+  if (!boatId || !from || !to) {
+    return { valid: false, message: 'Bitte füllen Sie alle Felder aus' };
+  }
+
+  if (new Date(from) >= new Date(to)) {
+    return { valid: false, message: 'Endzeit muss nach Startzeit liegen' };
+  }
+
+  if (!isBoatAvailable(boatId, from, to)) {
+    return { valid: false, message: 'Boot in diesem Zeitraum bereits gebucht' };
+  }
+
+  return { valid: true };
+}
+
 </script>
 
 <template>

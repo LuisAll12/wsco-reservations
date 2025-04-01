@@ -18,7 +18,7 @@ defineProps({
     
     <nav class="sidebar-nav">
       <ul>
-        <li v-for="page in ['Dashboard', 'Calendar', 'Settings', 'Help']" 
+        <li v-for="page in ['Dashboard', 'Einstellungen', 'Hilfe', 'Unsere Boote', 'Meine Reservierungen']" 
             :key="page"
             class="nav-item">
           {{ page }}
@@ -28,10 +28,6 @@ defineProps({
 
     <section class="reservation-actions">
       <div class="action-item">
-        <span>Siehe hier</span>
-        <span>></span>
-      </div>
-      <div class="action-item">
         <span>Schaden melden</span>
       </div>
     </section>
@@ -39,11 +35,11 @@ defineProps({
       :current-week="currentWeek"
       :current-date="currentDate"
     /> -->
-    <div class="user-info">
+    <!-- <div class="user-info">
       <h3>{{ currentUser?.fields?.FirstName }} {{ currentUser?.fields?.LastName }}</h3>
       <p>{{ currentUser?.fields?.Email }}</p>
       <p>Role: {{ currentUser?.fields?.Role }}</p>
-    </div>
+    </div> -->
   </aside>
 </template>
 

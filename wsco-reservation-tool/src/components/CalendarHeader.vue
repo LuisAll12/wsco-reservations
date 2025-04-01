@@ -29,12 +29,12 @@ watch(selectedBoatId, (newVal) => {
               selectedBoatId ? 
               boats.find(b => b.id === selectedBoatId)?.fields?.Name + 
               ` (${boats.find(b => b.id === selectedBoatId)?.fields?.Numberplate})` : 
-              'All Boats'
+              'Alle Boote'
             }}
           </span>
         </div>
         <select v-model="selectedBoatId">
-          <option value="">All Boats</option>
+          <option value="">Alle Boote</option>
           <option 
             v-for="boat in boats" 
             :key="boat.id" 
@@ -42,11 +42,11 @@ watch(selectedBoatId, (newVal) => {
             :disabled="boat.fields.Availability === false"
           >
             {{ boat.fields.Name }} ({{ boat.fields.Numberplate }})
-            <span v-if="boat.fields.Availability === false"> - Not Available</span>
+            <span v-if="boat.fields.Availability === false"> - Nicht verfügbar</span>
           </option>
         </select>
         <button @click="$emit('new-reservation')">
-          New Reservation
+          Neue Reservation
         </button>
       </div>
     </div>

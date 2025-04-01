@@ -1,4 +1,3 @@
-<!-- src/components/WeekGrid.vue -->
 <script setup>
 import { computed } from 'vue'
 import { isSameWeek, parseISO, startOfWeek, format } from 'date-fns'
@@ -11,13 +10,15 @@ const props = defineProps({
   currentUserId: String
 })
 
-// Time slots computation remains the same
+// Constants for precise layout
+const HOUR_HEIGHT = 60 // Each hour is 60px tall
+const MINUTE_HEIGHT = HOUR_HEIGHT / 60 // 1px per minute
+const START_HOUR = 6 // Calendar starts at 6:00 AM
+
 const timeSlots = computed(() => {
   const slots = []
-  for (let hour = 6; hour <= 22; hour++) {
-    for (let min = 0; min < 60; min += 15) {
-      slots.push(`${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`)
-    }
+  for (let hour = START_HOUR; hour <= 22; hour++) {
+    slots.push(`${hour.toString().padStart(2, '0')}h`)
   }
   return slots
 })
@@ -36,28 +37,25 @@ const positionedEvents = computed(() => {
       return isSameWeekCheck && boatMatch
     })
     .map(reservation => {
-      const fromDate = reservation.fields.From ? new Date(reservation.fields.From) : null
-      const toDate = reservation.fields.To ? new Date(reservation.fields.To) : null
-
-      if (!fromDate || !toDate || isNaN(fromDate) || isNaN(toDate)) {
-        return null // Skip invalid dates
-      }
+      const fromDate = new Date(reservation.fields.From)
+      const toDate = new Date(reservation.fields.To)
       
+      if (isNaN(fromDate) || isNaN(toDate)) return null
+
       const dayIndex = props.days.findIndex(day => 
         format(day, 'yyyy-MM-dd') === format(fromDate, 'yyyy-MM-dd')
       )
-      const isCurrentUser = reservation.fields.FK_Member?.[0] === props.currentUserId
-      const color = isCurrentUser ? '#FFD700' : '#ff6b6b' 
 
-      const startHour = fromDate.getHours()
-      const startMin = fromDate.getMinutes()
-      const endHour = toDate.getHours()
-      const endMin = toDate.getMinutes()
+      // Calculate minutes from calendar start (6:00 AM)
+      const startMinutes = (fromDate.getHours() - START_HOUR) * 60 + fromDate.getMinutes()
+      const endMinutes = (toDate.getHours() - START_HOUR) * 60 + toDate.getMinutes()
       
-      const startPosition = (startHour - 6) * 60 + startMin
-      const height = (endHour - startHour) * 60 + (endMin - startMin)
+      // Convert to pixel values
+      const top = startMinutes * MINUTE_HEIGHT
+      const height = (endMinutes - startMinutes) * MINUTE_HEIGHT
 
-      // Get boat details if available
+      // Determine if current user's reservation
+      const isCurrentUser = reservation.fields.FK_Member?.[0] === props.currentUserId
       const boat = props.boats.find(b => b.id === reservation.fields.FK_Boat?.[0])
 
       return {
@@ -65,15 +63,15 @@ const positionedEvents = computed(() => {
         title: boat ? `${boat.fields.Name} (${boat.fields.Numberplate})` : 'Reservation',
         start: format(fromDate, 'HH:mm'),
         end: format(toDate, 'HH:mm'),
-        date: fromDate,
-        top: startPosition,
+        top: top,
         height: height,
         dayIndex,
-        color: color,
+        color: isCurrentUser ? '#4CAF50' : '#2196F3', // Green for current user, blue for others
         isCurrentUser: isCurrentUser,
         boat: boat
       }
     })
+    .filter(Boolean)
 })
 </script>
 
@@ -85,9 +83,9 @@ const positionedEvents = computed(() => {
         v-for="(time, index) in timeSlots" 
         :key="index"
         class="time-slot"
-        :class="{ 'hour-mark': time.endsWith(':00') }"
+        :style="{ height: `${HOUR_HEIGHT}px` }"
       >
-        <span v-if="time.endsWith(':00')">{{ time.replace(':00', 'h') }}</span>
+        {{ time }}
       </div>
     </div>
 
@@ -96,34 +94,30 @@ const positionedEvents = computed(() => {
       v-for="(day, dayIndex) in days" 
       :key="dayIndex"
       class="day-column"
-      :style="{ gridColumn: dayIndex + 2 }"
     >
       <div class="day-header">
-        <div class="weekday">{{ format(day, 'EEE') }}</div>
-        <div class="date">{{ format(day, 'd') }}</div>
+        {{ format(day, 'EEE d') }}
       </div>
 
-      <div class="day-content">
+      <div 
+        class="day-content"
+        :style="{ height: `${(22 - START_HOUR) * HOUR_HEIGHT}px` }"
+      >
         <div
           v-for="event in positionedEvents.filter(e => e.dayIndex === dayIndex)"
           :key="event.id"
           class="calendar-event"
-          :class="{ 'unavailable': event.boat?.fields?.Availability === false }"
+          :class="{ 'current-user': event.isCurrentUser, 'other-user': !event.isCurrentUser }"
           :style="{
             top: `${event.top}px`,
             height: `${event.height}px`,
             backgroundColor: event.color
           }"
         >
-        <div class="event-content">
-            <div class="event-time">{{ event.start }} - {{ event.end }}</div>
-            <div class="event-title">
-              {{ event.title }}
-              <span v-if="!event.isCurrentUser" class="other-user-label">(Anderer Benutzer)</span>
-            </div>
-            <div class="event-details" v-if="event.boat">
-              Boat: {{ event.boat.fields.Name || 'Unknown' }}
-            </div>
+          <div class="event-time">{{ event.start }} - {{ event.end }}</div>
+          <div class="event-title">
+            {{ event.title }}
+            <span v-if="!event.isCurrentUser" class="user-label">(Anderer nutzer)</span>
           </div>
         </div>
       </div>
@@ -134,102 +128,88 @@ const positionedEvents = computed(() => {
 <style scoped>
 .calendar-grid {
   display: grid;
-  grid-template-columns: 80px repeat(7, 1fr);
-  grid-auto-rows: minmax(40px, auto);
-  position: relative;
-}
-
-.other-user-label {
-  font-size: 0.8em;
-  opacity: 0.8;
-  margin-left: 4px;
+  grid-template-columns: 60px repeat(7, 1fr);
+  font-family: Arial, sans-serif;
 }
 
 .time-scale {
   grid-column: 1;
   position: sticky;
   left: 0;
-  z-index: 2;
   background: white;
-  box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+  z-index: 2;
 }
 
 .time-slot {
-  height: 40px;
-  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding-right: 8px;
+  box-sizing: border-box;
   border-bottom: 1px solid #eee;
-  
-  &.hour-mark {
-    font-size: 0.9em;
-    color: #666;
-    font-weight: 500;
-  }
+  font-size: 12px;
+  color: #666;
 }
 
 .day-column {
-  display: grid;
-  grid-template-rows: 60px auto;
   border-right: 1px solid #eee;
 }
 
 .day-header {
+  padding: 8px;
+  text-align: center;
+  font-weight: bold;
+  border-bottom: 1px solid #eee;
   position: sticky;
   top: 0;
   background: white;
   z-index: 1;
-  padding: 12px;
-  text-align: center;
-  border-bottom: 2px solid #eee;
-  
-  .weekday {
-    font-weight: 600;
-    text-transform: uppercase;
-  }
-  
-  .date {
-    font-size: 1.4em;
-    margin-top: 4px;
-  }
 }
 
 .day-content {
   position: relative;
-  height: calc(40px * 64); /* 16 Stunden × 4 Slots pro Stunde */
 }
 
 .calendar-event {
   position: absolute;
   left: 2px;
   right: 2px;
-  border-radius: 6px;
-  padding: 8px;
+  border-radius: 4px;
+  padding: 4px;
   color: white;
+  font-size: 12px;
   overflow: hidden;
-  transition: transform 0.2s;
-  cursor: pointer;
-  
-  &:hover {
-    transform: scale(1.01);
-    z-index: 2;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  }
+  box-sizing: border-box;
+  transition: all 0.2s ease;
 }
 
-.event-content {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+.calendar-event:hover {
+  transform: scale(1.01);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  z-index: 2;
+}
+
+.current-user {
+  background-color: #4CAF50; /* Green */
+}
+
+.other-user {
+  background-color: #2196F3; /* Blue */
 }
 
 .event-time {
-  font-size: 0.75em;
-  opacity: 0.9;
-  margin-bottom: 4px;
+  font-weight: bold;
+  font-size: 11px;
 }
 
 .event-title {
-  font-size: 0.9em;
-  line-height: 1.2;
-  flex-grow: 1;
+  margin-top: 2px;
+  font-size: 11px;
+}
+
+.user-label {
+  font-style: italic;
+  font-size: 10px;
+  opacity: 0.8;
 }
 </style>
