@@ -21,7 +21,7 @@ watch(selectedBoatId, (newVal) => {
 <template>
 <header class="calendar-header">
     <div class="header-top">
-      <h2>Hi, {{ user.name }}</h2>
+      <h2>Ahoi, {{ user.name }}</h2>
       <div class="controls">
         <div class="filter-display" v-if="selectedBoatId">
           <span class="filter-value">

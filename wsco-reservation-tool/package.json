@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@date-io/date-fns": "^3.2.1",
+    "@heroicons/vue": "^2.2.0",
     "airtable": "^0.12.2",
     "axios": "^1.7.9",
     "date-fns": "^4.1.0",
