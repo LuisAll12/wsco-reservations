@@ -105,7 +105,6 @@ watch(
 
 // 6. Finally component methods
 function handleSubmit() {
-  console.log(props.currentUser.id);
   const fromDate = new Date(form.value.from);
   const toDate = new Date(form.value.to);
   const reservationData = {
