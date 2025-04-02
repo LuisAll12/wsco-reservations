@@ -18,14 +18,14 @@ const VerifyTry = ref(3);
 const inputcode = ref();
 const verificationCode = ref(0);
 const isLoading = ref(false);
-const isSending = ref(false); // Neu: Verhindert Mehrfachversand
+const isSending = ref(false);
 
 const generateVerificationCode = () => {
   verificationCode.value = Math.floor(100000 + Math.random() * 900000).toString();
 };
 
 const sendVerificationEmail = async (email) => {
-  if (isSending.value) return; // Verhindert Mehrfachversand
+  if (isSending.value) return;
   
   isSending.value = true;
   generateVerificationCode();
@@ -43,7 +43,7 @@ const sendVerificationEmail = async (email) => {
     successMessage.value = "Verifizierungscode wurde an Ihre E-Mail gesendet!";
     errorMessage.value = "";
     VerifyCodeSent.value = true;
-    VerifyTry.value = 3; // Reset der Versuche
+    VerifyTry.value = 3;
   } catch (error) {
     errorMessage.value = "Fehler beim Senden des Codes. Bitte versuchen Sie es später erneut.";
     successMessage.value = "";
@@ -59,7 +59,6 @@ const Login = async () => {
   isLoading.value = true;
   ErrorMessage.value = "";
   
-  // Einfache E-Mail-Validierung
   if (!LoginEmail.value || !LoginEmail.value.includes('@')) {
     ErrorMessage.value = "Bitte geben Sie eine gültige E-Mail-Adresse ein.";
     isLoading.value = false;
@@ -93,7 +92,6 @@ const Login = async () => {
 const EnterVerifyCode = () => {
   if (!inputcode.value || VerifyTry.value <= 0) return;
 
-  // Trim und Typ-Sicherheit
   const enteredCode = inputcode.value.toString().trim();
   const expectedCode = verificationCode.value.toString().trim();
 
@@ -113,7 +111,7 @@ const EnterVerifyCode = () => {
       VerifyCodeSent.value = false;
       LoginEmail.value = "";
     }
-    inputcode.value = ""; // Eingabe zurücksetzen
+    inputcode.value = "";
   }
 };
 </script>
@@ -123,16 +121,8 @@ const EnterVerifyCode = () => {
     <div class="Login">
       <h1>Willkommen zurück</h1>
       
-      <!-- Ladeanimation -->
-      <form v-if="isLoading">
-        <div class="spinner center">
-          <div v-for="i in 12" :key="i" class="spinner-blade"></div>
-        </div>
-        <p>Überprüfe E-Mail...</p>
-      </form>
-
-      <!-- Login Formular -->
-      <form class="LoginForm" @submit.prevent="Login" v-if="!VerifyCodeSent && !isLoading">
+      <!-- Login Formular mit integriertem Loader -->
+      <form class="LoginForm" @submit.prevent="Login" v-if="!VerifyCodeSent">
         <h1>Geben Sie Ihre E-Mail ein</h1>
         <div class="Field group">
           <input
@@ -142,16 +132,19 @@ const EnterVerifyCode = () => {
             placeholder=""
             type="email"
             required
-            :disabled="isSending"
+            :disabled="isLoading || isSending"
           />
           <span class="highlight"></span>
           <span class="bar"></span>
           <label>E-Mail</label>
+          <div v-if="isLoading" class="inline-spinner">
+            <div v-for="i in 12" :key="i" class="spinner-blade"></div>
+          </div>
         </div>
         <br />
-        <button type="submit" :disabled="isSending">
-          <span v-if="!isSending">Überprüfen</span>
-          <span v-else>Wird gesendet...</span>
+        <button type="submit" :disabled="isLoading || isSending">
+          <span v-if="!isLoading && !isSending">Überprüfen</span>
+          <span v-else>Bitte warten...</span>
           <div class="arrow-wrapper">
             <div class="arrow"></div>
           </div>
@@ -161,7 +154,7 @@ const EnterVerifyCode = () => {
       </form>
 
       <!-- Verifizierungsformular -->
-      <form @submit.prevent="EnterVerifyCode" v-if="VerifyCodeSent && !isLoading">
+      <form @submit.prevent="EnterVerifyCode" v-if="VerifyCodeSent">
         <h2>Verifizierungscode eingeben</h2>
         <p>Wir haben einen Code an {{ LoginEmail }} gesendet</p>
         <br>
@@ -227,13 +220,56 @@ form {
   color: var(--text);
   font-size: large;
 }
+
+/* Integrierter Spinner */
+.inline-spinner {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  width: 1em;
+  height: 1em;
+}
+
+.inline-spinner .spinner-blade {
+  position: absolute;
+  left: 0.4629em;
+  bottom: 0;
+  width: 0.074em;
+  height: 0.2777em;
+  border-radius: 0.0555em;
+  background-color: #69717d;
+  transform-origin: center -0.2222em;
+  animation: spinner-fade9234 1s infinite linear;
+}
+
+@keyframes spinner-fade9234 {
+  0% { opacity: 1; }
+  100% { opacity: 0.2; }
+}
+
+/* Positionierung der Blades */
+.inline-spinner .spinner-blade:nth-child(1) { transform: rotate(0deg); animation-delay: 0s; }
+.inline-spinner .spinner-blade:nth-child(2) { transform: rotate(30deg); animation-delay: 0.083s; }
+.inline-spinner .spinner-blade:nth-child(3) { transform: rotate(60deg); animation-delay: 0.166s; }
+.inline-spinner .spinner-blade:nth-child(4) { transform: rotate(90deg); animation-delay: 0.249s; }
+.inline-spinner .spinner-blade:nth-child(5) { transform: rotate(120deg); animation-delay: 0.332s; }
+.inline-spinner .spinner-blade:nth-child(6) { transform: rotate(150deg); animation-delay: 0.415s; }
+.inline-spinner .spinner-blade:nth-child(7) { transform: rotate(180deg); animation-delay: 0.498s; }
+.inline-spinner .spinner-blade:nth-child(8) { transform: rotate(210deg); animation-delay: 0.581s; }
+.inline-spinner .spinner-blade:nth-child(9) { transform: rotate(240deg); animation-delay: 0.664s; }
+.inline-spinner .spinner-blade:nth-child(10) { transform: rotate(270deg); animation-delay: 0.747s; }
+.inline-spinner .spinner-blade:nth-child(11) { transform: rotate(300deg); animation-delay: 0.83s; }
+.inline-spinner .spinner-blade:nth-child(12) { transform: rotate(330deg); animation-delay: 0.913s; }
+
 /* Form Field Styles */
 .group {
   position: relative;
 }
 .input {
   font-size: 16px;
-  padding: 10px 10px 10px 5px;
+  padding: 10px 30px 10px 5px; /* Rechts mehr Platz für Spinner */
   display: block;
   width: 200px;
   border: none;
@@ -363,141 +399,5 @@ button:hover .arrow {
 
 button:hover .arrow:before {
   right: 0;
-}
-.spinner {
-  font-size: 28px;
-  position: relative;
-  display: inline-block;
-  width: 1em;
-  height: 1em;
-}
-
-.spinner.center {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  margin: auto;
-}
-
-.spinner .spinner-blade {
-  position: absolute;
-  left: 0.4629em;
-  bottom: 0;
-  width: 0.074em;
-  height: 0.2777em;
-  border-radius: 0.0555em;
-  background-color: transparent;
-  -webkit-transform-origin: center -0.2222em;
-  -ms-transform-origin: center -0.2222em;
-  transform-origin: center -0.2222em;
-  animation: spinner-fade9234 1s infinite linear;
-}
-
-.spinner .spinner-blade:nth-child(1) {
-  -webkit-animation-delay: 0s;
-  animation-delay: 0s;
-  -webkit-transform: rotate(0deg);
-  -ms-transform: rotate(0deg);
-  transform: rotate(0deg);
-}
-
-.spinner .spinner-blade:nth-child(2) {
-  -webkit-animation-delay: 0.083s;
-  animation-delay: 0.083s;
-  -webkit-transform: rotate(30deg);
-  -ms-transform: rotate(30deg);
-  transform: rotate(30deg);
-}
-
-.spinner .spinner-blade:nth-child(3) {
-  -webkit-animation-delay: 0.166s;
-  animation-delay: 0.166s;
-  -webkit-transform: rotate(60deg);
-  -ms-transform: rotate(60deg);
-  transform: rotate(60deg);
-}
-
-.spinner .spinner-blade:nth-child(4) {
-  -webkit-animation-delay: 0.249s;
-  animation-delay: 0.249s;
-  -webkit-transform: rotate(90deg);
-  -ms-transform: rotate(90deg);
-  transform: rotate(90deg);
-}
-
-.spinner .spinner-blade:nth-child(5) {
-  -webkit-animation-delay: 0.332s;
-  animation-delay: 0.332s;
-  -webkit-transform: rotate(120deg);
-  -ms-transform: rotate(120deg);
-  transform: rotate(120deg);
-}
-
-.spinner .spinner-blade:nth-child(6) {
-  -webkit-animation-delay: 0.415s;
-  animation-delay: 0.415s;
-  -webkit-transform: rotate(150deg);
-  -ms-transform: rotate(150deg);
-  transform: rotate(150deg);
-}
-
-.spinner .spinner-blade:nth-child(7) {
-  -webkit-animation-delay: 0.498s;
-  animation-delay: 0.498s;
-  -webkit-transform: rotate(180deg);
-  -ms-transform: rotate(180deg);
-  transform: rotate(180deg);
-}
-
-.spinner .spinner-blade:nth-child(8) {
-  -webkit-animation-delay: 0.581s;
-  animation-delay: 0.581s;
-  -webkit-transform: rotate(210deg);
-  -ms-transform: rotate(210deg);
-  transform: rotate(210deg);
-}
-
-.spinner .spinner-blade:nth-child(9) {
-  -webkit-animation-delay: 0.664s;
-  animation-delay: 0.664s;
-  -webkit-transform: rotate(240deg);
-  -ms-transform: rotate(240deg);
-  transform: rotate(240deg);
-}
-
-.spinner .spinner-blade:nth-child(10) {
-  -webkit-animation-delay: 0.747s;
-  animation-delay: 0.747s;
-  -webkit-transform: rotate(270deg);
-  -ms-transform: rotate(270deg);
-  transform: rotate(270deg);
-}
-
-.spinner .spinner-blade:nth-child(11) {
-  -webkit-animation-delay: 0.83s;
-  animation-delay: 0.83s;
-  -webkit-transform: rotate(300deg);
-  -ms-transform: rotate(300deg);
-  transform: rotate(300deg);
-}
-
-.spinner .spinner-blade:nth-child(12) {
-  -webkit-animation-delay: 0.913s;
-  animation-delay: 0.913s;
-  -webkit-transform: rotate(330deg);
-  -ms-transform: rotate(330deg);
-  transform: rotate(330deg);
-}
-
-@keyframes spinner-fade9234 {
-  0% {
-    background-color: #69717d;
-  }
-
-  100% {
-    background-color: transparent;
-  }
 }
 </style>
