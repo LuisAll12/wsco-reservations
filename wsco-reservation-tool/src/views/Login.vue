@@ -3,7 +3,6 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import emailjs from 'emailjs-com';
-
 import {setSessionKey} from '../services/sessionKeyService.js';
 
 const baseId = "appzBNlFfIJC6865x";
@@ -19,19 +18,21 @@ const VerifyTry = ref(3);
 const inputcode = ref();
 const verificationCode = ref(0);
 const isLoading = ref(false);
+const isSending = ref(false); // Neu: Verhindert Mehrfachversand
 
 const generateVerificationCode = () => {
   verificationCode.value = Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-
-
 const sendVerificationEmail = async (email) => {
+  if (isSending.value) return; // Verhindert Mehrfachversand
+  
+  isSending.value = true;
   generateVerificationCode();
 
   const templateParams = {
     to_email: email,
-    message: `Your verification code is: ${verificationCode.value}`,
+    message: `Ihr Verifizierungscode lautet: ${verificationCode.value}`,
   };
   const serviceID = "service_wzhmwmh";
   const templateID = "template_z8u5xt3";
@@ -39,18 +40,32 @@ const sendVerificationEmail = async (email) => {
 
   try {
     await emailjs.send(serviceID, templateID, templateParams, userID);
-    successMessage.value = "Verifizierungscode erfolgreich gesendet!";
+    successMessage.value = "Verifizierungscode wurde an Ihre E-Mail gesendet!";
     errorMessage.value = "";
     VerifyCodeSent.value = true;
+    VerifyTry.value = 3; // Reset der Versuche
   } catch (error) {
-    errorMessage.value = "Überprüfungscode konnte nicht gesendet werden. Bitte versuchen Sie es erneut.";
+    errorMessage.value = "Fehler beim Senden des Codes. Bitte versuchen Sie es später erneut.";
     successMessage.value = "";
-    console.error(error);
+    console.error("EmailJS Error:", error);
+  } finally {
+    isSending.value = false;
   }
 };
 
 const Login = async () => {
-    isLoading.value = true;
+  if (isLoading.value) return;
+  
+  isLoading.value = true;
+  ErrorMessage.value = "";
+  
+  // Einfache E-Mail-Validierung
+  if (!LoginEmail.value || !LoginEmail.value.includes('@')) {
+    ErrorMessage.value = "Bitte geben Sie eine gültige E-Mail-Adresse ein.";
+    isLoading.value = false;
+    return;
+  }
+
   const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
   const headers = {
     Authorization: `Bearer ${import.meta.env.VITE_APP_API_KEY}`,
@@ -59,65 +74,64 @@ const Login = async () => {
   try {
     const response = await axios.get(url, { headers });
     const user = response.data.records.find(
-      (record) => record.fields.Email === LoginEmail.value
+      (record) => record.fields.Email?.toLowerCase() === LoginEmail.value.toLowerCase()
     );
 
     if (user) {
-        isLoading.value = false;
-      ErrorMessage.value = "";
-      sendVerificationEmail(LoginEmail.value);
+      await sendVerificationEmail(LoginEmail.value);
     } else {
-      ErrorMessage.value = "Ungültige E-Mail.";
+      ErrorMessage.value = "Diese E-Mail ist nicht registriert.";
     }
   } catch (error) {
-    console.error("Error during login:", error.response ? error.response.data : error.message);
-    ErrorMessage.value = "Es ist ein Fehler aufgetreten. Bitte versuchen Sie es später noch einmal.";
+    console.error("Login Error:", error.response ? error.response.data : error.message);
+    ErrorMessage.value = "Ein Fehler ist aufgetreten. Bitte versuchen Sie es später noch einmal.";
+  } finally {
+    isLoading.value = false;
   }
 };
 
 const EnterVerifyCode = () => {
-    if (inputcode.value.toString().trim() === verificationCode.value.trim()) {
-        //Set session key
-        const Loginvalid = setSessionKey(LoginEmail.value);
-          if (Loginvalid) {
-            successMessage.value = "Verification successful!";
-            VerifyCodeSent.value = false;
-            router.push("/dashboard");
-          }
-    } else {
-        VerifyTry.value -= 1;
-        errorMessage.value = `Wrong verification code. ${VerifyTry.value} tries left.`;
-    }
+  if (!inputcode.value || VerifyTry.value <= 0) return;
 
-    if (VerifyTry.value <= 0) {
-        errorMessage.value = "Falscher Verifizierungscode. Keine weiteren Versuche mehr möglich.";
-        VerifyCodeSent.value = false;
+  // Trim und Typ-Sicherheit
+  const enteredCode = inputcode.value.toString().trim();
+  const expectedCode = verificationCode.value.toString().trim();
+
+  if (enteredCode === expectedCode) {
+    const Loginvalid = setSessionKey(LoginEmail.value);
+    if (Loginvalid) {
+      successMessage.value = "Erfolgreich verifiziert!";
+      errorMessage.value = "";
+      router.push("/dashboard");
     }
+  } else {
+    VerifyTry.value -= 1;
+    if (VerifyTry.value > 0) {
+      errorMessage.value = `Falscher Code. Noch ${VerifyTry.value} Versuch${VerifyTry.value !== 1 ? 'e' : ''} übrig.`;
+    } else {
+      errorMessage.value = "Keine Versuche mehr übrig. Bitte starten Sie den Vorgang neu.";
+      VerifyCodeSent.value = false;
+      LoginEmail.value = "";
+    }
+    inputcode.value = ""; // Eingabe zurücksetzen
+  }
 };
 </script>
 
 <template>
   <div class="LoginContainer">
-    <!-- Login -->
     <div class="Login">
-
       <h1>Willkommen zurück</h1>
-        <form action="" v-if="isLoading">
-            <div class="spinner center">
-                <div class="spinner-blade"></div>
-                <div class="spinner-blade"></div>
-                <div class="spinner-blade"></div>
-                <div class="spinner-blade"></div>
-                <div class="spinner-blade"></div>
-                <div class="spinner-blade"></div>
-                <div class="spinner-blade"></div>
-                <div class="spinner-blade"></div>
-                <div class="spinner-blade"></div>
-                <div class="spinner-blade"></div>
-                <div class="spinner-blade"></div>
-                <div class="spinner-blade"></div>
-            </div>
-        </form>
+      
+      <!-- Ladeanimation -->
+      <form v-if="isLoading">
+        <div class="spinner center">
+          <div v-for="i in 12" :key="i" class="spinner-blade"></div>
+        </div>
+        <p>Überprüfe E-Mail...</p>
+      </form>
+
+      <!-- Login Formular -->
       <form class="LoginForm" @submit.prevent="Login" v-if="!VerifyCodeSent && !isLoading">
         <h1>Geben Sie Ihre E-Mail ein</h1>
         <div class="Field group">
@@ -128,26 +142,28 @@ const EnterVerifyCode = () => {
             placeholder=""
             type="email"
             required
+            :disabled="isSending"
           />
           <span class="highlight"></span>
           <span class="bar"></span>
           <label>E-Mail</label>
         </div>
         <br />
-        <br />
-        <button  type="submit">
-                Überprüfen 
-                    <div class="arrow-wrapper">
-                        <div class="arrow"></div>
-
-                    </div>
-                </button>
+        <button type="submit" :disabled="isSending">
+          <span v-if="!isSending">Überprüfen</span>
+          <span v-else>Wird gesendet...</span>
+          <div class="arrow-wrapper">
+            <div class="arrow"></div>
+          </div>
+        </button>
         <p v-if="ErrorMessage" class="Error">{{ ErrorMessage }}</p>
+        <p v-if="successMessage" style="color: green;">{{ successMessage }}</p>
       </form>
 
-      <!-- Verification -->
-      <form @submit.prevent="EnterVerifyCode" v-if="VerifyCodeSent">
-        <h2>Geben Sie den Verifizierungscode ein</h2>
+      <!-- Verifizierungsformular -->
+      <form @submit.prevent="EnterVerifyCode" v-if="VerifyCodeSent && !isLoading">
+        <h2>Verifizierungscode eingeben</h2>
+        <p>Wir haben einen Code an {{ LoginEmail }} gesendet</p>
         <br>
         <div class="Field group">
           <input
@@ -157,17 +173,23 @@ const EnterVerifyCode = () => {
             placeholder=""
             type="number"
             required
+            :disabled="VerifyTry <= 0"
           />
           <span class="highlight"></span>
           <span class="bar"></span>
-          <label>Verifizierungscode</label>
+          <label>6-stelliger Code</label>
         </div>
         <br />
-        <button class="SubmitButton" type="submit">Bestätigen</button>
+        <button class="SubmitButton" type="submit" :disabled="VerifyTry <= 0">
+          {{ VerifyTry > 0 ? 'Bestätigen' : 'Keine Versuche übrig' }}
+        </button>
         <p v-if="errorMessage" style="color: red;">{{ errorMessage }}</p>
+        <p v-if="successMessage" style="color: green;">{{ successMessage }}</p>
+        
+        <p v-if="VerifyTry <= 0" style="margin-top: 20px;">
+          <a href="#" @click.prevent="VerifyCodeSent = false">Neuen Code anfordern</a>
+        </p>
       </form>
-
-      <p v-if="successMessage">{{ successMessage }}</p>
     </div>
   </div>
 </template>

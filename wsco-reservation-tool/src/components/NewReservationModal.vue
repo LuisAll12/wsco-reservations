@@ -13,9 +13,9 @@ const form = ref({
   to: "",
   boatId: "",
   checklist: [
-    { text: "I agree to the boat usage rules", checked: false },
-    { text: "I confirm I have the required license", checked: false },
-    { text: "I will report any damages immediately", checked: false },
+    { text: "Ich erkläre mich mit den Regeln der Bootsnutzung einverstanden", checked: false },
+    { text: "Ich bestätige, dass ich die erforderliche Lizenz besitze", checked: false },
+    { text: "Ich werde jeden Schaden sofort melden", checked: false },
   ],
   notes: "",
 });
@@ -26,7 +26,6 @@ const props = defineProps({
   currentUser: Object,
   show: Boolean,
 });
-
 const emit = defineEmits(["close", "submit"]);
 
 // 3. Then computed properties
@@ -43,7 +42,6 @@ const totalPrice = computed(() => {
 
 const canSubmit = computed(() => {
   return (
-    form.value.title &&
     form.value.from &&
     form.value.to &&
     form.value.boatId &&
@@ -51,12 +49,19 @@ const canSubmit = computed(() => {
   );
 });
 
+// console.log(form.value.boatId);
+
 // 4. Then utility functions
 const debouncedCheckAvailability = debounce(async ([boatId, from, to]) => {
   if (!boatId || !from || !to) {
     availabilityError.value = '';
     return;
   }
+  const selectedBoat = computed(() => {
+  return props.boats.find((b) => b.id === form.value.boatId);
+});
+
+  const BoatNr = selectedBoat.value?.fields.BoatNr
 
   if (new Date(from) >= new Date(to)) {
     availabilityError.value = 'Endzeit muss nach Startzeit liegen';
@@ -72,10 +77,10 @@ const debouncedCheckAvailability = debounce(async ([boatId, from, to]) => {
   isCheckingAvailability.value = true;
   try {
     const { available, conflictingReservations, error } = 
-      await checkBoatAvailability(boatId, from, to);
+      await checkBoatAvailability(BoatNr, from, to);
     
     if (error) {
-      availabilityError.value = error;
+      availabilityError.value = `Boot bereits von ${conflictTime} Uhr gebucht`;
     } else if (!available) {
       const conflictTime = format(new Date(conflictingReservations[0].fields.From), 'HH:mm');
       availabilityError.value = `Boot bereits von ${conflictTime} Uhr gebucht`;
@@ -83,7 +88,7 @@ const debouncedCheckAvailability = debounce(async ([boatId, from, to]) => {
       availabilityError.value = '';
     }
   } catch (error) {
-    availabilityError.value = 'Verfügbarkeit konnte nicht geprüft werden';
+    availabilityError.value = 'Boot bereits zu dieser Uhrzeit gebucht';
   } finally {
     isCheckingAvailability.value = false;
   }
@@ -100,27 +105,23 @@ watch(
 
 // 6. Finally component methods
 function handleSubmit() {
-    const fromDate = new Date(form.value.from);
-    const toDate = new Date(form.value.to);
-
-    if (availabilityError.value) {
-        alert('Bitte beheben Sie die angezeigten Fehler');
-        return;
-    }
-
-    const reservationData = {
-        fields: {
-        From: fromDate.toISOString(),
-        To: toDate.toISOString(),
-        FK_Boat: [form.value.boatId],
-        FK_Member: [props.currentUser.id],
-        TotalPrice: parseFloat(totalPrice.value),
-        State: "Pending",
-        },
-    };
-    emit("submit", reservationData);
+  console.log(props.currentUser.id);
+  const fromDate = new Date(form.value.from);
+  const toDate = new Date(form.value.to);
+  const reservationData = {
+    fields: {
+      // Title: form.value.title,
+      From: fromDate.toISOString(),
+      To: toDate.toISOString(),
+      FK_Boat: [form.value.boatId],
+      FK_Member: [props.currentUser.id],
+      // Notes: form.value.notes,
+      TotalPrice: parseFloat(totalPrice.value),
+      State: "Pending",
+    },
+  };
+  emit("submit", reservationData);
 }
-
 onBeforeUnmount(() => {
   debouncedCheckAvailability.cancel();
 });
@@ -130,21 +131,21 @@ onBeforeUnmount(() => {
   <div v-if="show" class="modal-overlay">
     <div class="modal">
       <div class="modal-header">
-        <h2>New Reservation</h2>
+        <h2>Neue Reservation</h2>
         <button @click="$emit('close')" class="close-btn">
           <XMarkIcon class="icon" />
         </button>
       </div>
 
       <div class="modal-body">
-        <div class="form-group">
+        <!-- <div class="form-group">
           <label>Title</label>
           <input v-model="form.title" placeholder="Reservation title" />
-        </div>
+        </div> -->
 
         <div class="form-row">
             <div class="form-group">
-                <label>From</label>
+                <label>Von</label>
                 <input 
                 type="datetime-local" 
                 v-model="form.from"
@@ -153,7 +154,7 @@ onBeforeUnmount(() => {
                 >
             </div>
             <div class="form-group">
-                <label>To</label>
+                <label>Bis</label>
                 <input 
                 type="datetime-local" 
                 v-model="form.to"
@@ -174,9 +175,9 @@ onBeforeUnmount(() => {
             <CheckIcon class="icon" /> Boot ist verfügbar
         </div>
         <div class="form-group">
-            <label>Boat</label>
+            <label>Boot</label>
             <select v-model="form.boatId" @change="availabilityError = ''">
-                <option value="">Select a boat</option>
+                <option value="">Wähle ein Boot</option>
                 <option
                 v-for="boat in boats"
                 :key="boat.id"
@@ -184,18 +185,18 @@ onBeforeUnmount(() => {
                 :disabled="!boat.fields.Availability"
                 >
                 {{ boat.fields.Name }} ({{ boat.fields.Numberplate }})
-                <span v-if="!boat.fields.Availability"> - Not Available</span>
+                <span v-if="!boat.fields.Availability"> - Nicht verfügbar</span>
                 </option>
             </select>
         </div>
 
         <div class="form-group">
-            <label>Total Price</label>
+            <label>Totaler Preis</label>
             <div class="price-display">CHF {{ totalPrice }}</div>
         </div>
 
         <div class="checklist">
-            <h4>Requirements</h4>
+            <h4>Voraussetzungen</h4>
             <div
                 v-for="(item, index) in form.checklist"
                 :key="index"
@@ -209,24 +210,24 @@ onBeforeUnmount(() => {
             </div>
         </div>
 
-        <div class="form-group">
+        <!-- <div class="form-group">
             <label>Notes</label>
             <textarea
                 v-model="form.notes"
                 placeholder="Additional information"
             ></textarea>
-        </div>
+        </div> -->
     </div>
       
       <div class="modal-footer">
-        <button @click="$emit('close')" class="btn secondary">Cancel</button>
+        <button @click="$emit('close')" class="btn secondary">Abbrechen</button>
         <button
           @click="handleSubmit"
           :disabled="!canSubmit || isSubmitting"
           class="btn primary"
         >
             <span v-if="isSubmitting">Buchen...</span>
-            <span v-else>Submit Reservation</span>
+            <span v-else>Reservierung abschicken</span>
         </button>
       </div>
     </div>

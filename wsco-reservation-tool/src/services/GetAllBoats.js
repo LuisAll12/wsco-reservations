@@ -15,6 +15,10 @@ const getBoats = async () => {
     const response = await axios.get(url, { headers });
     let records = response.data.records;
 
+
+    //const userRecord = response[0];
+    //console.log(userRecord.fields.BoatNr)
+    console.log("Initial response:",records[0].fields.BoatNr, records);
     while (response.data.offset) {
       const nextResponse = await axios.get(url, {
         headers,
