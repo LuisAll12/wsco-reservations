@@ -94,3 +94,31 @@ export const checkSessionKey = async () => {
     return false;
   }
 };
+
+export const getCurrentUserFromSession = async () => {
+  const sessionKey = Cookies.get("sessionKey");
+  if (!sessionKey) return null;
+
+  try {
+    const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
+    const headers = {
+      Authorization: `Bearer ${import.meta.env.VITE_APP_API_KEY}`,
+      "Content-Type": "application/json"
+    };
+
+    const response = await axios.get(url, {
+      headers,
+      params: {
+        filterByFormula: `{SessionKey} = '${sessionKey}'`,
+        maxRecords: 1
+      }
+    });
+
+    if (response.data.records.length === 0) return null;
+
+    return response.data.records[0]; // enthält id & fields
+  } catch (error) {
+    console.error("Fehler beim Abrufen des Benutzers aus der Session:", error);
+    return null;
+  }
+};

@@ -6,7 +6,8 @@ const props = defineProps({
   user: Object,
   boats: Array,
   currentDate: Date,
-  selectedBoat: [String, Number]
+  selectedBoat: [String, Number],
+  currentUser: Object
 })
 
 const emit = defineEmits(['prev-week', 'next-week', 'new-reservation', 'boat-change'])
@@ -16,6 +17,7 @@ const selectedBoatId = ref(props.selectedBoat || '')
 watch(selectedBoatId, (newVal) => {
   emit('boat-change', newVal)
 })
+
 </script>
 
 <template>

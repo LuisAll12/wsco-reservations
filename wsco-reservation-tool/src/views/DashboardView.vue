@@ -132,7 +132,7 @@ function validateReservation(boatId, from, to) {
 
 <template>
   <div class="dashboard">
-    <Sidebar :user="user" />
+    <Sidebar :user="user"/>
     
     <main class="main-content">
       <CalendarHeader 
@@ -140,6 +140,7 @@ function validateReservation(boatId, from, to) {
         :boats="boats"
         :current-date="currentDate"
         :selected-boat="selectedBoat"
+        :currentUser="currentUser"
         @prev-week="prevWeek"
         @next-week="nextWeek"
         @new-reservation="handleNewReservation"

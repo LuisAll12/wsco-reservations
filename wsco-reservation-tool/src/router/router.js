@@ -6,6 +6,7 @@ const HomeView = () => import(/* webpackChunkName: "Home" */ '../views/Home.vue'
 const Login = () => import(/* webpackChunkName: "Login" */ '../views/Login.vue');
 const MyRes = () => import(/* webpackChunkName: "Login" */ '../views/MyRes.vue');
 const Dashboard = () => import(/* webpackChunkName: "Dashboard" */ '../views/DashboardView.vue');
+const ReportDamage = () => import(/* webpackChunkName: "ReportDamage" */ '../components/ReportDamage.vue');
 
 
 const routes = [
@@ -28,6 +29,11 @@ const routes = [
         path: '/dashboard',
         name: 'Dashboard',
         component: Dashboard
+    },
+    {
+        path: '/dashboard/schaden-melden',
+        name: 'ReportDamage',
+        component: ReportDamage
     }
 ];
 

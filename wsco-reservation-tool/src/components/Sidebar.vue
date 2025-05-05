@@ -28,7 +28,7 @@ defineProps({
 
     <section class="reservation-actions">
       <div class="action-item">
-        <span>Schaden melden</span>
+        <span><router-link to="/dashboard/schaden-melden" class="router-link">Schaden melden</router-link></span>
       </div>
     </section>
     <!-- <SidebarCalendar 
@@ -76,5 +76,10 @@ defineProps({
   background: #34495e;
   margin: 8px 0;
   border-radius: 8px;
+}
+.router-link {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
 }
 </style>

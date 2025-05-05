@@ -7,6 +7,8 @@ import checkBoatAvailability from '../services/CheckBoatAvailability';
 // 1. First declare all reactive variables
 const availabilityError = ref("");
 const isCheckingAvailability = ref(false);
+const isSubmitting = ref(false);
+
 const form = ref({
   title: "",
   from: "",
