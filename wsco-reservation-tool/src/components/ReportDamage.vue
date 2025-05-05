@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
-import { getUserReservations } from '../services/ReportDamageService.js'
+import { getUserReservations, createDamageReport } from '../services/ReportDamageService.js'
 import { getCurrentUserFromSession } from '../services/sessionKeyService.js'
 
 const reservations = ref([])
@@ -11,7 +11,7 @@ const description = ref('')
 const selectedReservationId = ref('')
 const isLoading = ref(false)
 const isSubmitting = ref(false)
-const contactEmail = 'support@bootsverein.ch'
+const contactEmail = 'support@wsco.ch'
 
 // Airtable-kompatible Typenliste
 const typeOptions = ['Loch', 'Fehlendes Teil', 'Motor', 'Elektronik', 'Sonstiges']
@@ -31,18 +31,15 @@ async function submitDamageReport() {
     const selected = reservations.value.find(r => r.id === selectedReservationId.value)
     const user = await getCurrentUserFromSession()
 
-    const payload = {
-      fields: {
-        Type:           type.value,
-        Reason:         reason.value.trim(),
-        Description:    description.value.trim(),
-        CreateDate:     new Date().toISOString(),
-        Reservation:    [selected.id],
-        CreatedPerson:  [user.id],  // user.record-id von Airtable
-      },
-    }
+    const fields = {
+        Type:          type.value,
+        Reason:        reason.value.trim(),
+        Description:   description.value.trim(),
+        Reservation:   [ selected.id ],   // Link zu Reservation-Tabelle
+        CreatedPerson: [ user.id ]        // Link zu User-Tabelle
+        };
 
-    await axios.post('/api/damages', payload)
+    await createDamageReport(fields)
     alert('Schadensmeldung erfolgreich gesendet.')
 
     // Reset
@@ -75,6 +72,7 @@ onMounted(async () => {
 
 <template>
   <div class="report-form">
+    <router-link to="/dashboard" class="router-link">Zurück</router-link>
     <h2>Schaden melden</h2>
 
     <div v-if="isLoading">Reservationen werden geladen...</div>
@@ -185,5 +183,11 @@ textarea {
 .btn.primary:disabled {
   background: #ccc;
   cursor: not-allowed;
+}
+.router-link {
+  color: #3498db;
+  font-weight: bold;
+  margin-bottom: 16px;
+  display: inline-block;
 }
 </style>
