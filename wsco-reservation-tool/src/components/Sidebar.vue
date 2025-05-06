@@ -18,7 +18,7 @@ defineProps({
     
     <nav class="sidebar-nav">
       <ul>
-        <li v-for="page in ['Dashboard', 'Einstellungen', 'Hilfe']" 
+        <li v-for="page in ['Einstellungen', 'Hilfe']" 
             :key="page"
             class="nav-item">
           {{ page }}

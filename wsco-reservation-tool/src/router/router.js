@@ -8,6 +8,7 @@ const Dashboard = () => import(/* webpackChunkName: "Dashboard" */ '../views/Das
 const ReportDamage = () => import(/* webpackChunkName: "ReportDamage" */ '../components/ReportDamage.vue');
 const ClubBoats = () => import(/* webpackChunkName: "ClubBoats" */ '../components/ClubBoats.vue');
 const MyReservations = () => import(/* webpackChunkName: "MyReservations" */ '../components/MyReservations.vue');
+const BoatDetail = () => import(/* webpackChunkName: "BoatDetail" */ '../components/BoatDetail.vue');
 
 
 const routes = [
@@ -40,6 +41,11 @@ const routes = [
         path: '/dashboard/meine-reservierungen',
         name: 'MyReservations',
         component: MyReservations
+    },
+    {
+        path: '/dashboard/unsere-boote/:id',
+        name: 'BoatDetail',
+        component: BoatDetail  // Datei siehe unten
     }
 ];
 
