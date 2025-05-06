@@ -7,6 +7,7 @@ const Login = () => import(/* webpackChunkName: "Login" */ '../views/Login.vue')
 const MyRes = () => import(/* webpackChunkName: "Login" */ '../views/MyRes.vue');
 const Dashboard = () => import(/* webpackChunkName: "Dashboard" */ '../views/DashboardView.vue');
 const ReportDamage = () => import(/* webpackChunkName: "ReportDamage" */ '../components/ReportDamage.vue');
+const ClubBoats = () => import(/* webpackChunkName: "ClubBoats" */ '../components/ClubBoats.vue');
 
 
 const routes = [
@@ -34,6 +35,11 @@ const routes = [
         path: '/dashboard/schaden-melden',
         name: 'ReportDamage',
         component: ReportDamage
+    },
+    {
+        path: '/dashboard/unsere-boote',
+        name: 'ClubBoats',
+        component: ClubBoats
     }
 ];
 

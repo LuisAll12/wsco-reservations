@@ -18,7 +18,7 @@ defineProps({
     
     <nav class="sidebar-nav">
       <ul>
-        <li v-for="page in ['Dashboard', 'Einstellungen', 'Hilfe', 'Unsere Boote', 'Meine Reservierungen']" 
+        <li v-for="page in ['Dashboard', 'Einstellungen', 'Hilfe', 'Meine Reservierungen']" 
             :key="page"
             class="nav-item">
           {{ page }}
@@ -29,6 +29,9 @@ defineProps({
     <section class="reservation-actions">
       <div class="action-item">
         <span><router-link to="/dashboard/schaden-melden" class="router-link">Schaden melden</router-link></span>
+      </div>
+      <div class="action-item">
+        <span><router-link to="/dashboard/unsere-boote" class="router-link">Unsere Boote</router-link></span>
       </div>
     </section>
     <!-- <SidebarCalendar 
