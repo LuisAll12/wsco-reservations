@@ -1,6 +1,12 @@
 <script setup>
 import { ref } from 'vue'
-import { CalendarIcon, ClockIcon, TagIcon, XCircleIcon } from '@heroicons/vue/24/outline'
+import {
+  CalendarIcon,
+  ClockIcon,
+  TagIcon,
+  XCircleIcon,
+  ExclamationTriangleIcon
+} from '@heroicons/vue/24/outline'
 
 const reservations = ref([
   {
@@ -26,16 +32,31 @@ const reservations = ref([
   }
 ])
 
-function cancelReservation(id) {
-  const reservation = reservations.value.find(r => r.id === id)
+const showModal = ref(false)
+const selectedReservationId = ref(null)
+
+function openConfirmation(id) {
+  selectedReservationId.value = id
+  showModal.value = true
+}
+
+function confirmCancel() {
+  const reservation = reservations.value.find(r => r.id === selectedReservationId.value)
   if (reservation && reservation.status !== 'Storniert') {
     reservation.status = 'Storniert'
   }
+  closeModal()
+}
+
+function closeModal() {
+  selectedReservationId.value = null
+  showModal.value = false
 }
 </script>
 
 <template>
   <div class="container">
+    <router-link to="/dashboard" class="back">Zurück</router-link>
     <h1 class="title">Meine Reservierungen</h1>
     <div class="reservation-list">
       <div
@@ -60,12 +81,24 @@ function cancelReservation(id) {
 
         <button
           class="cancel-button"
-          @click="cancelReservation(reservation.id)"
+          @click="openConfirmation(reservation.id)"
           :disabled="reservation.status === 'Storniert'"
         >
           <XCircleIcon class="icon-button" />
           Reservierung stornieren
         </button>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div v-if="showModal" class="modal-overlay">
+      <div class="modal">
+        <ExclamationTriangleIcon class="modal-icon" />
+        <p>Möchtest du diese Reservierung wirklich stornieren?</p>
+        <div class="modal-actions">
+          <button class="confirm-btn" @click="confirmCancel">Ja, stornieren</button>
+          <button class="cancel-btn" @click="closeModal">Abbrechen</button>
+        </div>
       </div>
     </div>
   </div>
@@ -77,6 +110,9 @@ function cancelReservation(id) {
   margin: 0 auto;
   padding: 24px;
   font-family: Arial, sans-serif;
+  background-color: #fff;
+  border-radius: 12px;
+  position: relative;
 }
 
 .title {
@@ -156,5 +192,66 @@ function cancelReservation(id) {
 .icon-button {
   width: 20px;
   height: 20px;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  padding: 24px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 300px;
+}
+
+.modal-icon {
+  width: 40px;
+  height: 40px;
+  color: #f59e0b;
+  margin-bottom: 12px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.confirm-btn {
+  background-color: #e53935;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  background-color: #ccc;
+  color: black;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.back{
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 1.2em;
+    color: #007bff;
 }
 </style>
