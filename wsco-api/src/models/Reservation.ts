@@ -1,0 +1,219 @@
+import * as admin from 'firebase-admin';
+import { db } from '@/config/db';
+import { Boat } from './Boat';
+import { User } from './user';
+import { Damage } from './Damage';
+
+export enum status {
+    pending = 'pending',
+    confirmed = 'confirmed',
+    cancelled = 'cancelled'
+}
+export enum PaymentStatus {
+    paid = 'paid',
+    unpaid = 'unpaid'
+}
+
+export interface Reservation {
+    // The id of the reservation in the database
+    id: string;
+
+    // Reservation details
+    startDate: Date;
+    endDate: Date;
+    status: status;
+    NumBlocks: number;
+    PaymentStatus: PaymentStatus;
+    TotalPrice: number;
+    FK_BoatId: admin.firestore.DocumentReference<Boat>;
+    FK_UserId: admin.firestore.DocumentReference<User>;
+    FK_DamageId?: admin.firestore.DocumentReference<Damage>;
+
+    // Timestamps
+    createdAt: admin.firestore.Timestamp;
+    updatedAt: admin.firestore.Timestamp;
+}
+
+class ReservationModel {
+    private static reservationsRef = db.collection('reservations');
+
+    static async createReservation(reservation: Omit<Reservation, 'id' | 'createdAt' | 'updatedAt'>): Promise<Reservation> {
+        const timestamp = admin.firestore.FieldValue.serverTimestamp();
+        const reservationData = {
+            ...reservation,
+            createdAt: timestamp,
+            updatedAt: timestamp
+        };
+
+        const reservationDocRef = await this.reservationsRef.add(reservationData);
+
+        const createdReservationDoc = await reservationDocRef.get();
+        const createdReservationData = createdReservationDoc.data();
+
+        if (createdReservationData) {
+            return {
+                id: reservationDocRef.id,
+                ...createdReservationData
+            } as Reservation;
+        } else {
+            throw new Error('Failed to create reservation');
+        }
+    }
+
+    static async getReservationById(reservationId: string): Promise<Reservation | null> {
+        const reservationDoc = await this.reservationsRef.doc(reservationId).get();
+        if (reservationDoc.exists) {
+            return {
+                id: reservationDoc.id,
+                ...reservationDoc.data()
+            } as Reservation;
+        } else {
+            return null;
+        }
+    }
+
+    static async updateReservation(reservationId: string, updatedData: Partial<Reservation>): Promise<void> {
+        const reservationDocRef = this.reservationsRef.doc(reservationId);
+        await reservationDocRef.update({
+            ...updatedData,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+    }
+
+    static async deleteReservation(reservationId: string): Promise<void> {
+        const reservationDocRef = this.reservationsRef.doc(reservationId);
+        await reservationDocRef.delete();
+    }
+
+    static async getAllReservations(): Promise<Reservation[]> {
+        const snapshot = await this.reservationsRef.get();
+        const reservations: Reservation[] = [];
+
+        snapshot.forEach((doc) => {
+            reservations.push({
+                id: doc.id,
+                ...doc.data()
+            } as Reservation);
+        });
+
+        return reservations;
+    }
+
+    static async getReservationsByUserId(userId: string): Promise<Reservation[]> {
+        const snapshot = await this.reservationsRef.where('FK_UserId', '==', userId).get();
+        const reservations: Reservation[] = [];
+
+        snapshot.forEach((doc) => {
+            reservations.push({
+                id: doc.id,
+                ...doc.data()
+            } as Reservation);
+        });
+
+        return reservations;
+    }
+
+    static async getReservationsByBoatId(boatId: string): Promise<Reservation[]> {
+        const snapshot = await this.reservationsRef.where('FK_BoatId', '==', boatId).get();
+        const reservations: Reservation[] = [];
+
+        snapshot.forEach((doc) => {
+            reservations.push({
+                id: doc.id,
+                ...doc.data()
+            } as Reservation);
+        });
+
+        return reservations;
+    }
+
+
+    static async getReservationsByStatus(status: status): Promise<Reservation[]> {
+        const snapshot = await this.reservationsRef.where('status', '==', status).get();
+        const reservations: Reservation[] = [];
+
+        snapshot.forEach((doc) => {
+            reservations.push({
+                id: doc.id,
+                ...doc.data()
+            } as Reservation);
+        });
+
+        return reservations;
+    }
+
+    static async getReservationsByPaymentStatus(paymentStatus: PaymentStatus): Promise<Reservation[]> {
+        const snapshot = await this.reservationsRef.where('PaymentStatus', '==', paymentStatus).get();
+        const reservations: Reservation[] = [];
+
+        snapshot.forEach((doc) => {
+            reservations.push({
+                id: doc.id,
+                ...doc.data()
+            } as Reservation);
+        });
+
+        return reservations;
+    }
+
+    static async getReservationsByDateRange(startDate: Date, endDate: Date): Promise<Reservation[]> {
+        const snapshot = await this.reservationsRef
+            .where('startDate', '>=', startDate)
+            .where('endDate', '<=', endDate)
+            .get();
+        const reservations: Reservation[] = [];
+
+        snapshot.forEach((doc) => {
+            reservations.push({
+                id: doc.id,
+                ...doc.data()
+            } as Reservation);
+        });
+
+        return reservations;
+    }
+
+    static async getReservationsByBoatIdAndDateRange(boatId: string, startDate: Date, endDate: Date): Promise<Reservation[]> {
+        const snapshot = await this.reservationsRef
+            .where('FK_BoatId', '==', boatId)
+            .where('startDate', '>=', startDate)
+            .where('endDate', '<=', endDate)
+            .get();
+        const reservations: Reservation[] = [];
+
+        snapshot.forEach((doc) => {
+            reservations.push({
+                id: doc.id,
+                ...doc.data()
+            } as Reservation);
+        });
+
+        return reservations;
+    }
+
+    static async markReservationAsPaid(reservationId: string): Promise<void> {
+        const reservationDocRef = this.reservationsRef.doc(reservationId);
+        await reservationDocRef.update({
+            PaymentStatus: PaymentStatus.paid,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+    }
+
+    static async markReservationAsConfirmed(reservationId: string): Promise<void> {
+        const reservationDocRef = this.reservationsRef.doc(reservationId);
+        await reservationDocRef.update({
+            status: status.confirmed,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+    }
+
+    static async markReservationAsCancelled(reservationId: string): Promise<void> {
+        const reservationDocRef = this.reservationsRef.doc(reservationId);
+        await reservationDocRef.update({
+            status: status.cancelled,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+    }
+}
+
+export default ReservationModel;
