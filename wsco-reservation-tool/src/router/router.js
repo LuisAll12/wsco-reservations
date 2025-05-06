@@ -4,10 +4,10 @@ import Cookies from 'js-cookie';
 
 const HomeView = () => import(/* webpackChunkName: "Home" */ '../views/Home.vue');
 const Login = () => import(/* webpackChunkName: "Login" */ '../views/Login.vue');
-const MyRes = () => import(/* webpackChunkName: "Login" */ '../views/MyRes.vue');
 const Dashboard = () => import(/* webpackChunkName: "Dashboard" */ '../views/DashboardView.vue');
 const ReportDamage = () => import(/* webpackChunkName: "ReportDamage" */ '../components/ReportDamage.vue');
 const ClubBoats = () => import(/* webpackChunkName: "ClubBoats" */ '../components/ClubBoats.vue');
+const MyReservations = () => import(/* webpackChunkName: "MyReservations" */ '../components/MyReservations.vue');
 
 
 const routes = [
@@ -20,11 +20,6 @@ const routes = [
         path: '/login',
         name: 'Login',
         component: Login
-    },
-    {
-        path: '/meine-reservationen',
-        name: 'MyRes',
-        component: MyRes
     },
     {
         path: '/dashboard',
@@ -40,6 +35,11 @@ const routes = [
         path: '/dashboard/unsere-boote',
         name: 'ClubBoats',
         component: ClubBoats
+    },
+    {
+        path: '/dashboard/meine-reservierungen',
+        name: 'MyReservations',
+        component: MyReservations
     }
 ];
 
