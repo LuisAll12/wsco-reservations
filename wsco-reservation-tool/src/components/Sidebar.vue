@@ -33,6 +33,9 @@ defineProps({
       <div class="action-item">
         <span><router-link to="/dashboard/unsere-boote" class="router-link">Unsere Boote</router-link></span>
       </div>
+      <div class="action-item">
+        <span><router-link to="/dashboard/meine-reservierungen" class="router-link">Meine Reservierungen</router-link></span>
+      </div>
     </section>
     <!-- <SidebarCalendar 
       :current-week="currentWeek"
