@@ -1,14 +1,14 @@
 # Dependencies
 /node_modules
 /.pnp
-.pnp.js
+.yarn
 
 # Testing
 /coverage
 
 # Production
-build
-dist
+build/
+dist/
 
 # Misc
 .DS_Store
@@ -32,3 +32,5 @@ credentials/
 
 # typescript
 *.tsbuildinfo
+
+.vercel

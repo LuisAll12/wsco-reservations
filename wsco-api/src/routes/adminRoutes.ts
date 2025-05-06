@@ -5,6 +5,6 @@ import { adminMiddleware } from '@/middleware/Admin';
 const router = Router();
 
 // Admin routes
-router.post('/admin/createUser', adminMiddleware, CreateUser);
+router.post('/createUser', adminMiddleware, CreateUser);
 
 export default router;
