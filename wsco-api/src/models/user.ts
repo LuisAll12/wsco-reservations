@@ -23,6 +23,7 @@ export interface User {
     lastName: string;
     name: string;
     email: string;
+    phone: string;
 
     // State management and Privileges
     State?: State;
@@ -32,6 +33,7 @@ export interface User {
     Reservation?: string[];
     Session_Key?: string;
     DamageReport?: string[];
+    authCode?: string;
 
     // Timestamps
     createdAt: admin.firestore.Timestamp;
@@ -59,6 +61,7 @@ class UserModel {
                 id: userDocRef.id,
                 firstName: createdUserData.firstName,
                 lastName: createdUserData.lastName,
+                phone: createdUserData.phone,
                 name: createdUserData.firstName + " " + createdUserData.lastName,
                 email: createdUserData.email,
                 State: createdUserData.State || State.Active,
@@ -90,9 +93,9 @@ class UserModel {
         return { id: userDoc.docs[0].id, ...userDoc.docs[0].data() } as User;
     }
 
-    static async getAllUsers(): Promise<Omit<User, 'firstName' | 'lastName' | 'Session_Key'>[]> {
+    static async getAllUsers(): Promise<Omit<User, 'firstName' | 'lastName' | 'Session_Key' | 'authCode'>[]> {
         const usersSnapshot = await this.usersRef.get();
-        const users: Omit<User, 'firstName' | 'lastName' | 'Session_Key'>[] = [];
+        const users: Omit<User, 'firstName' | 'lastName' | 'Session_Key' | 'authCode'>[] = [];
 
         usersSnapshot.forEach((doc) => {
             const data = doc.data();
@@ -101,6 +104,7 @@ class UserModel {
                 id: doc.id,
                 name: `${data.firstName} ${data.lastName}`,
                 email: data.email,
+                phone: data.phone,
                 State: data.State,
                 Role: data.Role,
                 Reservation: data.Reservation,
@@ -125,9 +129,45 @@ class UserModel {
         return { id: userDoc.docs[0].id, ...userDoc.docs[0].data() } as User;
     }
 
+    static async generateSessionKey(userId: string): Promise<void> {
+        const sessionKey = Math.random().toString(36).substring(2, 15); // Generate a random session key
+        const userRef = this.usersRef.doc(userId);
+        await userRef.update({ Session_Key: sessionKey });
+    }
+
     static async clearUserSessionKey(id: string): Promise<void> {
         const userRef = this.usersRef.doc(id);
         await userRef.update({ Session_Key: "" });
+    }
+
+    static async storeAuthCode(email: string, code: string): Promise<void> {
+        const userRef = this.usersRef.where('email', '==', email);
+        const userDoc = await userRef.get();
+
+        if (userDoc.empty) {
+            throw new Error("User not found");
+        }
+
+        const userId = userDoc.docs[0].id;
+        await this.usersRef.doc(userId).update({ authCode: code });
+    }
+
+    static async verifyAuthCode(email: string, code: string): Promise<boolean> {
+        const userRef = this.usersRef.where('email', '==', email);
+        const userDoc = await userRef.get();
+
+        if (userDoc.empty) {
+            throw new Error("User not found");
+        }
+
+        const userId = userDoc.docs[0].id;
+        const userData = await this.getUserById(userId);
+
+        if (userData && userData.authCode === code) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     static async updateUser(id: string, data: Partial<User>): Promise<User | null> {
