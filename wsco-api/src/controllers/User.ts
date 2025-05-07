@@ -1,6 +1,5 @@
 import UserModel, { State, User, Role } from "@/models/user";
-import { Encrypt } from "@/utils/encrypt";
-import { generateKey, randomInt } from "crypto";
+import { randomInt } from "crypto";
 import { Request, RequestHandler, Response } from "express";
 
 export const CreateUser: RequestHandler = async (req: Request, res: Response): Promise<void> => {
@@ -50,9 +49,9 @@ export const AuthenticateUser: RequestHandler = async (req: Request, res: Respon
 
         UserModel.storeAuthCode(user.email, code);
 
-        const _code = await Encrypt(code);
 
-        res.status(200).json({ message: "User found", code: _code });
+
+        res.status(200).json({ message: "success" });
     } catch (error) {
         console.error("Auth error:", error);
         res.status(500).json({ message: "Error during authentication", error });
