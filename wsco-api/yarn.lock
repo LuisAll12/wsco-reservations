@@ -1301,6 +1301,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"emailjs-com@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "emailjs-com@npm:3.2.0"
+  checksum: 10c0/3c6865ce89ebabeccd4f678fbd5f545f58482bb99fc23c17d9cebbf895705275df2da9c6fadaef8148397fe7fcc18cbbe49f9c720b5ad88b2dd6b82680ef169f
+  languageName: node
+  linkType: hard
+
 "emoji-regex@npm:^8.0.0":
   version: 8.0.0
   resolution: "emoji-regex@npm:8.0.0"
@@ -3986,6 +3993,7 @@ __metadata:
     cookie-parser: "npm:^1.4.7"
     crypto-js: "npm:^4.2.0"
     dotenv: "npm:^16.5.0"
+    emailjs-com: "npm:^3.2.0"
     eslint: "npm:^9.26.0"
     express: "npm:^5.1.0"
     firebase-admin: "npm:^13.3.0"
