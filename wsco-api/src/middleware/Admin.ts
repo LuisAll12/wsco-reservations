@@ -1,4 +1,4 @@
-import UserModel from "@/models/user";
+import UserModel, { Role, User } from "@/models/user";
 import { NextFunction, Request, Response } from "express";
 
 export async function adminMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -9,9 +9,9 @@ export async function adminMiddleware(req: Request, res: Response, next: NextFun
         return;
     }
 
-    const user = await UserModel.getUserBySessionKey(Session_Key.Session_Key);
+    const user = await UserModel.getUserBySessionKey(Session_Key.Session_Key) as User;
 
-    if (user?.Role !== "admin") {
+    if (user?.Role !== Role.Admin) {
         res.status(403).json({ message: "Forbidden" });
         return;
     }
