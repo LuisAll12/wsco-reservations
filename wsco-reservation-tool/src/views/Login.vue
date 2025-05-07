@@ -1,8 +1,6 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { Decrypt } from "../services/decrypt.js";
-import emailjs from 'emailjs-com';
 import { setSessionKey } from '../services/sessionKeyService.js';
 
 const router = useRouter();
@@ -17,44 +15,13 @@ const isLoading = ref(false);
 const isSending = ref(false);
 
 
-
-const sendVerificationEmail = async (email, verificationCode) => {
-  if (isSending.value) return;
-
-  isSending.value = true;
-
-  const cverificationCode = await Decrypt(verificationCode);
-
-  console.log("Decrypted verification code:", cverificationCode);
-
-  const templateParams = {
-    to_email: email,
-    message: `Ihr Verifizierungscode lautet: ${verificationCode}`,
-  };
-  const serviceID = "service_wzhmwmh";
-  const templateID = "template_z8u5xt3";
-  const userID = "n5sGkJrXJbUIwcaC6";
-
-  try {
-    await emailjs.send(serviceID, templateID, templateParams, userID);
-    successMessage.value = "Verifizierungscode wurde an Ihre E-Mail gesendet!";
-    errorMessage.value = "";
-    VerifyCodeSent.value = true;
-    VerifyTry.value = 3;
-  } catch (error) {
-    errorMessage.value = "Fehler beim Senden des Codes. Bitte versuchen Sie es später erneut.";
-    successMessage.value = "";
-    console.error("EmailJS Error:", error);
-  } finally {
-    isSending.value = false;
-  }
-};
-
 const Login = async () => {
   if (isLoading.value) return;
 
   isLoading.value = true;
   ErrorMessage.value = "";
+  LoginEmail.value = LoginEmail.value.trim();
+  LoginEmail.value = LoginEmail.value.toLowerCase();
 
   if (!LoginEmail.value || !LoginEmail.value.includes('@')) {
     ErrorMessage.value = "Bitte geben Sie eine gültige E-Mail-Adresse ein.";
@@ -75,7 +42,9 @@ const Login = async () => {
     const data = await res.json();
 
     if (data.message === "success") {
-      await sendVerificationEmail(LoginEmail.value, data.code);
+      VerifyCodeSent.value = true;
+      successMessage.value = "Ein Verifizierungscode wurde an Ihre E-Mail gesendet. Bitte überprüfen Sie Ihren Posteingang und Ihren Spam.";
+      errorMessage.value = "";
     } else {
       ErrorMessage.value = "Diese E-Mail ist nicht registriert.";
     }
@@ -87,29 +56,42 @@ const Login = async () => {
   }
 };
 
-const EnterVerifyCode = () => {
+const EnterVerifyCode = async () => {
   if (!inputcode.value || VerifyTry.value <= 0) return;
 
   const enteredCode = inputcode.value.toString().trim();
-  const expectedCode = verificationCode.value.toString().trim();
 
-  if (enteredCode === expectedCode) {
-    const Loginvalid = setSessionKey(LoginEmail.value);
-    if (Loginvalid) {
+  try {
+    const res = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/auth/finish`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email: LoginEmail.value, code: enteredCode }),
+      credentials: "include",
+    }
+    );
+    const data = await res.json();
+
+    if (data.message === "success") {
+      VerifyCodeSent.value = false;
       successMessage.value = "Erfolgreich verifiziert!";
       errorMessage.value = "";
       router.push("/dashboard");
-    }
-  } else {
-    VerifyTry.value -= 1;
-    if (VerifyTry.value > 0) {
-      errorMessage.value = `Falscher Code. Noch ${VerifyTry.value} Versuch${VerifyTry.value !== 1 ? 'e' : ''} übrig.`;
     } else {
-      errorMessage.value = "Keine Versuche mehr übrig. Bitte starten Sie den Vorgang neu.";
-      VerifyCodeSent.value = false;
-      LoginEmail.value = "";
+      VerifyTry.value -= 1;
+      if (VerifyTry.value > 0) {
+        errorMessage.value = `Falscher Code. Noch ${VerifyTry.value} Versuch${VerifyTry.value !== 1 ? 'e' : ''} übrig.`;
+      } else {
+        errorMessage.value = "Keine Versuche mehr übrig. Bitte starten Sie den Vorgang neu.";
+        VerifyCodeSent.value = false;
+        LoginEmail.value = "";
+      }
+      inputcode.value = "";
     }
-    inputcode.value = "";
+  } catch (error) {
+    console.error("Verification Error:", error.response ? error.response.data : error.message);
+    errorMessage.value = "Ein Fehler ist aufgetreten. Bitte versuchen Sie es später noch einmal.";
   }
 };
 </script>

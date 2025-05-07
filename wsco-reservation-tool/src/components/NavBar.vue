@@ -1,27 +1,34 @@
 <script setup>
-    import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { authCheck, logoutUser } from '../services/auth';
+import router from '../router/router';
 
-    const isAdmin = ref(false);
-    const isLoggedin = ref(false);
-    const isBurgerActive = ref(false);
+const isAdmin = ref(false);
+const isLoggedin = async () => { return await authCheck(); }
+const isBurgerActive = ref(false);
 
-    const closeDropdown = (e) => {
-        if (!e.target.closest('.Burger')) {
-            isBurgerActive.value = false;
-        }
-    };
-
-    onMounted(() => {
-        document.addEventListener('click', closeDropdown);
-    });
-
-    onUnmounted(() => {
-        document.removeEventListener('click', closeDropdown);
-    });
-
-    function logout() {
-        isLoggedin.value = false;
+const closeDropdown = (e) => {
+    if (!e.target.closest('.Burger')) {
+        isBurgerActive.value = false;
     }
+};
+
+onMounted(() => {
+    document.addEventListener('click', closeDropdown);
+});
+
+onUnmounted(() => {
+    document.removeEventListener('click', closeDropdown);
+});
+
+async function logout() {
+    try {
+        await logoutUser();
+        router.push('/login');
+    } catch (error) {
+        console.error('Logout failed:', error);
+    }
+}
 </script>
 <template>
     <div class="Navbar-Container">
@@ -39,15 +46,15 @@
             <div class="Login-Logout">
                 <RouterLink to="/login">
                     <button v-if="!isLoggedin">
-                        Einloggen 
+                        Einloggen
                         <div class="arrow-wrapper">
                             <div class="arrow"></div>
 
                         </div>
                     </button>
                 </RouterLink>
-                <button v-if="isLoggedin">
-                    Ausloggen 
+                <button v-if="isLoggedin" @click="logout">
+                    Ausloggen
                     <div class="arrow-wrapper">
                         <div class="arrow"></div>
 
@@ -69,14 +76,14 @@
             </div>
             <div class="Login-Logout">
                 <button v-if="!isLoggedin">
-                    Einloggen 
+                    Einloggen
                     <div class="arrow-wrapper">
                         <div class="arrow"></div>
 
                     </div>
                 </button>
                 <button v-if="isLoggedin">
-                    Ausloggen 
+                    Ausloggen
                     <div class="arrow-wrapper">
                         <div class="arrow"></div>
 
@@ -89,93 +96,145 @@
 <style scoped>
 @import '../assets/css/global.css';
 @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
-h1, h2, h3, h4, h5, h6, p, a, span, div, li, ul, ol, input, button {
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+a,
+span,
+div,
+li,
+ul,
+ol,
+input,
+button {
     font-family: "Roboto", serif;
     font-optical-sizing: auto;
     font-weight: 600;
     font-style: normal;
 }
-body, html{
+
+body,
+html {
     margin: 0;
     padding: 0;
 }
-.NormalNavbar, .MediaNavbar {
+
+.NormalNavbar,
+.MediaNavbar {
     display: flex;
-    justify-content: center; /* Zentriere die Items horizontal */
-    align-items: center; /* Zentriere die Items vertikal */
+    justify-content: center;
+    /* Zentriere die Items horizontal */
+    align-items: center;
+    /* Zentriere die Items vertikal */
     padding: 1rem;
     background-color: #22209b;
     color: #fff;
-    gap: 2rem; /* Abstand zwischen den Hauptblöcken */
+    gap: 2rem;
+    /* Abstand zwischen den Hauptblöcken */
 }
-.MediaNavbar{
+
+.MediaNavbar {
     display: none;
 }
+
 ul {
-    margin: 0; /* Entfernt Standardabstände */
-    padding: 0; /* Entfernt Standardabstände */
-    list-style: none; /* Entfernt Bullet Points */
+    margin: 0;
+    /* Entfernt Standardabstände */
+    padding: 0;
+    /* Entfernt Standardabstände */
+    list-style: none;
+    /* Entfernt Bullet Points */
     display: flex;
-    justify-content: center; /* Horizontale Zentrierung */
-    gap: 1.5rem; /* Abstand zwischen Items */
+    justify-content: center;
+    /* Horizontale Zentrierung */
+    gap: 1.5rem;
+    /* Abstand zwischen Items */
 }
+
 .Items {
     display: flex;
-    justify-content: center; /* Horizontale Zentrierung */
-    align-items: center; /* Vertikale Zentrierung */
-    gap: 1rem; /* Abstand zwischen den Items */
-    flex-grow: 1; /* Lässt die Items den verfügbaren Platz nutzen */
+    justify-content: center;
+    /* Horizontale Zentrierung */
+    align-items: center;
+    /* Vertikale Zentrierung */
+    gap: 1rem;
+    /* Abstand zwischen den Items */
+    flex-grow: 1;
+    /* Lässt die Items den verfügbaren Platz nutzen */
     text-align: center;
 }
-.Items ul{
+
+.Items ul {
     display: flex;
     gap: 1rem;
 }
-ul li{
+
+ul li {
     list-style: none;
 }
-ul li, .Logo:hover{
-    cursor:pointer;
+
+ul li,
+.Logo:hover {
+    cursor: pointer;
 }
-.Login-Logout{
+
+.Login-Logout {
     position: relative;
     right: 0;
 }
-@media screen and (max-width: 840px){
-    .NormalNavbar{
+
+@media screen and (max-width: 840px) {
+    .NormalNavbar {
         display: none;
     }
-    .MediaNavbar{
+
+    .MediaNavbar {
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: 1rem;
         background-color: #22209b;
     }
+
     .MediaNavbar .Media-Items {
-        display: flex; /* Verwende Flexbox für die Zentrierung */
-        flex-direction: column; /* Vertikale Anordnung */
-        align-items: center; /* Zentriere die Items */
-        gap: 1rem; /* Abstand zwischen den Items */
+        display: flex;
+        /* Verwende Flexbox für die Zentrierung */
+        flex-direction: column;
+        /* Vertikale Anordnung */
+        align-items: center;
+        /* Zentriere die Items */
+        gap: 1rem;
+        /* Abstand zwischen den Items */
     }
-    .MediaNavbar ul{
+
+    .MediaNavbar ul {
         display: flex;
         gap: 1rem;
     }
-    .MediaNavbar ul li{
+
+    .MediaNavbar ul li {
         list-style: none;
     }
-    .MediaNavbar .Login-Logout{
+
+    .MediaNavbar .Login-Logout {
         position: relative;
         right: 0;
     }
-    .Logo{
+
+    .Logo {
         width: 170px;
     }
-    .Reser{
+
+    .Reser {
         display: none;
     }
 }
+
 .Burger {
     position: relative;
     display: inline-block;
@@ -188,15 +247,18 @@ ul li, .Logo:hover{
     box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
     padding: 12px 16px;
     z-index: 1;
-    display: none; /* Hide by default */
+    display: none;
+    /* Hide by default */
 }
-.Media-Items p:hover{
-    cursor:pointer;
+
+.Media-Items p:hover {
+    cursor: pointer;
 }
 
 .Media-Items.active {
-    display: block; 
+    display: block;
 }
+
 button {
     --primary-color: #ffff;
     --secondary-color: #002152;
@@ -246,15 +308,14 @@ button .arrow::before {
 }
 
 button:hover {
-  background-color: var(--hover-color);
+    background-color: var(--hover-color);
 }
 
 button:hover .arrow {
-  background: var(--secondary-color);
+    background: var(--secondary-color);
 }
 
 button:hover .arrow:before {
-  right: 0;
+    right: 0;
 }
-
 </style>

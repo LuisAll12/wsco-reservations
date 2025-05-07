@@ -8,5 +8,4 @@ const router = Router();
 router.use('/admin', admin);
 router.use('/auth', auth);
 
-
 export default router;

@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Cookies from 'js-cookie';
+import { authCheck } from '../services/auth';
 
 
 const HomeView = () => import(/* webpackChunkName: "Home" */ '../views/Home.vue');
@@ -55,7 +56,7 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-    const isAuthenticated = Cookies.get("sessionKey") !== undefined;
+    const isAuthenticated = await authCheck();
     const isLoginPage = to.name === 'Login';
 
     if (isAuthenticated && isLoginPage) {

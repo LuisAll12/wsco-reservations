@@ -1,6 +1,6 @@
 <!-- src/App.vue -->
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'  
+import { ref, reactive, computed, onMounted } from 'vue'
 import Sidebar from '../components/Sidebar.vue'
 import CalendarHeader from '../components/CalendarHeader.vue'
 import WeekGrid from '../components/WeekGrid.vue'
@@ -61,17 +61,14 @@ function nextWeek() {
 
 onMounted(async () => {
   try {
-    const sessionKey = Cookies.get('sessionKey')
-    if (sessionKey) {
-      currentUser.value = await getUserBySessionKey(sessionKey)
-      console.log("Current user:", currentUser.value); 
-      
-      user.name = currentUser.value?.fields?.FirstName || "Gast";
-      user.id = currentUser.value?.id;
-      user.email = currentUser.value?.fields?.Email;
-      user.isAdmin = currentUser.value?.fields?.Role === "Admin";
-    }
-    
+    currentUser.value = await getUserBySessionKey()
+    console.log("Current user:", currentUser.value);
+
+    user.name = currentUser.value?.firstName || "Gast";
+    user.id = currentUser.value?.id;
+    user.email = currentUser.value?.Email;
+    user.isAdmin = currentUser.value?.Role === "Admin";
+
     reservations.value = await getReservations()
     boats.value = await getBoats()
   } catch (error) {
@@ -80,7 +77,7 @@ onMounted(async () => {
 })
 
 function handleNewReservation() {
-  console.log("handleNewReservation called"); 
+  console.log("handleNewReservation called");
   showReservationModal.value = true;
   console.log("showReservationModal value:", showReservationModal.value);
 }
@@ -93,7 +90,7 @@ async function submitReservation(reservationData) {
       Authorization: `Bearer ${import.meta.env.VITE_APP_API_KEY}`,
       "Content-Type": "application/json"
     };
-    
+
     // Direkter API-Aufruf ohne lokale Prüfung
     await axios.post(url, reservationData, { headers });
     showReservationModal.value = false;
@@ -132,38 +129,19 @@ function validateReservation(boatId, from, to) {
 
 <template>
   <div class="dashboard">
-    <Sidebar :user="user"/>
-    
+    <Sidebar :user="user" />
+
     <main class="main-content">
-      <CalendarHeader 
-        :user="user"
-        :boats="boats"
-        :current-date="currentDate"
-        :selected-boat="selectedBoat"
-        :currentUser="currentUser"
-        @prev-week="prevWeek"
-        @next-week="nextWeek"
-        @new-reservation="handleNewReservation"
-        @boat-change="handleBoatChange"
-      />
-      
-      <WeekGrid 
-        :days="weekDays"
-        :reservations="reservations"
-        :selected-boat="selectedBoat"
-        :boats="boats"
-        :current-user-id="currentUser?.id"
-      />
+      <CalendarHeader :user="user" :boats="boats" :current-date="currentDate" :selected-boat="selectedBoat"
+        :currentUser="currentUser" @prev-week="prevWeek" @next-week="nextWeek" @new-reservation="handleNewReservation"
+        @boat-change="handleBoatChange" />
+
+      <WeekGrid :days="weekDays" :reservations="reservations" :selected-boat="selectedBoat" :boats="boats"
+        :current-user-id="currentUser?.id" />
 
     </main>
-    <NewReservationModal 
-      v-if="showReservationModal"
-      :show="showReservationModal" 
-      :boats="boats"
-      :current-user="currentUser"
-      @close="showReservationModal = false"
-      @submit="submitReservation"
-    />
+    <NewReservationModal v-if="showReservationModal" :show="showReservationModal" :boats="boats"
+      :current-user="currentUser" @close="showReservationModal = false" @submit="submitReservation" />
   </div>
 </template>
 
@@ -215,8 +193,9 @@ function validateReservation(boatId, from, to) {
   border-radius: 8px;
   padding: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -228,7 +207,8 @@ function validateReservation(boatId, from, to) {
   opacity: 1 !important;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* High z-index to appear above everything */
+  z-index: 1000;
+  /* High z-index to appear above everything */
 }
 
 .modal {
