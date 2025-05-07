@@ -13,6 +13,8 @@
     "@heroicons/vue": "^2.2.0",
     "airtable": "^0.12.2",
     "axios": "^1.7.9",
+    "crypt-js": "^1.0.4",
+    "crypto-js": "^4.2.0",
     "date-fns": "^4.1.0",
     "emailjs": "^4.0.3",
     "emailjs-com": "^3.2.0",

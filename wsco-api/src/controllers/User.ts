@@ -1,6 +1,11 @@
 import UserModel, { State, User, Role } from "@/models/user";
+
 import { randomInt } from "crypto";
+import { sendVerificationEmail } from "@/services/mail";
+import { Encrypt } from "@/utils/encrypt";
+import { generateKey, randomInt } from "crypto";
 import { Request, RequestHandler, Response } from "express";
+import { AwsInstance } from "twilio/lib/rest/accounts/v1/credential/aws";
 
 export const CreateUser: RequestHandler = async (req: Request, res: Response): Promise<void> => {
     const { firstName, lastName, email, _Role } = req.body;
@@ -49,8 +54,13 @@ export const AuthenticateUser: RequestHandler = async (req: Request, res: Respon
 
         UserModel.storeAuthCode(user.email, code);
 
-
-
+        try {
+            await sendVerificationEmail(user.email, user.firstName, code);
+        } catch (error) {
+            console.error("Error sending email:", error);
+            res.status(500).json({ message: "Error sending verification email", error });
+            return;
+        }
         res.status(200).json({ message: "success" });
     } catch (error) {
         console.error("Auth error:", error);
@@ -76,16 +86,57 @@ export const FinishAuth: RequestHandler = async (req, res) => {
         }
 
         await UserModel.generateSessionKey(user.id);
+        const sessionKey = await UserModel.getSessionKey(user.id);
 
-        res.cookie("session_key", user.Session_Key, {
+        res.cookie("session_key", sessionKey, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "strict",
             maxAge: 24 * 60 * 60 * 1000,
         });
 
-        res.status(200).json({ message: "User authenticated" });
+        res.status(200).json({ message: "success" });
     } catch (error) {
         res.status(500).json({ message: "Authentication failed", error });
+    }
+};
+
+export const GetUserSession: RequestHandler = async (req, res) => {
+    const sessionKey = req.cookies.session_key;
+
+    if (!sessionKey) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+    }
+
+    try {
+        const user = await UserModel.getUserBySessionKey(sessionKey);
+
+        if (!user) {
+            res.status(401).json({ message: "Unauthorized" });
+            return;
+        }
+
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching user session", error });
+    }
+};
+
+export const LogoutUser: RequestHandler = async (req, res) => {
+    const sessionKey = req.cookies.session_key;
+
+    if (!sessionKey) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+    }
+
+    try {
+        const user = await UserModel.getUserBySessionKey(sessionKey) as User;
+        await UserModel.clearUserSessionKey(user.id);
+        res.clearCookie("session_key");
+        res.status(200).json({ message: "Logged out successfully" });
+    } catch (error) {
+        res.status(500).json({ message: "Error logging out", error });
     }
 };

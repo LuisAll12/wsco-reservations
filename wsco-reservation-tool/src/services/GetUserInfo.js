@@ -1,26 +1,23 @@
-// src/services/getUserBySessionKey.js
-import axios from "axios";
-
-const baseId = "appzBNlFfIJC6865x";
-const tableName = "Member";
-
-const getUserBySessionKey = async (sessionKey) => {
+const getUserBySessionKey = async () => {
   try {
-    const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
+    const url = `${import.meta.env.VITE_APP_BACKEND_BASEURL}/auth/session`;
     const headers = {
-      Authorization: `Bearer ${import.meta.env.VITE_APP_API_KEY}`,
       "Content-Type": "application/json"
     };
 
-    const response = await axios.get(url, { 
+    const response = await fetch(url, {
+      method: "GET",
       headers,
-      params: {
-        filterByFormula: `{SessionKey} = '${sessionKey}'`
-      }
+      credentials: "include",
     });
 
-    if (response.data.records.length > 0) {
-      return response.data.records[0]; // Return the first matching user
+    if (response.ok) {
+      const data = await response.json();
+
+      if (data && data.user) {
+        console.log("User data:", data.user);
+        return data.user;
+      }
     }
     return null;
   } catch (error) {

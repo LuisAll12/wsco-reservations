@@ -176,6 +176,27 @@ const positionedEvents = computed(() => {
   font-family: Arial, sans-serif;
 }
 
+@media (max-width: 1100px) {
+  .calendar-grid {
+    grid-template-columns: 40px repeat(auto-fit, minmax(120px, 1fr));
+  }
+
+  .day-header {
+    font-size: 10px;
+    padding: 4px;
+  }
+
+  .time-slot {
+    font-size: 10px;
+    padding-right: 4px;
+  }
+
+  .event-time,
+  .event-title {
+    font-size: 10px;
+  }
+}
+
 .time-scale {
   grid-column: 1;
   position: sticky;

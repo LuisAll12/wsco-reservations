@@ -1,12 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Cookies from 'js-cookie';
+import { authCheck } from '../services/auth';
 
 
 const HomeView = () => import(/* webpackChunkName: "Home" */ '../views/Home.vue');
 const Login = () => import(/* webpackChunkName: "Login" */ '../views/Login.vue');
-const MyRes = () => import(/* webpackChunkName: "Login" */ '../views/MyRes.vue');
 const Dashboard = () => import(/* webpackChunkName: "Dashboard" */ '../views/DashboardView.vue');
 const ReportDamage = () => import(/* webpackChunkName: "ReportDamage" */ '../components/ReportDamage.vue');
+const ClubBoats = () => import(/* webpackChunkName: "ClubBoats" */ '../components/ClubBoats.vue');
+const MyReservations = () => import(/* webpackChunkName: "MyReservations" */ '../components/MyReservations.vue');
+const BoatDetail = () => import(/* webpackChunkName: "BoatDetail" */ '../components/BoatDetail.vue');
 
 
 const routes = [
@@ -21,11 +24,6 @@ const routes = [
         component: Login
     },
     {
-        path: '/meine-reservationen',
-        name: 'MyRes',
-        component: MyRes
-    },
-    {
         path: '/dashboard',
         name: 'Dashboard',
         component: Dashboard
@@ -34,6 +32,21 @@ const routes = [
         path: '/dashboard/schaden-melden',
         name: 'ReportDamage',
         component: ReportDamage
+    },
+    {
+        path: '/dashboard/unsere-boote',
+        name: 'ClubBoats',
+        component: ClubBoats
+    },
+    {
+        path: '/dashboard/meine-reservierungen',
+        name: 'MyReservations',
+        component: MyReservations
+    },
+    {
+        path: '/dashboard/unsere-boote/:id',
+        name: 'BoatDetail',
+        component: BoatDetail  // Datei siehe unten
     }
 ];
 
@@ -43,7 +56,7 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-    const isAuthenticated = Cookies.get("sessionKey") !== undefined;
+    const isAuthenticated = await authCheck();
     const isLoginPage = to.name === 'Login';
 
     if (isAuthenticated && isLoginPage) {

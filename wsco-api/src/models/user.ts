@@ -1,5 +1,6 @@
 import * as admin from 'firebase-admin';
 import { db } from '@/config/db';
+import Crypto from 'crypto';
 
 export enum State {
     Active = "active",
@@ -91,6 +92,14 @@ class UserModel {
         return { id: userDoc.docs[0].id, ...userDoc.docs[0].data() } as User;
     }
 
+    static async getSessionKey(id: string): Promise<string | null> {
+        const userDoc = await this.usersRef.doc(id).get();
+        if (!userDoc.exists) {
+            return null;
+        }
+        return userDoc.data()?.Session_Key || null;
+    }
+
     static async getAllUsers(): Promise<Omit<User, 'firstName' | 'lastName' | 'Session_Key' | 'authCode'>[]> {
         const usersSnapshot = await this.usersRef.get();
         const users: Omit<User, 'firstName' | 'lastName' | 'Session_Key' | 'authCode'>[] = [];
@@ -127,7 +136,7 @@ class UserModel {
     }
 
     static async generateSessionKey(userId: string): Promise<void> {
-        const sessionKey = Math.random().toString(36).substring(2, 15); // Generate a random session key
+        const sessionKey = Crypto.randomBytes(64).toString('hex');
         const userRef = this.usersRef.doc(userId);
         await userRef.update({ Session_Key: sessionKey });
     }
