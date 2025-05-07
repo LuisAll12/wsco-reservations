@@ -4,7 +4,7 @@ import { generateKey, randomInt } from "crypto";
 import { Request, RequestHandler, Response } from "express";
 
 export const CreateUser: RequestHandler = async (req: Request, res: Response): Promise<void> => {
-    const { firstName, lastName, email, phone, _Role } = req.body;
+    const { firstName, lastName, email, _Role } = req.body;
 
     if (!firstName || !lastName || !email) {
         res.status(400).json({ message: "All fields are required" });
@@ -15,7 +15,6 @@ export const CreateUser: RequestHandler = async (req: Request, res: Response): P
         const user: Omit<User, 'id' | 'name' | 'createdAt' | 'updatedAt'> = {
             firstName: firstName,
             lastName: lastName,
-            phone: phone,
             email: email,
             State: State.Active,
             Role: _Role || Role.Member,
