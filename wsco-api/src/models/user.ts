@@ -23,7 +23,6 @@ export interface User {
     lastName: string;
     name: string;
     email: string;
-    phone: string;
 
     // State management and Privileges
     State?: State;
@@ -61,7 +60,6 @@ class UserModel {
                 id: userDocRef.id,
                 firstName: createdUserData.firstName,
                 lastName: createdUserData.lastName,
-                phone: createdUserData.phone,
                 name: createdUserData.firstName + " " + createdUserData.lastName,
                 email: createdUserData.email,
                 State: createdUserData.State || State.Active,
@@ -104,7 +102,6 @@ class UserModel {
                 id: doc.id,
                 name: `${data.firstName} ${data.lastName}`,
                 email: data.email,
-                phone: data.phone,
                 State: data.State,
                 Role: data.Role,
                 Reservation: data.Reservation,
