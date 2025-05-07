@@ -1,8 +1,6 @@
 import UserModel, { State, User, Role } from "@/models/user";
 
-import { randomInt } from "crypto";
 import { sendVerificationEmail } from "@/services/mail";
-import { Encrypt } from "@/utils/encrypt";
 import { generateKey, randomInt } from "crypto";
 import { Request, RequestHandler, Response } from "express";
 import { AwsInstance } from "twilio/lib/rest/accounts/v1/credential/aws";
