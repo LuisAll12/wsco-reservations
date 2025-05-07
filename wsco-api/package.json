@@ -9,15 +9,20 @@
 	},
 	"dependencies": {
 		"cookie-parser": "^1.4.7",
+		"crypto-js": "^4.2.0",
+		"dotenv": "^16.5.0",
 		"eslint": "^9.26.0",
 		"express": "^5.1.0",
 		"firebase-admin": "^13.3.0",
 		"fs": "^0.0.1-security",
 		"path": "^0.12.7",
-		"tsc": "^2.0.4"
+		"tsc": "^2.0.4",
+		"twilio": "^5.6.0",
+		"win-ca": "^3.5.1"
 	},
 	"devDependencies": {
 		"@types/cookie-parser": "^1",
+		"@types/crypto-js": "^4.2.2",
 		"@types/express": "^5.0.1",
 		"@types/node": "^22.15.14",
 		"nodemon": "^3.1.10",

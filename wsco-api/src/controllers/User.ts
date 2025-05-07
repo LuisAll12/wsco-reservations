@@ -1,8 +1,10 @@
 import UserModel, { State, User, Role } from "@/models/user";
+import { Encrypt } from "@/utils/encrypt";
+import { generateKey, randomInt } from "crypto";
 import { Request, RequestHandler, Response } from "express";
 
 export const CreateUser: RequestHandler = async (req: Request, res: Response): Promise<void> => {
-    const { firstName, lastName, email, _Role } = req.body;
+    const { firstName, lastName, email, phone, _Role } = req.body;
 
     if (!firstName || !lastName || !email) {
         res.status(400).json({ message: "All fields are required" });
@@ -13,6 +15,7 @@ export const CreateUser: RequestHandler = async (req: Request, res: Response): P
         const user: Omit<User, 'id' | 'name' | 'createdAt' | 'updatedAt'> = {
             firstName: firstName,
             lastName: lastName,
+            phone: phone,
             email: email,
             State: State.Active,
             Role: _Role || Role.Member,
@@ -27,3 +30,64 @@ export const CreateUser: RequestHandler = async (req: Request, res: Response): P
         res.status(500).json({ message: "Error creating user", error });
     }
 }
+
+export const AuthenticateUser: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+    const { email } = req.body;
+
+    if (!email) {
+        res.status(400).json({ message: "Email is required" });
+        return;
+    }
+
+    try {
+        const user = await UserModel.getUserByEmail(email);
+
+        if (!user) {
+            res.status(404).json({ message: "User not found" });
+            return;
+        }
+
+        const code = randomInt(100000, 999999).toString();
+
+        UserModel.storeAuthCode(user.email, code);
+
+        const _code = await Encrypt(code);
+
+        res.status(200).json({ message: "User found", code: _code });
+    } catch (error) {
+        console.error("Auth error:", error);
+        res.status(500).json({ message: "Error during authentication", error });
+    }
+};
+
+
+export const FinishAuth: RequestHandler = async (req, res) => {
+    const { code, email } = req.body;
+
+    if (!email) {
+        res.status(400).json({ message: "Code and email are required" });
+        return;
+    }
+
+    try {
+        const user = await UserModel.getUserByEmail(email) as User;
+
+        if (!await UserModel.verifyAuthCode(user.email, code)) {
+            res.status(401).json({ message: "Invalid code" });
+            return;
+        }
+
+        await UserModel.generateSessionKey(user.id);
+
+        res.cookie("session_key", user.Session_Key, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 24 * 60 * 60 * 1000,
+        });
+
+        res.status(200).json({ message: "User authenticated" });
+    } catch (error) {
+        res.status(500).json({ message: "Authentication failed", error });
+    }
+};
