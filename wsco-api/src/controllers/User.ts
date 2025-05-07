@@ -52,7 +52,7 @@ export const AuthenticateUser: RequestHandler = async (req: Request, res: Respon
 
         const _code = await Encrypt(code);
 
-        res.status(200).json({ message: "User found", code: _code });
+        res.status(200).json({ message: "success", code: _code });
     } catch (error) {
         console.error("Auth error:", error);
         res.status(500).json({ message: "Error during authentication", error });
