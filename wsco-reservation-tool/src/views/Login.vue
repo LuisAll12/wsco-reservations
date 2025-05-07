@@ -109,7 +109,7 @@ const EnterVerifyCode = async () => {
             :disabled="isLoading || isSending" />
           <span class="highlight"></span>
           <span class="bar"></span>
-          <label>E-Mail</label>
+          <label :class="{ floated: LoginEmail }">E-Mail</label>
           <div v-if="isLoading" class="inline-spinner">
             <div v-for="i in 12" :key="i" class="spinner-blade"></div>
           </div>
@@ -212,6 +212,12 @@ form {
   background-color: #69717d;
   transform-origin: center -0.2222em;
   animation: spinner-fade9234 1s infinite linear;
+}
+
+label.floated {
+  top: -20px;
+  font-size: 14px;
+  color: #22209b;
 }
 
 @keyframes spinner-fade9234 {
