@@ -176,6 +176,8 @@ function validateReservation(boatId, from, to) {
   background: #f5f6fa;
 }
 
+
+
 .main-content {
   padding: 2rem;
 }

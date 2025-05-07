@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
+import { Decrypt} from "../services/decrypt.js";
 import emailjs from 'emailjs-com';
 import {setSessionKey} from '../services/sessionKeyService.js';
 
@@ -16,23 +17,23 @@ const errorMessage = ref("");
 const VerifyCodeSent = ref(false);
 const VerifyTry = ref(3);
 const inputcode = ref();
-const verificationCode = ref(0);
 const isLoading = ref(false);
 const isSending = ref(false);
 
-const generateVerificationCode = () => {
-  verificationCode.value = Math.floor(100000 + Math.random() * 900000).toString();
-};
 
-const sendVerificationEmail = async (email) => {
+
+const sendVerificationEmail = async (email, verificationCode) => {
   if (isSending.value) return;
   
   isSending.value = true;
-  generateVerificationCode();
+
+  const cverificationCode = await Decrypt(verificationCode);
+
+  console.log("Decrypted verification code:", cverificationCode);
 
   const templateParams = {
     to_email: email,
-    message: `Ihr Verifizierungscode lautet: ${verificationCode.value}`,
+    message: `Ihr Verifizierungscode lautet: ${verificationCode}`,
   };
   const serviceID = "service_wzhmwmh";
   const templateID = "template_z8u5xt3";
@@ -65,19 +66,20 @@ const Login = async () => {
     return;
   }
 
-  const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
-  const headers = {
-    Authorization: `Bearer ${import.meta.env.VITE_APP_API_KEY}`,
-  };
-
+  const res = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/auth`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email: LoginEmail.value }),
+    credentials: "include",
+    redirect: "follow",
+  });
   try {
-    const response = await axios.get(url, { headers });
-    const user = response.data.records.find(
-      (record) => record.fields.Email?.toLowerCase() === LoginEmail.value.toLowerCase()
-    );
+    const data = await res.json();
 
-    if (user) {
-      await sendVerificationEmail(LoginEmail.value);
+    if (data.message === "success") {
+      await sendVerificationEmail(LoginEmail.value, data.code);
     } else {
       ErrorMessage.value = "Diese E-Mail ist nicht registriert.";
     }
