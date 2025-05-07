@@ -1,4 +1,6 @@
 import UserModel, { State, User, Role } from "@/models/user";
+
+import { randomInt } from "crypto";
 import { sendVerificationEmail } from "@/services/mail";
 import { Encrypt } from "@/utils/encrypt";
 import { generateKey, randomInt } from "crypto";
@@ -59,7 +61,6 @@ export const AuthenticateUser: RequestHandler = async (req: Request, res: Respon
             res.status(500).json({ message: "Error sending verification email", error });
             return;
         }
-
         res.status(200).json({ message: "success" });
     } catch (error) {
         console.error("Auth error:", error);
