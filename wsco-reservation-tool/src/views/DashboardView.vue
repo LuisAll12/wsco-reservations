@@ -70,7 +70,17 @@ onMounted(async () => {
     user.isAdmin = currentUser.value?.Role === "Admin";
 
     reservations.value = await getReservations()
-    boats.value = await getBoats()
+    try {
+      const response = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat`);
+      if (!response.ok) throw new Error("Fehler beim Abrufen der Boote");
+
+      const data = await response.json();
+      boats.value = data;
+      console.log("Boote:", boats.value);
+    } catch (error) {
+      console.error("Fetch-Fehler:", error);
+    }
+
   } catch (error) {
     console.error('Failed to load data:', error)
   }

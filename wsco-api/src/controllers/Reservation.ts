@@ -42,3 +42,4 @@ export const createReservation: RequestHandler = async (req: Request, res: Respo
         res.status(500).json({ message: "Error creating reservation", error });
     }
 };
+
