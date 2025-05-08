@@ -95,19 +95,20 @@ function handleNewReservation() {
 async function submitReservation(reservationData) {
   isSubmitting.value = true;
   try {
-    const url = `https://api.airtable.com/v0/${baseId}/Reservation`;
-    const headers = {
-      Authorization: `Bearer ${import.meta.env.VITE_APP_API_KEY}`,
-      "Content-Type": "application/json"
-    };
+    const url = `${import.meta.env.VITE_APP_BACKEND_BASEURL}/reservation`;
+    
+    await axios.post(url, reservationData, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
 
-    // Direkter API-Aufruf ohne lokale Prüfung
-    await axios.post(url, reservationData, { headers });
     showReservationModal.value = false;
-    reservations.value = await getReservations();
+    reservations.value = await getReservations(); // Deine eigene Funktion zum Nachladen
   } catch (error) {
     console.error('Error creating reservation:', error);
-    if (error.response?.status === 422) {
+
+    if (error.response?.status === 409) {
       alert('Das Boot ist in diesem Zeitraum bereits gebucht!');
     } else {
       alert('Fehler bei der Buchung: ' + error.message);
