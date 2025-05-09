@@ -33,6 +33,12 @@ const user = reactive({
 const currentDate = ref(new Date())
 const selectedBoat = ref(null)
 
+const isSidebarOpen = ref(true);
+function toggleSidebar() {
+  isSidebarOpen.value = !isSidebarOpen.value;
+}
+
+
 const handleBoatChange = (boatId) => {
   selectedBoat.value = boatId || null
 }
@@ -167,9 +173,10 @@ function validateReservation(boatId, from, to) {
 /* Globale Styles */
 .dashboard {
   display: grid;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: var(--sidebar-width, 240px) 1fr;
   min-height: 100vh;
   background: #f5f6fa;
+  transition: all 0.3s ease;
 }
 
 

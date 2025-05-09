@@ -16,11 +16,6 @@ const AdminDashboard = () => import(/* webpackChunkName: "AdminDashboard" */ '..
 const routes = [
     {
         path: '/',
-        name: 'Home',
-        component: HomeView
-    },
-    {
-        path: '/login',
         name: 'Login',
         component: Login
     },

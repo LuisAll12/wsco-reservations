@@ -11,3 +11,11 @@ body, html {
     margin: 0;
     padding: 0;
   }
+
+  :root {
+  --sidebar-width: 240px;
+}
+
+.sidebar.collapsed {
+  --sidebar-width: 60px;
+}

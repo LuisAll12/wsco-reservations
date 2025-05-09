@@ -23,9 +23,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <NavBar v-if="!hasSessionKey" />
   <router-view />
-  <Footer />
 </template>
 
 <style scoped>
