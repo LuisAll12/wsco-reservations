@@ -42,9 +42,6 @@ onMounted(async () => {
 
 <template>
   <div class="boats-container">
-    <div class="back">
-      <router-link to="/dashboard" class="router-link">← Zurück zum Dashboard</router-link>
-    </div>
 
     <h1 class="title">Verfügbare Boote</h1>
 
@@ -100,9 +97,8 @@ onMounted(async () => {
 .boats-container {
   max-width: 1200px;
   margin: auto;
-  padding: 32px;
-  background-color: #fefefe;
   font-family: 'Segoe UI', sans-serif;
+  height: 100dvh;
 }
 
 .router-link {

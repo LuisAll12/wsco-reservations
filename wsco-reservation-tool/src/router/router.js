@@ -22,33 +22,42 @@ const routes = [
     {
         path: '/dashboard',
         name: 'Dashboard',
-        component: Dashboard
+        component: Dashboard,
+        children: [
+            {
+                path: '',
+                component: () => import(/* webpackChunkName: "Dashboard" */ '../components/Calendar.vue')
+            },
+            {
+                path: 'schaden-melden',
+                component: ReportDamage
+            },
+            {
+                path: 'unsere-boote',
+                component: ClubBoats
+            },
+            {
+                path: 'meine-reservierungen',
+                component: MyReservations
+            },
+            {
+                path: 'unsere-boote/:id',
+                component: BoatDetail
+            },
+            {
+                path: 'admin',
+                component: AdminDashboard
+            },
+            {
+                path: 'hilfe',
+                component: AdminDashboard
+            },
+            {
+                path: 'settings',
+                component: AdminDashboard
+            }
+        ]
     },
-    {
-        path: '/dashboard/schaden-melden',
-        name: 'ReportDamage',
-        component: ReportDamage
-    },
-    {
-        path: '/dashboard/unsere-boote',
-        name: 'ClubBoats',
-        component: ClubBoats
-    },
-    {
-        path: '/dashboard/meine-reservierungen',
-        name: 'MyReservations',
-        component: MyReservations
-    },
-    {
-        path: '/dashboard/unsere-boote/:id',
-        name: 'BoatDetail',
-        component: BoatDetail  // Datei siehe unten
-    },
-    {
-        path: '/dashboard/admin',
-        name: 'AdminDashboard',
-        component: AdminDashboard,
-    }
 ];
 
 const router = createRouter({

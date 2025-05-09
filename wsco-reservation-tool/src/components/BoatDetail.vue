@@ -3,51 +3,6 @@ import { useRoute } from 'vue-router';
 import { ref, onMounted } from 'vue';
 const route = useRoute();
 
-// Testdaten – später aus einer API oder zentralen Datei holen
-const boats = ref([
-  {
-    id: 1,
-    name: 'Sea Explorer',
-    plate: 'ZH 12345',
-    image: 'https://i.pinimg.com/736x/c0/d4/bb/c0d4bb1c8db652872de1d5ffb94b6475.jpg',
-    description: 'Ideal für Küstentouren mit Familie.',
-    capacity: 6,
-    pricePerHour: 75,
-    pdfUrl: 'https://example.com/manuals/sea-explorer.pdf'
-  },
-  {
-    id: 2,
-    name: 'Ocean Breeze',
-    plate: 'LU 54321',
-    image: 'https://i.pinimg.com/736x/c0/d4/bb/c0d4bb1c8db652872de1d5ffb94b6475.jpg',
-    description: 'Komfortables Motorboot für Ausflüge.',
-    capacity: 4,
-    pricePerHour: 65,
-    pdfUrl: 'https://example.com/manuals/ocean-breeze.pdf'
-  },
-  {
-    id: 3,
-    name: 'River Runner',
-    plate: 'BE 11122',
-    image: 'https://i.pinimg.com/736x/14/25/47/142547271c036b14137604901d35e2c7.jpg',
-    description: 'Wendig und perfekt für Flüsse.',
-    capacity: 2,
-    pricePerHour: 50,
-    pdfUrl: 'https://poropointfreeport.gov.ph/wp-content/uploads/2023/02/PPFZ-Local-Purchase-Form.pdf'
-  },
-  {
-    id: 4,
-    name: 'Sea Explorer',
-    plate: 'AG 99887',
-    image: 'https://i.pinimg.com/736x/14/25/47/142547271c036b14137604901d35e2c7.jpg',
-    description: 'Zweites Modell, größerer Tank.',
-    capacity: 8,
-    pricePerHour: 90,
-    pdfUrl: 'https://example.com/manuals/sea-explorer-v2.pdf'
-  }
-])
-
-
 const boat = ref(null)
 const showImageModal = ref(false)
 
@@ -75,7 +30,6 @@ onMounted(async() => {
 
 <template>
   <div class="boat-detail-container" v-if="boat">
-    <router-link to="/dashboard/unsere-boote" class="back-link">← Zurück zur Übersicht</router-link>
 
     <h1>{{ boat.name }}</h1>
     <img :src="boat.image"

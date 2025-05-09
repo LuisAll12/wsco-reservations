@@ -1,6 +1,6 @@
 <!-- src/components/Sidebar.vue -->
 <script setup>
-import SidebarCalendar from './SidebarCalendar.vue'
+import { HomeIcon, ExclamationTriangleIcon, LifebuoyIcon, Cog6ToothIcon, UserCircleIcon, ArrowLeftOnRectangleIcon, WrenchScrewdriverIcon, QuestionMarkCircleIcon } from '@heroicons/vue/24/outline'
 import {ref} from 'vue'
 import { authCheck, logoutUser } from '../services/auth';
 import router from '../router/router';
@@ -10,13 +10,6 @@ const isAdmin = ref(false);
 const isLoggedin = async () => { return await authCheck(); }
 
 const isSidebarOpen = ref(true);
-
-function toggleSidebar() {
-  console.log("shdn")
-  isSidebarOpen.value = !isSidebarOpen.value;
-}
-
-
 
 defineProps({
   user: Object,
@@ -36,44 +29,62 @@ async function logout() {
 </script>
 
 <template>
-
   <div class="sidebar-wrapper">
-    <button class="toggle-button" @click="toggleSidebar">☰</button>
     <aside class="sidebar" :class="{ collapsed: !isSidebarOpen }">  
     <div class="sidebar-header">
-      <br>
       <h1>WSCO Reservationen</h1>
     </div>
-    
-    <nav class="sidebar-nav">
-      <ul>
-        <li v-for="page in ['Einstellungen', 'Hilfe']" 
-            :key="page"
-            class="nav-item">
-          {{ page }}
-        </li>
-      </ul>
-    </nav>
 
     <section class="reservation-actions">
       <div class="action-item">
-        <span><router-link to="/dashboard/schaden-melden" class="router-link">Schaden melden</router-link></span>
+        <router-link to="/dashboard" class="router-link">
+          <HomeIcon class="icon" /> Dashboard
+        </router-link>
       </div>
+
       <div class="action-item">
-        <span><router-link to="/dashboard/unsere-boote" class="router-link">Unsere Boote</router-link></span>
+        <router-link to="/dashboard/schaden-melden" class="router-link">
+          <ExclamationTriangleIcon class="icon" /> Schaden melden
+        </router-link>
       </div>
+
       <div class="action-item">
-        <span><router-link to="/dashboard/meine-reservierungen" class="router-link">Meine Reservierungen</router-link></span>
+        <router-link to="/dashboard/unsere-boote" class="router-link">
+          <LifebuoyIcon class="icon" /> Unsere Boote
+        </router-link>
       </div>
+
+      <div class="action-item">
+        <router-link to="/dashboard/meine-reservierungen" class="router-link">
+          <UserCircleIcon class="icon" /> Meine Reservierungen
+        </router-link>
+      </div>
+
       <div class="action-item" v-if="!isAdmin">
-        <span><router-link to="/dashboard/admin" class="router-link">Admin Dashboard</router-link></span>
+        <router-link to="/dashboard/admin" class="router-link">
+          <WrenchScrewdriverIcon class="icon" /> Admin Dashboard
+        </router-link>
       </div>
-        <button v-if="isLoggedin" @click="logout">
-          Ausloggen
-          <div class="arrow-wrapper">
-            <div class="arrow"></div>
-          </div>
-        </button>
+
+      <br>
+
+      <div class="action-item" v-if="!isAdmin">
+        <router-link to="/dashboard/hilfe" class="router-link">
+          <QuestionMarkCircleIcon class="icon" /> Hilfe
+        </router-link>
+      </div>
+            <div class="action-item" v-if="!isAdmin">
+        <router-link to="/dashboard/settings" class="router-link">
+          <Cog6ToothIcon class="icon" /> Einstellungen
+        </router-link>
+      </div>
+
+      <br>
+
+      <button class="logout-btn" v-if="isLoggedin" @click="logout">
+        <ArrowLeftOnRectangleIcon class="icon" />
+        Ausloggen
+      </button>
 
     </section>
     <!-- <SidebarCalendar 
@@ -90,24 +101,6 @@ async function logout() {
 </template>
 
 <style scoped>
-.sidebar-wrapper {
-  position: relative;
-}
-
-.toggle-button {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  z-index: 2000;
-  background: #3498db;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-
 .sidebar.collapsed {
   width: 60px;
 }
@@ -121,11 +114,15 @@ async function logout() {
   background: #2c3e50;
   color: white;
   padding: 1.5rem;
+  width: 240px;
   height: 100vh;
-  position: sticky;
   top: 0;
+  position: fixed;
 }
 
+.sidebar-wrapper {
+  width: 288px;
+}
 .nav-item {
   padding: 12px;
   border-radius: 8px;
@@ -150,11 +147,47 @@ async function logout() {
   margin: 8px 0;
   border-radius: 8px;
 }
+.icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
 .router-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   color: white;
   text-decoration: none;
   font-weight: bold;
 }
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: white;
+  color: #2c3e50;
+  font-weight: bold;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  width: 100%;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 1rem;
+}
+
+.logout-btn:hover {
+  background-color: #f0f0f0;
+}
+
+.logout-btn .icon {
+  width: 20px;
+  height: 20px;
+}
+
+
 button {
     --primary-color: #ffff;
     --secondary-color: #002152;
