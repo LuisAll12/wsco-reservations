@@ -5,7 +5,7 @@ import { Router } from "express";
 const router = Router();
 
 router.get('/', memberMiddleware, getAllReservations);
-router.post('/', createReservation);
+router.post('/create', memberMiddleware, createReservation);
 
 
 export default router;
