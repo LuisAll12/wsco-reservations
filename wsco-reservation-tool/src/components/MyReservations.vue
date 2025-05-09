@@ -39,7 +39,6 @@ function closeModal() {
 
 <template>
   <div class="container">
-    <router-link to="/dashboard" class="back">Zurück</router-link>
     <h1 class="title">Meine Reservierungen</h1>
     <div class="reservation-list">
       <div class="reservation-card" v-for="reservation in reservations" :key="reservation.id">
@@ -70,6 +69,9 @@ function closeModal() {
           <XCircleIcon class="icon-button" />
           Reservierung stornieren
         </button>
+      </div>
+      <div v-if="!reservations">
+        Sie haben noch keine Reservierungen.
       </div>
     </div>
 

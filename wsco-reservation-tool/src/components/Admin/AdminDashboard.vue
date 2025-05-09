@@ -1,6 +1,5 @@
 <template>
   <div class="dashboard">
-    <router-link class="back-router" to="/dashboard">Zurück</router-link>
     <h1>Admin Panel</h1>
     <div class="grid">
       <BoatStatsWidget />
@@ -23,6 +22,8 @@ import UpcomingReservationsWidget from './UpcomingReservationsWidget.vue';
 <style scoped>
 .dashboard {
   padding: 2rem;
+  display: block;
+  height: 100dvh;
 }
 .grid {
   display: grid;

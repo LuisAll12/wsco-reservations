@@ -72,7 +72,6 @@ onMounted(async () => {
 
 <template>
   <div class="report-form">
-    <router-link to="/dashboard" class="router-link">Zurück</router-link>
     <h2>Schaden melden</h2>
 
     <div v-if="isLoading">Reservationen werden geladen...</div>
