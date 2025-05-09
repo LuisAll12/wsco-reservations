@@ -9,6 +9,15 @@ const isAdmin = ref(false);
 
 const isLoggedin = async () => { return await authCheck(); }
 
+const isSidebarOpen = ref(true);
+
+function toggleSidebar() {
+  console.log("shdn")
+  isSidebarOpen.value = !isSidebarOpen.value;
+}
+
+
+
 defineProps({
   user: Object,
   currentUser: Object,
@@ -27,8 +36,12 @@ async function logout() {
 </script>
 
 <template>
-  <aside class="sidebar">
+
+  <div class="sidebar-wrapper">
+    <button class="toggle-button" @click="toggleSidebar">☰</button>
+    <aside class="sidebar" :class="{ collapsed: !isSidebarOpen }">  
     <div class="sidebar-header">
+      <br>
       <h1>WSCO Reservationen</h1>
     </div>
     
@@ -52,7 +65,7 @@ async function logout() {
       <div class="action-item">
         <span><router-link to="/dashboard/meine-reservierungen" class="router-link">Meine Reservierungen</router-link></span>
       </div>
-      <div class="action-item" v-if="isAdmin">
+      <div class="action-item" v-if="!isAdmin">
         <span><router-link to="/dashboard/admin" class="router-link">Admin Dashboard</router-link></span>
       </div>
         <button v-if="isLoggedin" @click="logout">
@@ -73,9 +86,37 @@ async function logout() {
       <p>Role: {{ currentUser?.fields?.Role }}</p>
     </div> -->
   </aside>
+  </div>
 </template>
 
 <style scoped>
+.sidebar-wrapper {
+  position: relative;
+}
+
+.toggle-button {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 2000;
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+
+.sidebar.collapsed {
+  width: 60px;
+}
+
+.sidebar.collapsed .sidebar-header,
+.sidebar.collapsed .reservation-actions,
+.sidebar.collapsed .sidebar-nav {
+  display: none;
+}
 .sidebar {
   background: #2c3e50;
   color: white;
