@@ -1,6 +1,6 @@
 <!-- src/components/CalendarHeader.vue -->
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 
 const props = defineProps({
   user: Object,
@@ -18,6 +18,9 @@ watch(selectedBoatId, (newVal) => {
   emit('boat-change', newVal)
 })
 
+onMounted(() => {
+  console.log('Mounted CalendarHeader with user:', props.boats)
+})
 </script>
 
 <template>
@@ -28,10 +31,9 @@ watch(selectedBoatId, (newVal) => {
         <div class="filter-display" v-if="selectedBoatId">
           <span class="filter-value">
             {{
-              selectedBoatId ? 
-              boats.find(b => b.id === selectedBoatId)?.fields?.Name + 
-              ` (${boats.find(b => b.id === selectedBoatId)?.fields?.Numberplate})` : 
-              'Alle Boote'
+              selectedBoatId
+                ? `${boats.find(b => b.id === selectedBoatId)?.name} (${boats.find(b => b.id === selectedBoatId)?.numberplate})`
+                : 'Alle Boote'
             }}
           </span>
         </div>
@@ -41,10 +43,10 @@ watch(selectedBoatId, (newVal) => {
             v-for="boat in boats" 
             :key="boat.id" 
             :value="boat.id"
-            :disabled="boat.fields.Availability === false"
+            :disabled="boat.status === 'unavailable'"
           >
-            {{ boat.fields.Name }} ({{ boat.fields.Numberplate }})
-            <span v-if="boat.fields.Availability === false"> - Nicht verfügbar</span>
+            {{ boat.name }} ({{ boat.numberplate }})
+            <span v-if="boat.status === 'unavailable'"> - Nicht verfügbar</span>
           </option>
         </select>
         <button @click="$emit('new-reservation')">

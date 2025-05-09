@@ -59,9 +59,15 @@ function closeImageModal() {
   showImageModal.value = false
 }
 
-onMounted(() => {
+onMounted(async() => {
   const id = parseInt(route.params.id)
-  boat.value = boats.value.find(b => b.id === id)
+  try {
+    const response = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat/${id}`)
+    console.log('Response:', response)
+  } catch (error) {
+    console.error(error)
+    alert('Boot nicht gefunden')
+  }
 })
 </script>
 

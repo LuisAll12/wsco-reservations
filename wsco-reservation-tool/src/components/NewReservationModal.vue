@@ -34,21 +34,16 @@ const emit = defineEmits(["close", "submit"]);
 const totalPrice = computed(() => {
   if (!form.value.boatId || !form.value.from || !form.value.to) return 0;
 
+  const from = new Date(form.value.from);
+  const to = new Date(form.value.to);
+
+  if (to <= from) return 0;
+
   const boat = props.boats.find((b) => b.id === form.value.boatId);
-  if (!boat || !boat.fields.Price) return 0;
+  if (!boat || !boat.pricePerBlock) return 0;
 
-  const hours =
-    (new Date(form.value.to) - new Date(form.value.from)) / (1000 * 60 * 60);
-  return (hours * boat.fields.Price).toFixed(2);
-});
-
-const canSubmit = computed(() => {
-  return (
-    form.value.from &&
-    form.value.to &&
-    form.value.boatId &&
-    form.value.checklist.every((item) => item.checked)
-  );
+  const hours = (to - from) / (1000 * 60 * 60);
+  return (hours * boat.pricePerBlock).toFixed(2);
 });
 
 // console.log(form.value.boatId);
@@ -63,7 +58,7 @@ const debouncedCheckAvailability = debounce(async ([boatId, from, to]) => {
   return props.boats.find((b) => b.id === form.value.boatId);
 });
 
-  const BoatNr = selectedBoat.value?.fields.BoatNr
+  const BoatNr = selectedBoat.value?.id;
 
   if (new Date(from) >= new Date(to)) {
     availabilityError.value = 'Endzeit muss nach Startzeit liegen';
@@ -71,7 +66,7 @@ const debouncedCheckAvailability = debounce(async ([boatId, from, to]) => {
   }
 
   const boat = props.boats.find(b => b.id === boatId);
-  if (!boat?.fields.Availability) {
+  if (boat.status !== 'available') {
     availabilityError.value = 'Dieses Boot ist nicht verfügbar';
     return;
   }
@@ -107,24 +102,23 @@ watch(
 
 // 6. Finally component methods
 function handleSubmit() {
+    if (!props.currentUser?.id) {
+    availabilityError.value = "Benutzer ist nicht verfügbar.";
+    return;
+  }
   const fromDate = new Date(form.value.from);
   const toDate = new Date(form.value.to);
   const reservationData = {
-    fields: {
-      // Title: form.value.title,
-      From: fromDate.toISOString(),
-      To: toDate.toISOString(),
-      FK_Boat: [form.value.boatId],
-      FK_Member: [props.currentUser.id],
-      // Notes: form.value.notes,
-      TotalPrice: parseFloat(totalPrice.value),
-      State: "Pending",
-    },
+    boatId: form.value.boatId,
+    userId: props.currentUser.id,
+    from: form.value.from,
+    to: form.value.to,
+    price: parseFloat(totalPrice.value),
   };
-  emit("submit", reservationData);
 }
 onBeforeUnmount(() => {
   debouncedCheckAvailability.cancel();
+  console.log("User", props.currentUser);
 });
 </script>
 
@@ -183,11 +177,11 @@ onBeforeUnmount(() => {
                 v-for="boat in boats"
                 :key="boat.id"
                 :value="boat.id"
-                :disabled="!boat.fields.Availability"
-                >
-                {{ boat.fields.Name }} ({{ boat.fields.Numberplate }})
-                <span v-if="!boat.fields.Availability"> - Nicht verfügbar</span>
-                </option>
+                :disabled="boat.status === 'unavailable'"
+              >
+                {{ boat.name }} ({{ boat.numberplate }})
+                <span v-if="boat.status === 'unavailable'"> - Nicht verfügbar</span>
+              </option>
             </select>
         </div>
 
@@ -210,15 +204,13 @@ onBeforeUnmount(() => {
             <span>{{ item.text }}</span>
             </div>
         </div>
-
-        <!-- <div class="form-group">
-            <label>Notes</label>
-            <textarea
-                v-model="form.notes"
-                placeholder="Additional information"
-            ></textarea>
-        </div> -->
-    </div>
+        <div class="payment-info">
+          <h4>Hier zur Bezahlung</h4>
+          <button class="stripe-payment">
+            💳 Jetzt mit Stripe bezahlen
+          </button>
+        </div>
+      </div>
       
       <div class="modal-footer">
         <button @click="$emit('close')" class="btn secondary">Abbrechen</button>
@@ -438,4 +430,27 @@ textarea {
   background: #ffeeee;
   border-radius: 4px;
 }
+
+.stripe-payment {
+  background: linear-gradient(135deg, #6772e5, #5a67d8);
+  color: #fff;
+  border: none;
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stripe-payment:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, #6b73ff, #667eea);
+}
+
 </style>

@@ -11,6 +11,7 @@ const ClubBoats = () => import(/* webpackChunkName: "ClubBoats" */ '../component
 const MyReservations = () => import(/* webpackChunkName: "MyReservations" */ '../components/MyReservations.vue');
 const BoatDetail = () => import(/* webpackChunkName: "BoatDetail" */ '../components/BoatDetail.vue');
 
+const AdminDashboard = () => import(/* webpackChunkName: "AdminDashboard" */ '../components/Admin/AdminDashboard.vue');
 
 const routes = [
     {
@@ -47,6 +48,11 @@ const routes = [
         path: '/dashboard/unsere-boote/:id',
         name: 'BoatDetail',
         component: BoatDetail  // Datei siehe unten
+    },
+    {
+        path: '/dashboard/admin',
+        name: 'AdminDashboard',
+        component: AdminDashboard,
     }
 ];
 

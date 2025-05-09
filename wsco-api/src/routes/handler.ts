@@ -1,12 +1,15 @@
 import { Router } from "express";
 import admin from "./adminRoutes";
 import auth from "./authRoutes";
-import reservations from "./Reservations";
+import reservation from "./reservationRoutes";
+import boat from "./boatRoutes";
 
 const router = Router();
 
-router.use('/reservations', reservations)
+
 router.use('/admin', admin);
 router.use('/auth', auth);
+router.use('/reservation', reservation);
+router.use('/boat', boat);
 
 export default router;
