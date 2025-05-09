@@ -6,9 +6,10 @@ import { Damage } from './Damage';
 import { Timestamp } from 'firebase-admin/firestore';
 
 export enum status {
-    pending = 'pending',
-    confirmed = 'confirmed',
-    cancelled = 'cancelled'
+    created = 'created',         // Reservation wurde erstellt
+    checkedin = 'checkedin',     // Reservation wurde vor Ort angenommen
+    completed = 'completed',     // Reservation durchgeführt + Boot zurückgegeben
+    cancelled = 'cancelled'      // Reservation wurde gecancelled
 }
 export enum PaymentStatus {
     paid = 'paid',
