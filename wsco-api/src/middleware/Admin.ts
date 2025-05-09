@@ -9,12 +9,14 @@ export async function adminMiddleware(req: Request, res: Response, next: NextFun
         return;
     }
 
-    const user = await UserModel.getUserBySessionKey(Session_Key.Session_Key) as User;
+    const user = await UserModel.getUserBySessionKey(Session_Key.session_key) as User;
 
     if (user?.Role !== Role.Admin) {
         res.status(403).json({ message: "Forbidden" });
         return;
     }
+
+    (req as any).user = user;
 
     next();
 }

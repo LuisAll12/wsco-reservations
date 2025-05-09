@@ -155,10 +155,11 @@ const EnterVerifyCode = async () => {
 
 <style scoped>
 .LoginContainer {
+  margin-top: 10%;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  height: 100%;
   width: 100%;
 }
 

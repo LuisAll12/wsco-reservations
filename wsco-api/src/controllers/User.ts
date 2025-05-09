@@ -1,9 +1,8 @@
 import UserModel, { State, User, Role } from "@/models/user";
-
 import { sendVerificationEmail } from "@/services/mail";
-import { generateKey, randomInt } from "crypto";
+import { randomInt } from "crypto";
 import { Request, RequestHandler, Response } from "express";
-import { AwsInstance } from "twilio/lib/rest/accounts/v1/credential/aws";
+
 
 export const CreateUser: RequestHandler = async (req: Request, res: Response): Promise<void> => {
     const { firstName, lastName, email, _Role } = req.body;
@@ -136,5 +135,14 @@ export const LogoutUser: RequestHandler = async (req, res) => {
         res.status(200).json({ message: "Logged out successfully" });
     } catch (error) {
         res.status(500).json({ message: "Error logging out", error });
+    }
+};
+
+export const GetAllUsers: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const users = await UserModel.getAllUsers();
+        res.status(200).json(users);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching users", error });
     }
 };
