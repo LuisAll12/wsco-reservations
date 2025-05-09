@@ -20,16 +20,19 @@ import UpcomingReservationsWidget from './UpcomingReservationsWidget.vue';
 </script>
 
 <style scoped>
-.dashboard {
+.AdminDash {
   padding: 2rem;
   display: block;
   height: 100dvh;
 }
+
 .grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: 1.5rem;
 }
+
 .back-router {
   display: inline-block;
   margin-bottom: 1rem;

@@ -1,10 +1,7 @@
 import BoatModel, { Boat, BoatStatus } from "@/models/Boat";
-import { uploadFile } from "../services/S3";
-import { db } from '@/config/db';
+import { uploadFile } from "@/services/S3";
 
-import { NextFunction, Request, Response, RequestHandler } from 'express';
-import { constrainedMemory } from 'process';
-import { profile } from "console";
+import { Request, Response, RequestHandler } from 'express';
 
 export const getAllBoats: RequestHandler = async (req, res) => {
     try {
@@ -25,6 +22,8 @@ export const createBoat: RequestHandler = async (req, res) => {
             numberplate,
             pricePerBlock,
             Type,
+            pdfUrl,
+            imgUrl,
             status = BoatStatus.available
         } = req.body;
 
@@ -40,6 +39,8 @@ export const createBoat: RequestHandler = async (req, res) => {
 
         const newBoat: Omit<Boat, 'id' | 'createdAt' | 'updatedAt'> = {
             name,
+            pdfUrl,
+            imgUrl,
             description,
             numberplate,
             pricePerBlock,
@@ -60,6 +61,6 @@ export const createBoat: RequestHandler = async (req, res) => {
 export const getBoatById = async (req: Request, res: Response): Promise<void> => {
     const boatId = req.params.id;
     const boat = await BoatModel.getBoatById(boatId);
-    if (!boat) {res.status(404).json({ error: 'Not found' }); return;};
+    if (!boat) { res.status(404).json({ error: 'Not found' }); return; };
     res.status(200).json(boat);
 };

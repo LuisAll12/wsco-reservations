@@ -10,7 +10,6 @@ import { getReservations } from '../services/GetAllRes';
 import getBoats from '../services/GetAllBoats'
 import { getUserBySessionKey } from '../services/GetUserInfo'
 import NewReservationModal from '../components/NewReservationModal.vue'
-import axios from "axios";
 
 const showReservationModal = ref(false)
 const router = useRouter();
@@ -111,14 +110,15 @@ async function submitReservation(reservationData) {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(reservationData)
+      body: JSON.stringify(reservationData),
+      credentials: 'include'
     });
 
     showReservationModal.value = false;
 
     const start = currentWeek.value;
     const end = addDays(currentWeek.value, 7);
-    reservations.value.map(await getReservations(start.toISOString(), end.toISOString()));
+    reservations.value = [...await getReservations(start.toISOString(), end.toISOString())];
 
   } catch (error) {
     console.error('Error creating reservation:', error);
