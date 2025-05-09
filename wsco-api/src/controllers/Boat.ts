@@ -1,4 +1,4 @@
-import BoatModel, {Boat, BoatStatus} from "@/models/Boat";
+import BoatModel, { Boat, BoatStatus } from "@/models/Boat";
 import { db } from '@/config/db';
 
 import { NextFunction, Request, Response, RequestHandler } from 'express';
@@ -22,7 +22,7 @@ export const createBoat: RequestHandler = async (req, res) => {
             description,
             numberplate,
             pricePerBlock,
-            Type, 
+            Type,
             status = BoatStatus.available
         } = req.body;
 
@@ -33,7 +33,7 @@ export const createBoat: RequestHandler = async (req, res) => {
             pricePerBlock,
             Type,
             status,
-            FK_ReservationId: [] // 👈 muss gesetzt werden
+            FK_ReservationId: []
         };
 
         const createdBoat = await BoatModel.createBoat(newBoat);

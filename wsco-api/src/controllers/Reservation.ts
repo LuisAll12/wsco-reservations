@@ -1,10 +1,6 @@
 import ReservationModel, { Reservation, PaymentStatus, status } from '../models/Reservation';
-import BoatModel from '@/models/Boat';
-
 import { db } from '@/config/db';
-
 import { Request, Response, RequestHandler } from 'express';
-import { constrainedMemory } from 'process';
 
 export const createReservation: RequestHandler = async (req: Request, res: Response): Promise<void> => {
     const { startDate, endDate, FK_BoatId, FK_UserId } = req.body;
@@ -43,3 +39,23 @@ export const createReservation: RequestHandler = async (req: Request, res: Respo
     }
 };
 
+export const getAllReservations: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+    const { startDate, endDate } = req.query as { startDate: string, endDate: string };
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        res.status(400).json({ message: "Invalid date format" });
+        return;
+    }
+
+    const Reservations = await ReservationModel.getAllReservationsInRange(start, end) as Reservation[];
+
+    if (!Reservations) {
+        res.status(200).json({ message: "No reservations found" });
+        return;
+    }
+
+    res.status(200).json(Reservations);
+}

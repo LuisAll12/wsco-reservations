@@ -1,9 +1,11 @@
-import { getAllReservations } from "@/controllers/Reservations";
+import { createReservation, getAllReservations } from "@/controllers/Reservation";
 import { memberMiddleware } from "@/middleware/Member";
 import { Router } from "express";
 
 const router = Router();
 
 router.get('/', memberMiddleware, getAllReservations);
+router.post('/', createReservation);
+
 
 export default router;

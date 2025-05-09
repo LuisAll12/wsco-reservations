@@ -1,7 +1,7 @@
 import { Router } from "express";
 import admin from "./adminRoutes";
 import auth from "./authRoutes";
-import reservation from "./reservationRoutes";
+import reservation from "./Reservations";
 import boat from "./boatRoutes";
 
 const router = Router();
