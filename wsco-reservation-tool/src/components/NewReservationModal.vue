@@ -30,6 +30,15 @@ const props = defineProps({
 });
 const emit = defineEmits(["close", "submit"]);
 
+const canSubmit = computed(() => {
+  const allChecklistChecked = form.value.checklist.every(item => item.checked)
+  const fromValid = !!form.value.from
+  const toValid = !!form.value.to
+  const boatSelected = !!form.value.boatId
+  const noAvailabilityError = availabilityError.value === ''
+  return allChecklistChecked && fromValid && toValid && boatSelected && noAvailabilityError
+})
+
 // 3. Then computed properties
 const totalPrice = computed(() => {
   if (!form.value.boatId || !form.value.from || !form.value.to) return 0;
