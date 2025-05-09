@@ -11,16 +11,21 @@ const nameOptions = computed(() =>
 )
 
 const plateOptions = computed(() =>
-  [...new Set(boats.value.map(b => b.numberplate.toString()))]
+  [...new Set(
+    boats.value
+      .filter(b => b.numberplate != null) // <== filtere leere raus
+      .map(b => b.numberplate.toString())
+  )]
 )
 
 const filteredBoats = computed(() => {
   return boats.value.filter(boat => {
-    const matchName = selectedName.value === '' || boat.name === selectedName.value
-    const matchPlate = selectedPlate.value === '' || boat.numberplate.toString() === selectedPlate.value
-    return matchName && matchPlate
-  })
-})
+    const plate = boat.numberplate?.toString() || '';
+    const matchName = selectedName.value === '' || boat.name === selectedName.value;
+    const matchPlate = selectedPlate.value === '' || plate === selectedPlate.value;
+    return matchName && matchPlate;
+  });
+});
 
 onMounted(async () => {
   try {
@@ -82,7 +87,8 @@ onMounted(async () => {
       <p class="desc">{{ boat.description }}</p>
       <p><strong>Nummernschild:</strong> {{ boat.numberplate }}</p>
       <p><strong>Status:</strong> {{ boat.status }}</p>
-      <p><strong>Preis:</strong> CHF {{ boat.pricePerBlock.toFixed(2) }} / Block</p>
+      <p><strong>Preis:</strong> CHF {{ boat.pricePerBlock != null ? boat.pricePerBlock.toFixed(2) : '–' }} / Block</p>
+
     </div>
   </div>
 </router-link>

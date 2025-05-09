@@ -1,6 +1,7 @@
 <script setup>
-import { useRoute } from 'vue-router'
-import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router';
+import { ref, onMounted } from 'vue';
+const route = useRoute();
 
 // Testdaten – später aus einer API oder zentralen Datei holen
 const boats = ref([
@@ -47,7 +48,6 @@ const boats = ref([
 ])
 
 
-const route = useRoute()
 const boat = ref(null)
 const showImageModal = ref(false)
 
@@ -60,10 +60,12 @@ function closeImageModal() {
 }
 
 onMounted(async() => {
-  const id = parseInt(route.params.id)
+
+  const id = route.params.id
   try {
     const response = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat/${id}`)
-    console.log('Response:', response)
+    boat.value = await response.json()
+    console.log('Response:', boat.value)
   } catch (error) {
     console.error(error)
     alert('Boot nicht gefunden')
@@ -80,11 +82,10 @@ onMounted(async() => {
         alt="Bootsbild"
         class="large-image"
         @click="openImageModal"/>
-
+    
     <div class="details">
-      <p><strong>Nummernschild:</strong> {{ boat.plate }}</p>
-      <p><strong>Kapazität:</strong> {{ boat.capacity }} Personen</p>
-      <p><strong>Preis:</strong> CHF {{ boat.pricePerHour }} / Stunde</p>
+      <p><strong>Nummernschild:</strong> {{ boat.numberplate }}</p>
+      <p><strong>Preis:</strong> CHF {{ boat.pricePerBlock }} / Stunde</p>
       <p class="desc">{{ boat.description }}</p>
     </div>
 

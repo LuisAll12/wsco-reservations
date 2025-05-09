@@ -1,6 +1,11 @@
 <!-- src/components/Sidebar.vue -->
 <script setup>
 import SidebarCalendar from './SidebarCalendar.vue'
+import {ref} from 'vue'
+import { authCheck, logoutUser } from '../services/auth';
+import router from '../router/router';
+const isAdmin = ref(false);
+const isLoggedin = async () => { return await authCheck(); }
 
 defineProps({
   user: Object,
@@ -8,6 +13,15 @@ defineProps({
   currentWeek: Date,
   currentDate: Date
 })
+
+async function logout() {
+    try {
+        await logoutUser();
+        router.push('/login');
+    } catch (error) {
+        console.error('Logout failed:', error);
+    }
+}
 </script>
 
 <template>
@@ -36,9 +50,16 @@ defineProps({
       <div class="action-item">
         <span><router-link to="/dashboard/meine-reservierungen" class="router-link">Meine Reservierungen</router-link></span>
       </div>
-            <div class="action-item">
+      <div class="action-item">
         <span><router-link to="/dashboard/admin" class="router-link">Admin Dashboard</router-link></span>
       </div>
+        <button v-if="isLoggedin" @click="logout">
+          Ausloggen
+          <div class="arrow-wrapper">
+            <div class="arrow"></div>
+          </div>
+        </button>
+
     </section>
     <!-- <SidebarCalendar 
       :current-week="currentWeek"
@@ -90,5 +111,64 @@ defineProps({
   color: white;
   text-decoration: none;
   font-weight: bold;
+}
+button {
+    --primary-color: #ffff;
+    --secondary-color: #002152;
+    --hover-color: #eceff2;
+    --arrow-width: 10px;
+    --arrow-stroke: 2px;
+    box-sizing: border-box;
+    border: 0;
+    border-radius: 50px;
+    color: var(--secondary-color);
+    padding: 1em 1.8em;
+    background: var(--primary-color);
+    display: flex;
+    transition: 0.2s background;
+    align-items: center;
+    gap: 0.6em;
+    font-weight: bold;
+}
+
+button .arrow-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+button .arrow {
+    margin-top: 1px;
+    width: var(--arrow-width);
+    background: var(--primary-color);
+    height: var(--arrow-stroke);
+    position: relative;
+    transition: 0.2s;
+}
+
+button .arrow::before {
+    content: "";
+    box-sizing: border-box;
+    position: absolute;
+    border: solid var(--secondary-color);
+    border-width: 0 var(--arrow-stroke) var(--arrow-stroke) 0;
+    display: inline-block;
+    top: -3px;
+    right: 3px;
+    transition: 0.2s;
+    padding: 3px;
+    transform: rotate(-45deg);
+}
+
+button:hover {
+    background-color: var(--hover-color);
+}
+
+button:hover .arrow {
+    background: var(--secondary-color);
+}
+
+button:hover .arrow:before {
+    right: 0;
 }
 </style>

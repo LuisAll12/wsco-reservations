@@ -15,15 +15,62 @@
         </div>
 
         <div class="modal-body">
-          <div class="form-group" v-for="field in fields" :key="field.label">
-            <label :for="field.model">{{ field.label }}</label>
-            <component
-              :is="field.type"
-              v-model="boat[field.model]"
-              v-bind="field.attrs"
-              :placeholder="field.placeholder"
-            ></component>
+          <div class="form-group">
+          <label for="name">Name</label>
+          <input id="name" v-model="boat.name" type="text" placeholder="Bootsname" />
+        </div>
+
+        <div class="form-group">
+          <label for="description">Beschreibung</label>
+          <textarea id="description" v-model="boat.description" placeholder="Beschreibung"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="numberplate">Nummernschild</label>
+          <input id="numberplate" v-model="boat.numberplate" type="number" placeholder="z. B. 123" />
+        </div>
+
+        <div class="form-group">
+          <label for="pricePerHour">Preis pro Stunde</label>
+          <input id="pricePerHour" v-model="boat.pricePerHour" type="number" step="0.1" placeholder="z. B. 45" />
+        </div>
+
+        <div class="form-group">
+          <label for="type">Typ</label>
+          <input id="type" v-model="boat.Type" type="text" placeholder="z. B. Ruderboot" />
+        </div>
+
+        <div class="form-group">
+          <label for="status">Status</label>
+          <select id="status" v-model="boat.status">
+            <option value="available">Verfügbar</option>
+            <option value="unavailable">Nicht verfügbar</option>
+          </select>
+        </div>
+        <div class="upload-wrapper">
+          <label class="upload-label">
+            Bild 
+          </label>
+
+          <div class="upload-box">
+            <input
+              type="file"
+              @change="handleImageUpload"
+              class="upload-input"
+              id="profilepicture"
+              ref="profilepicture"
+              accept="image/*"
+            />
+            <label for="profilepicture" class="upload-button">
+              Hier ein Bild auswählen
+            </label>
+
+            <div v-if="previewUrl" class="image-preview">
+              <img :src="previewUrl" alt="Preview" />
+            </div>
           </div>
+        </div>
+
         </div>
 
         <div class="modal-footer">
@@ -41,6 +88,9 @@ import { XMarkIcon } from '@heroicons/vue/24/solid';
 
 const openDialog = ref(false);
 
+const profilepicture = ref(null);
+const previewUrl = ref(null);
+
 const boat = ref({
   name: '',
   description: '',
@@ -50,14 +100,19 @@ const boat = ref({
   status: 'available',
 });
 
-const fields = [
-  { label: 'Name', model: 'name', type: 'input', placeholder: 'Bootsname', attrs: {} },
-  { label: 'Beschreibung', model: 'description', type: 'textarea', placeholder: 'Beschreibung', attrs: {} },
-  { label: 'Nummernschild', model: 'numberplate', type: 'input', placeholder: 'z. B. 123', attrs: { type: 'number' } },
-  { label: 'Preis pro Stunde', model: 'pricePerHour', type: 'input', placeholder: 'z. B. 45', attrs: { type: 'number', step: 0.1 } },
-  { label: 'Typ', model: 'Type', type: 'input', placeholder: 'z. B. Ruderboot', attrs: {} },
-  { label: 'Status', model: 'status', type: 'select', placeholder: '', attrs: {} },
-];
+
+function handleImageUpload(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    previewUrl.value = e.target.result;
+  };
+  reader.readAsDataURL(file);
+
+  event.target.value = null; // reset input
+}
 
 const submitBoat = async () => {
   try {
@@ -86,6 +141,67 @@ const submitBoat = async () => {
 </script>
 
 <style scoped>
+
+.upload-wrapper {
+  margin-bottom: 2rem;
+}
+
+.upload-label {
+  display: block;
+  margin-bottom: 8px;
+  color: #444;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.upload-box {
+  border: 2px dashed #ccc;
+  border-radius: 10px;
+  padding: 24px;
+  background-color: #f9f9f9;
+  text-align: center;
+}
+
+.upload-input {
+  display: none;
+}
+
+.upload-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #4f46e5;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  border: none;
+}
+
+.upload-button:hover {
+  background-color: #4338ca;
+}
+
+.upload-hint {
+  color: #666;
+  font-size: 13px;
+  margin-top: 10px;
+}
+
+.image-preview {
+  margin-top: 16px;
+}
+
+.image-preview img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px; /* optional: remove for sharp corners */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
 .widget-card {
   background: white;
   padding: 1.5rem;
