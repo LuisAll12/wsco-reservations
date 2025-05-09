@@ -6,7 +6,7 @@ import CalendarHeader from '../components/CalendarHeader.vue'
 import WeekGrid from '../components/WeekGrid.vue'
 import { startOfWeek, addDays } from 'date-fns'
 import { useRouter } from "vue-router";
-import getReservations from '../services/GetAllRes';
+import { getReservations } from '../services/GetAllRes';
 import getBoats from '../services/GetAllBoats'
 import getUserBySessionKey from '../services/GetUserInfo'
 import NewReservationModal from '../components/NewReservationModal.vue'
@@ -68,7 +68,11 @@ onMounted(async () => {
     user.email = currentUser.value?.Email;
     user.isAdmin = currentUser.value?.Role === "Admin";
 
-    reservations.value = await getReservations()
+    const start = currentWeek.value;
+    const end = addDays(currentWeek.value, 7);
+    reservations.value = [...await getReservations(start.toISOString(), end.toISOString())];
+    console.log("Reservierungen:", reservations.value);
+
     try {
       const response = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat`);
       if (!response.ok) throw new Error("Fehler beim Abrufen der Boote");
@@ -95,7 +99,7 @@ async function submitReservation(reservationData) {
   isSubmitting.value = true;
   try {
     const url = `${import.meta.env.VITE_APP_BACKEND_BASEURL}/reservation`;
-    
+
     await axios.post(url, reservationData, {
       headers: {
         'Content-Type': 'application/json'
@@ -103,7 +107,11 @@ async function submitReservation(reservationData) {
     });
 
     showReservationModal.value = false;
-    reservations.value = await getReservations(); // Deine eigene Funktion zum Nachladen
+
+    const start = currentWeek.value;
+    const end = addDays(currentWeek.value, 7);
+    reservations.value.map(await getReservations(start.toISOString(), end.toISOString()));
+
   } catch (error) {
     console.error('Error creating reservation:', error);
 

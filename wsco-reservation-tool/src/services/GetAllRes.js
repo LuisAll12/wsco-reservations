@@ -1,26 +1,28 @@
-const getReservations = async () => {
+export const getReservations = async (startDate, endDate) => {
   try {
-    const url = `${import.meta.env.VITE_APP_BACKEND_BASEURL}/reservations`;
+    const url = `${import.meta.env.VITE_APP_BACKEND_BASEURL}/reservation?start=${startDate}&end=${endDate}`;
     const headers = {
       "Content-Type": "application/json"
     };
 
-    const response = await fetch(url, { headers });
+    const response = await fetch(url, {
+      method: "GET",
+      headers,
+      credentials: "include",
+    });
 
-    while (response.data.offset) {
-      const nextResponse = await axios.get(url, {
-        headers,
-        params: { offset: response.data.offset }
-      });
-      records = [...records, ...nextResponse.data.records];
-      response.data.offset = nextResponse.data.offset;
+    console.log("Response:", response);
+    if (!response.ok) {
+      throw new Error(`Error fetching reservations: ${response.statusText}`);
     }
 
-    return records;
+    const data = await response.json();
+
+    console.log("Data:", data);
+
+    return data;
   } catch (error) {
     console.error("Error fetching reservations:", error);
     throw error;
   }
 };
-
-export default getReservations;

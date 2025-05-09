@@ -13,7 +13,7 @@ const props = defineProps({
 
 const HOUR_HEIGHT = 60
 const MINUTE_HEIGHT = HOUR_HEIGHT / 60
-const START_HOUR = 6 
+const START_HOUR = 6
 
 const timeSlots = computed(() => {
   const slots = []
@@ -26,21 +26,21 @@ const timeSlots = computed(() => {
 const baseEvents = computed(() => {
   return props.reservations
     .filter(reservation => {
-      const reservationDate = new Date(reservation.fields.From)
+      const reservationDate = new Date(reservation.startDate)
       const isSameWeekCheck = isSameWeek(reservationDate, props.days[0], { weekStartsOn: 1 })
 
-      const boatMatch = !props.selectedBoat || 
-        (reservation.fields.FK_Boat && 
-          reservation.fields.FK_Boat[0] === props.selectedBoat)
+      const boatMatch = !props.selectedBoat ||
+        (reservation.FK_Boat &&
+          reservation.FK_Boat[0] === props.selectedBoat)
       return isSameWeekCheck && boatMatch
     })
     .map(reservation => {
-      const fromDate = new Date(reservation.fields.From)
-      const toDate = new Date(reservation.fields.To)
-      
+      const fromDate = new Date(reservation.startDate)
+      const toDate = new Date(reservation.endDate)
+
       if (isNaN(fromDate) || isNaN(toDate)) return null
 
-      const dayIndex = props.days.findIndex(day => 
+      const dayIndex = props.days.findIndex(day =>
         format(day, 'yyyy-MM-dd') === format(fromDate, 'yyyy-MM-dd')
       )
 
@@ -50,8 +50,8 @@ const baseEvents = computed(() => {
       const top = startMinutes * MINUTE_HEIGHT
       const height = (endMinutes - startMinutes) * MINUTE_HEIGHT
 
-      const isCurrentUser = reservation.fields.FK_Member?.[0] === props.currentUserId
-      const boat = props.boats.find(b => b.id === reservation.fields.FK_Boat?.[0])
+      const isCurrentUser = reservation.FK_UserId?.[0] === props.currentUserId
+      const boat = props.boats.find(b => b.id === reservation.FK_Boat?.[0])
 
       return {
         id: reservation.id,
@@ -76,7 +76,7 @@ const positionedEvents = computed(() => {
   props.days.forEach((day, index) => {
     eventsByDay[index] = []
   })
-  
+
   baseEvents.value.forEach(event => {
     if (eventsByDay[event.dayIndex]) {
       eventsByDay[event.dayIndex].push({ ...event })
@@ -86,9 +86,9 @@ const positionedEvents = computed(() => {
   Object.keys(eventsByDay).forEach(dayIndex => {
     const dayEvents = eventsByDay[dayIndex]
     dayEvents.sort((a, b) => a.top - b.top)
-    
+
     const columns = []
-    
+
     dayEvents.forEach(event => {
       let placed = false
       for (let i = 0; i < columns.length; i++) {
@@ -108,8 +108,8 @@ const positionedEvents = computed(() => {
 
     dayEvents.forEach(event => {
       const totalColumns = columns.length
-      event.width = 100 / totalColumns 
-      event.left = event.column * event.width 
+      event.width = 100 / totalColumns
+      event.left = event.column * event.width
       results.push(event)
     })
   })
@@ -122,42 +122,26 @@ const positionedEvents = computed(() => {
 <template>
   <div class="calendar-grid">
     <div class="time-scale">
-      <div 
-        v-for="(time, index) in timeSlots" 
-        :key="index"
-        class="time-slot"
-        :style="{ height: `${HOUR_HEIGHT}px` }"
-      >
+      <div v-for="(time, index) in timeSlots" :key="index" class="time-slot" :style="{ height: `${HOUR_HEIGHT}px` }">
         {{ time }}
       </div>
     </div>
 
-    <div 
-      v-for="(day, dayIndex) in days" 
-      :key="dayIndex"
-      class="day-column"
-    >
+    <div v-for="(day, dayIndex) in days" :key="dayIndex" class="day-column">
       <div class="day-header">
         {{ format(day, 'EEE d', { locale: de }) }}
       </div>
 
-      <div 
-        class="day-content"
-        :style="{ height: `${(22 - START_HOUR) * HOUR_HEIGHT}px` }"
-      >
-        <div
-          v-for="event in positionedEvents.filter(e => e.dayIndex === dayIndex)"
-          :key="event.id"
-          class="calendar-event"
-          :class="{ 'current-user': event.isCurrentUser, 'other-user': !event.isCurrentUser }"
+      <div class="day-content" :style="{ height: `${(22 - START_HOUR) * HOUR_HEIGHT}px` }">
+        <div v-for="event in positionedEvents.filter(e => e.dayIndex === dayIndex)" :key="event.id"
+          class="calendar-event" :class="{ 'current-user': event.isCurrentUser, 'other-user': !event.isCurrentUser }"
           :style="{
             top: `${event.top}px`,
             height: `${event.height}px`,
             left: `${event.left}%`,
             width: `${event.width}%`,
             backgroundColor: event.color
-          }"
-        >
+          }">
           <div class="event-time">{{ event.start }} - {{ event.end }}</div>
           <div class="event-title">
             {{ event.title }}
@@ -250,16 +234,18 @@ const positionedEvents = computed(() => {
 
 .calendar-event:hover {
   transform: scale(1.01);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   z-index: 2;
 }
 
 .current-user {
-  background-color: #4CAF50; /* Green */
+  background-color: #4CAF50;
+  /* Green */
 }
 
 .other-user {
-  background-color: #2196F3; /* Blue */
+  background-color: #2196F3;
+  /* Blue */
 }
 
 .event-time {

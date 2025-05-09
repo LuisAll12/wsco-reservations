@@ -127,17 +127,21 @@ class UserModel {
         await this.usersRef.doc(id).delete();
     }
 
-    static async getUserBySessionKey(sessionKey: string): Promise<User | null> {
+    static async getUserBySessionKey(sessionKey: string): Promise<User> {
         if (!sessionKey) {
             throw new Error('sessionKey must be provided');
         }
 
         const userDoc = await this.usersRef.where('Session_Key', '==', sessionKey).get();
+
         if (userDoc.empty) {
-            return null;
+            throw new Error('No user found with the provided session key');
         }
-        return { id: userDoc.docs[0].id, ...userDoc.docs[0].data() } as User;
+
+        const doc = userDoc.docs[0];
+        return { id: doc.id, ...doc.data() } as User;
     }
+
 
     static async generateSessionKey(userId: string): Promise<void> {
         const sessionKey = Crypto.randomBytes(64).toString('hex');

@@ -3,6 +3,7 @@ import { db } from '@/config/db';
 import { Boat } from './Boat';
 import { User } from './user';
 import { Damage } from './Damage';
+import { Timestamp } from 'firebase-admin/firestore';
 
 export enum status {
     pending = 'pending',
@@ -99,29 +100,32 @@ class ReservationModel {
         return reservations;
     }
 
-    static async getAllReservationsInRange(startDate: Date, endDate: Date): Promise<Reservation[]> {
-        const snapshot = await this.reservationsRef
-            .where('startDate', '<=', endDate)
-            .get();
+    static async getAllReservationsInRange(startDate: string, endDate: string): Promise<Reservation[]> {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        const snapshot = await this.reservationsRef.get();
 
         const reservations: Reservation[] = [];
 
         snapshot.forEach((doc) => {
             const data = doc.data() as Reservation;
 
-            const resEnd = data.endDate instanceof Date ? data.endDate : new Date(data.endDate);
+            const resStart = (data.startDate as unknown as Timestamp).toDate();
+            const resEnd = (data.endDate as unknown as Timestamp).toDate();
 
-            if (resEnd >= startDate) {
+            if (resStart <= end && resEnd >= start) {
                 reservations.push({
                     ...data,
-                    id: doc.id
+                    id: doc.id,
+                    startDate: resStart,
+                    endDate: resEnd
                 });
             }
         });
 
         return reservations;
     }
-
 
 
     static async getReservationsByUserId(userId: string): Promise<Reservation[]> {
