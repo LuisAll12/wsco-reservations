@@ -204,15 +204,13 @@ onBeforeUnmount(() => {
             <span>{{ item.text }}</span>
             </div>
         </div>
-
-        <!-- <div class="form-group">
-            <label>Notes</label>
-            <textarea
-                v-model="form.notes"
-                placeholder="Additional information"
-            ></textarea>
-        </div> -->
-    </div>
+        <div class="payment-info">
+          <h4>Hier zur Bezahlung</h4>
+          <button class="stripe-payment">
+            💳 Jetzt mit Stripe bezahlen
+          </button>
+        </div>
+      </div>
       
       <div class="modal-footer">
         <button @click="$emit('close')" class="btn secondary">Abbrechen</button>
@@ -432,4 +430,27 @@ textarea {
   background: #ffeeee;
   border-radius: 4px;
 }
+
+.stripe-payment {
+  background: linear-gradient(135deg, #6772e5, #5a67d8);
+  color: #fff;
+  border: none;
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stripe-payment:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, #6b73ff, #667eea);
+}
+
 </style>

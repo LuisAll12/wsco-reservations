@@ -1,7 +1,7 @@
 import BoatModel, {Boat, BoatStatus} from "@/models/Boat";
 import { db } from '@/config/db';
 
-import { Request, Response, RequestHandler } from 'express';
+import { NextFunction, Request, Response, RequestHandler } from 'express';
 import { constrainedMemory } from 'process';
 
 export const getAllBoats: RequestHandler = async (req, res) => {
@@ -44,3 +44,10 @@ export const createBoat: RequestHandler = async (req, res) => {
     }
 };
 
+
+export const getBoatById = async (req: Request, res: Response) => {
+    const boatId = req.params.id;
+    const boat = await BoatModel.getBoatById(boatId);
+    if (!boat) return res.status(404).json({ error: 'Not found' });
+    res.status(200).json(boat);
+};
