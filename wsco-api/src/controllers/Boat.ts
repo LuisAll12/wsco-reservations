@@ -1,8 +1,10 @@
 import BoatModel, { Boat, BoatStatus } from "@/models/Boat";
+import { uploadFile } from "../services/S3";
 import { db } from '@/config/db';
 
 import { NextFunction, Request, Response, RequestHandler } from 'express';
 import { constrainedMemory } from 'process';
+import { profile } from "console";
 
 export const getAllBoats: RequestHandler = async (req, res) => {
     try {
@@ -25,6 +27,16 @@ export const createBoat: RequestHandler = async (req, res) => {
             Type,
             status = BoatStatus.available
         } = req.body;
+
+        let imageUrl: string | undefined = undefined;
+        
+        if (req.file) {
+            imageUrl = await uploadFile(
+                req.file.buffer, 
+                req.file.originalname, 
+                req.file.mimetype
+            );
+        }
 
         const newBoat: Omit<Boat, 'id' | 'createdAt' | 'updatedAt'> = {
             name,

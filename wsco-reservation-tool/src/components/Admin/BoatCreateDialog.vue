@@ -37,7 +37,7 @@
 
         <div class="form-group">
           <label for="type">Typ</label>
-          <input id="type" v-model="boat.Type" type="text" placeholder="z. B. Ruderboot" />
+          <input id="type" v-model="boat.Type" type="text" placeholder="z. B. Ruderboot" />
         </div>
 
         <div class="form-group">
@@ -135,23 +135,25 @@ function handleImageUpload(event) {
 
 const submitBoat = async () => {
   const fieldsok = checkFields();
-  if(fieldsok)
-  {
+  if (fieldsok) {
     try {
+      const formData = new FormData();
+      formData.append('name', boat.value.name);
+      formData.append('description', boat.value.description);
+      formData.append('numberplate', boat.value.numberplate);
+      formData.append('pricePerBlock', parseFloat(boat.value.pricePerHour));
+      formData.append('Type', boat.value.Type);
+      formData.append('status', boat.value.status);
+
+      if (profilepicture.value?.files?.[0]) {
+        formData.append('image', profilepicture.value.files[0]); // <- Der Key muss zu deinem Backend passen!
+      }
+
       const res = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: boat.value.name,
-          description: boat.value.description,
-          numberplate: boat.value.numberplate,
-          pricePerBlock: parseFloat(boat.value.pricePerHour),
-          Type: boat.value.Type,
-          status: boat.value.status,
-        }),
+        body: formData, // ← keine content-type nötig
       });
+
       if (!res.ok) throw new Error('Fehler beim Erstellen');
       alert('Boot erfolgreich erstellt!');
       openDialog.value = false;
@@ -159,11 +161,11 @@ const submitBoat = async () => {
       console.error('Fehler:', err);
       alert('Fehler beim Erstellen des Bootes');
     }
-  }
-  else{
-    // Show ErrorFields
+  } else {
+    ErrorMsg.value = 'Bitte fülle alle Felder korrekt aus.';
   }
 };
+
 
 function checkFields(){
   const boatName = boat.value.name?.trim();
