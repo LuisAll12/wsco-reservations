@@ -8,7 +8,7 @@ import { ConversationListInstance } from 'twilio/lib/rest/conversations/v1/conve
 
 export enum status {
     created = 'created',         // Reservation wurde erstellt
-    checkedin = 'checkedin',     // Reservation wurde vor Ort angenommen
+    checkedin = 'checkedin',    // Reservation wurde vor Ort angenommen
     completed = 'completed',     // Reservation durchgeführt + Boot zurückgegeben
     cancelled = 'cancelled'      // Reservation wurde gecancelled
 }
@@ -73,6 +73,15 @@ class ReservationModel {
         } else {
             return null;
         }
+    }
+
+    static async markReservationAsCompleted(reservationId: string): Promise<void> {
+        const reservationDocRef = this.reservationsRef.doc(reservationId);
+
+        await reservationDocRef.update({
+            status: status.completed,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
     }
 
     static async updateReservation(reservationId: string, updatedData: Partial<Reservation>): Promise<void> {
@@ -233,13 +242,25 @@ class ReservationModel {
             updatedAt: admin.firestore.FieldValue.serverTimestamp()
         });
     }
-
-    static async markReservationAsConfirmed(reservationId: string): Promise<void> {
+    static async markReservationAsConfirmed(reservationId: string, time: string): Promise<void> {
         const reservationDocRef = this.reservationsRef.doc(reservationId);
-        await reservationDocRef.update({
-            status: status.checkedin,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp()
-        });
+        const reservationDoc = await reservationDocRef.get();
+
+        if (!reservationDoc.exists) {
+            throw new Error('Reservation not found');
+        }
+
+        const reservationData = reservationDoc.data() as Reservation;
+        const reservationStartTime = (reservationData.startDate as unknown as Timestamp).toDate();
+
+        if (reservationStartTime.getTime() - new Date(time).getTime() <= 60 * 60 * 1000) {
+            await reservationDocRef.update({
+                status: status.checkedin,
+                updatedAt: admin.firestore.FieldValue.serverTimestamp()
+            });
+        } else {
+            throw new Error('Reservation can only be confirmed one hour or less before the start time');
+        }
     }
 
     static async markReservationAsCancelled(reservationId: string): Promise<void> {
