@@ -1,15 +1,15 @@
-<!-- src/App.vue -->
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import Sidebar from '../components/Sidebar.vue'
-import CalendarHeader from '../components/CalendarHeader.vue'
-import WeekGrid from '../components/WeekGrid.vue'
+import Sidebar from './Sidebar.vue'
+import CalendarHeader from './CalendarHeader.vue'
+import WeekGrid from './WeekGrid.vue'
 import { startOfWeek, addDays } from 'date-fns'
 import { useRouter } from "vue-router";
 import { getReservations } from '../services/GetAllRes';
 import getBoats from '../services/GetAllBoats'
 import { getUserBySessionKey } from '../services/GetUserInfo'
-import NewReservationModal from '../components/NewReservationModal.vue'
+import NewReservationModal from './NewReservationModal.vue'
+import axios from "axios";
 
 const showReservationModal = ref(false)
 const router = useRouter();
@@ -110,15 +110,14 @@ async function submitReservation(reservationData) {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(reservationData),
-      credentials: 'include'
+      body: JSON.stringify(reservationData)
     });
 
     showReservationModal.value = false;
 
     const start = currentWeek.value;
     const end = addDays(currentWeek.value, 7);
-    reservations.value = [...await getReservations(start.toISOString(), end.toISOString())];
+    reservations.value.map(await getReservations(start.toISOString(), end.toISOString()));
 
   } catch (error) {
     console.error('Error creating reservation:', error);
@@ -154,12 +153,7 @@ function validateReservation(boatId, from, to) {
 </script>
 
 <template>
-  <div class="dashboard">
-    <Sidebar :user="user" />
     <main class="main-content">
-      <router-view />
-    </main>
-    <!-- <main class="main-content">
       <CalendarHeader :user="user" :boats="boats" :current-date="currentDate" :selected-boat="selectedBoat"
         :currentUser="currentUser" @prev-week="prevWeek" @next-week="nextWeek" @new-reservation="handleNewReservation"
         @boat-change="handleBoatChange" />
@@ -169,23 +163,14 @@ function validateReservation(boatId, from, to) {
 
     </main>
     <NewReservationModal v-if="showReservationModal" :show="showReservationModal" :boats="boats"
-      :current-user="currentUser" @close="showReservationModal = false" @submit="submitReservation" /> -->
-  </div>
+      :current-user="currentUser" @close="showReservationModal = false" @submit="submitReservation" />
 </template>
 
-<style scoped>
+<style>
 /* Globale Styles */
 .dashboard {
-  display: grid;
-  grid-template-columns: 288px 1fr;
   background: #f5f6fa;
   transition: all 0.3s ease;
-}
-
-
-
-.main-content {
-  padding: 1rem;
 }
 
 /* Time Scale Styles */
