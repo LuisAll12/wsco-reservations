@@ -1,6 +1,8 @@
 import BoatModel, { Boat, BoatStatus } from "@/models/Boat";
+import ReservationModel, { Reservation } from "@/models/Reservation";
 
 import { Request, Response, RequestHandler } from 'express';
+import { Timestamp } from "firebase-admin/firestore";
 
 export const getAllBoats: RequestHandler = async (req, res) => {
     try {
@@ -53,3 +55,33 @@ export const getBoatById = async (req: Request, res: Response): Promise<void> =>
     if (!boat) { res.status(404).json({ error: 'Not found' }); return; };
     res.status(200).json(boat);
 };
+
+export const isBoatOccupied = async (req: Request, res: Response): Promise<void> => {
+    const { boatId, startCheckTime, endCheckTime } = req.query as {
+        boatId: string,
+        startCheckTime: string,
+        endCheckTime: string
+    };
+
+    const start = new Date(startCheckTime).getTime() / 1000;
+    const end = new Date(endCheckTime).getTime() / 1000;
+
+    const boatReservations = await ReservationModel.getReservationsByBoatId(boatId) as Reservation[];
+
+    for (const reservation of boatReservations) {
+        const eStart = (reservation.startDate as unknown as Timestamp).toDate().getTime() / 1000;
+        const eEnd = (reservation.endDate as unknown as Timestamp).toDate().getTime() / 1000;
+
+        console.log('Requested:', { start, end });
+        console.log('Reservation:', { eStart, eEnd });
+
+        console.log('Overlap check:', start > eEnd, end < eStart);
+        if (start < eEnd && end > eStart) {
+            res.status(200).json({ isOccupied: true });
+            return;
+        }
+    }
+
+    res.status(200).json({ isOccupied: false });
+};
+

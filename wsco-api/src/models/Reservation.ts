@@ -4,6 +4,7 @@ import { Boat } from './Boat';
 import { User } from './user';
 import { Damage } from './Damage';
 import { Timestamp } from 'firebase-admin/firestore';
+import { ConversationListInstance } from 'twilio/lib/rest/conversations/v1/conversation';
 
 export enum status {
     created = 'created',         // Reservation wurde erstellt
@@ -147,7 +148,8 @@ class ReservationModel {
     }
 
     static async getReservationsByBoatId(boatId: string): Promise<Reservation[]> {
-        const snapshot = await this.reservationsRef.where('FK_BoatId', '==', boatId).get();
+        const boatRef = admin.firestore().doc(`boats/${boatId}`);
+        const snapshot = await this.reservationsRef.where('FK_BoatId', '==', boatRef).get();
         const reservations: Reservation[] = [];
 
         snapshot.forEach((doc) => {

@@ -1,10 +1,11 @@
-import { getAllBoats, getBoatById, createBoat } from "../controllers/Boat";
+import { getAllBoats, getBoatById, createBoat, isBoatOccupied } from "@/controllers/Boat";
 import Router from "express";
 
 const router = Router();
 
 router.get("/", getAllBoats);
-router.get('/:id', getBoatById);
 router.post("/", createBoat);
+router.get('/isOccupied', isBoatOccupied);
+router.get('/:id', getBoatById);
 
-export default router
+export default router;   
