@@ -16,6 +16,8 @@ export interface Boat {
     description: string;
     numberplate: string;
     pricePerBlock: number;
+    imgUrl: string;
+    pdfUrl: string;
     Type: string;
     status: BoatStatus;
     FK_ReservationId: admin.firestore.DocumentReference<Reservation>[];

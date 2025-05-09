@@ -20,6 +20,7 @@ const reports = [
   background: white;
   padding: 1rem;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  width: 20vw;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 </style>

@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, watch, onBeforeUnmount } from "vue";
 import { debounce } from 'lodash'
-import { XMarkIcon, CheckIcon } from "@heroicons/vue/24/solid"; 
+import { XMarkIcon, CheckIcon } from "@heroicons/vue/24/solid";
 import checkBoatAvailability from '../services/CheckBoatAvailability';
 
 // 1. First declare all reactive variables
@@ -55,8 +55,8 @@ const debouncedCheckAvailability = debounce(async ([boatId, from, to]) => {
     return;
   }
   const selectedBoat = computed(() => {
-  return props.boats.find((b) => b.id === form.value.boatId);
-});
+    return props.boats.find((b) => b.id === form.value.boatId);
+  });
 
   const BoatNr = selectedBoat.value?.id;
 
@@ -73,9 +73,9 @@ const debouncedCheckAvailability = debounce(async ([boatId, from, to]) => {
 
   isCheckingAvailability.value = true;
   try {
-    const { available, conflictingReservations, error } = 
+    const { available, conflictingReservations, error } =
       await checkBoatAvailability(BoatNr, from, to);
-    
+
     if (error) {
       availabilityError.value = `Boot bereits von ${conflictTime} Uhr gebucht`;
     } else if (!available) {
@@ -102,19 +102,16 @@ watch(
 
 // 6. Finally component methods
 function handleSubmit() {
-    if (!props.currentUser?.id) {
-    availabilityError.value = "Benutzer ist nicht verfügbar.";
-    return;
-  }
   const fromDate = new Date(form.value.from);
   const toDate = new Date(form.value.to);
   const reservationData = {
-    boatId: form.value.boatId,
-    userId: props.currentUser.id,
-    from: form.value.from,
-    to: form.value.to,
+    FK_BoatId: form.value.boatId,
+    startDate: form.value.from,
+    endDate: form.value.to,
     price: parseFloat(totalPrice.value),
   };
+
+  emit("submit", reservationData);
 }
 onBeforeUnmount(() => {
   debouncedCheckAvailability.cancel();
@@ -139,70 +136,53 @@ onBeforeUnmount(() => {
         </div> -->
 
         <div class="form-row">
-            <div class="form-group">
-                <label>Von</label>
-                <input 
-                type="datetime-local" 
-                v-model="form.from"
-                :min="new Date().toISOString().slice(0, 16)"
-                @change="checkAvailability"
-                >
-            </div>
-            <div class="form-group">
-                <label>Bis</label>
-                <input 
-                type="datetime-local" 
-                v-model="form.to"
-                :min="form.from || new Date().toISOString().slice(0, 16)"
-                @change="checkAvailability"
-                >
-            </div>
+          <div class="form-group">
+            <label>Von</label>
+            <input type="datetime-local" v-model="form.from" :min="new Date().toISOString().slice(0, 16)"
+              @change="checkAvailability">
+          </div>
+          <div class="form-group">
+            <label>Bis</label>
+            <input type="datetime-local" v-model="form.to" :min="form.from || new Date().toISOString().slice(0, 16)"
+              @change="checkAvailability">
+          </div>
         </div>
         <div v-if="isCheckingAvailability" class="loading-message">
-            <span class="loader"></span> Überprüfe Verfügbarkeit...
+          <span class="loader"></span> Überprüfe Verfügbarkeit...
         </div>
-            
+
         <div v-if="availabilityError" class="error-message">
-            {{ availabilityError }}
+          {{ availabilityError }}
         </div>
 
         <div v-else-if="form.boatId && form.from && form.to" class="success-message">
-            <CheckIcon class="icon" /> Boot ist verfügbar
+          <CheckIcon class="icon" /> Boot ist verfügbar
         </div>
         <div class="form-group">
-            <label>Boot</label>
-            <select v-model="form.boatId" @change="availabilityError = ''">
-                <option value="">Wähle ein Boot</option>
-                <option
-                v-for="boat in boats"
-                :key="boat.id"
-                :value="boat.id"
-                :disabled="boat.status === 'unavailable'"
-              >
-                {{ boat.name }} ({{ boat.numberplate }})
-                <span v-if="boat.status === 'unavailable'"> - Nicht verfügbar</span>
-              </option>
-            </select>
+          <label>Boot</label>
+          <select v-model="form.boatId" @change="availabilityError = ''">
+            <option value="">Wähle ein Boot</option>
+            <option v-for="boat in boats" :key="boat.id" :value="boat.id" :disabled="boat.status === 'unavailable'">
+              {{ boat.name }} ({{ boat.numberplate }})
+              <span v-if="boat.status === 'unavailable'"> - Nicht verfügbar</span>
+            </option>
+          </select>
         </div>
 
         <div class="form-group">
-            <label>Totaler Preis</label>
-            <div class="price-display">CHF {{ totalPrice }}</div>
+          <label>Totaler Preis</label>
+          <div class="price-display">CHF {{ totalPrice }}</div>
         </div>
 
         <div class="checklist">
-            <h4>Voraussetzungen</h4>
-            <div
-                v-for="(item, index) in form.checklist"
-                :key="index"
-                class="checklist-item"
-                @click="item.checked = !item.checked"
-            >
+          <h4>Voraussetzungen</h4>
+          <div v-for="(item, index) in form.checklist" :key="index" class="checklist-item"
+            @click="item.checked = !item.checked">
             <div class="checkbox" :class="{ checked: item.checked }">
-                <CheckIcon v-if="item.checked" class="check-icon" />
+              <CheckIcon v-if="item.checked" class="check-icon" />
             </div>
             <span>{{ item.text }}</span>
-            </div>
+          </div>
         </div>
         <div class="payment-info">
           <h4>Hier zur Bezahlung</h4>
@@ -211,16 +191,12 @@ onBeforeUnmount(() => {
           </button>
         </div>
       </div>
-      
+
       <div class="modal-footer">
         <button @click="$emit('close')" class="btn secondary">Abbrechen</button>
-        <button
-          @click="handleSubmit"
-          :disabled="!canSubmit || isSubmitting"
-          class="btn primary"
-        >
-            <span v-if="isSubmitting">Buchen...</span>
-            <span v-else>Reservierung abschicken</span>
+        <button @click="handleSubmit" :disabled="isSubmitting" class="btn primary">
+          <span v-if="isSubmitting">Buchen...</span>
+          <span v-else>Reservierung abschicken</span>
         </button>
       </div>
     </div>
@@ -239,7 +215,8 @@ onBeforeUnmount(() => {
   opacity: 1 !important;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* High z-index to appear above everything */
+  z-index: 1000;
+  /* High z-index to appear above everything */
 }
 
 .modal {
@@ -403,8 +380,13 @@ textarea {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .success-message {
@@ -452,5 +434,4 @@ textarea {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
   background: linear-gradient(135deg, #6b73ff, #667eea);
 }
-
 </style>

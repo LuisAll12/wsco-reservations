@@ -16,61 +16,55 @@
 
         <div class="modal-body">
           <div class="form-group">
-          <label for="name">Name</label>
-          <input id="name" v-model="boat.name" type="text" placeholder="Bootsname" />
-        </div>
+            <label for="name">Name</label>
+            <input id="name" v-model="boat.name" type="text" placeholder="Bootsname" />
+          </div>
 
-        <div class="form-group">
-          <label for="description">Beschreibung</label>
-          <textarea id="description" v-model="boat.description" placeholder="Beschreibung"></textarea>
-        </div>
+          <div class="form-group">
+            <label for="description">Beschreibung</label>
+            <textarea id="description" v-model="boat.description" placeholder="Beschreibung"></textarea>
+          </div>
 
-        <div class="form-group">
-          <label for="numberplate">Nummernschild</label>
-          <input id="numberplate" v-model="boat.numberplate" type="text" placeholder="z.B. OW 123" />
-        </div>
+          <div class="form-group">
+            <label for="numberplate">Nummernschild</label>
+            <input id="numberplate" v-model="boat.numberplate" type="text" placeholder="z.B. OW 123" />
+          </div>
 
-        <div class="form-group">
-          <label for="pricePerHour">Preis pro Stunde</label>
-          <input id="pricePerHour" v-model="boat.pricePerHour" type="number" step="0.1" placeholder="z. B. 45" />
-        </div>
+          <div class="form-group">
+            <label for="pricePerHour">Preis pro Stunde</label>
+            <input id="pricePerHour" v-model="boat.pricePerHour" type="number" step="0.1" placeholder="z. B. 45" />
+          </div>
 
-        <div class="form-group">
-          <label for="type">Typ</label>
-          <input id="type" v-model="boat.Type" type="text" placeholder="z. B. Ruderboot" />
-        </div>
+          <div class="form-group">
+            <label for="type">Typ</label>
+            <input id="type" v-model="boat.Type" type="text" placeholder="z. B. Ruderboot" />
+          </div>
 
-        <div class="form-group">
-          <label for="status">Status</label>
-          <select id="status" v-model="boat.status">
-            <option value="available">Verfügbar</option>
-            <option value="unavailable">Nicht verfügbar</option>
-          </select>
-        </div>
-        <div class="upload-wrapper">
-          <label class="upload-label">
-            Bild 
-          </label>
-
-          <div class="upload-box">
-            <input
-              type="file"
-              @change="handleImageUpload"
-              class="upload-input"
-              id="profilepicture"
-              ref="profilepicture"
-              accept="image/*"
-            />
-            <label for="profilepicture" class="upload-button">
-              Hier ein Bild auswählen
+          <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" v-model="boat.status">
+              <option value="available">Verfügbar</option>
+              <option value="unavailable">Nicht verfügbar</option>
+            </select>
+          </div>
+          <div class="upload-wrapper">
+            <label class="upload-label">
+              Bild
             </label>
 
-            <div v-if="previewUrl" class="image-preview">
-              <img :src="previewUrl" alt="Preview" />
+            <div class="upload-box">
+              <input type="file" @change="handleImageUpload" class="upload-input" id="profilepicture"
+                ref="profilepicture" accept="image/*" />
+              <label for="profilepicture" class="upload-button">
+                Hier ein Bild auswählen
+              </label>
+
+              <div v-if="previewUrl" class="image-preview">
+                <img :src="previewUrl" alt="Preview" />
+              </div>
             </div>
           </div>
-        </div>
-        <p class="error-message" v-if="ErrorMsg != ''">{{ ErrorMsg }}</p>
+          <p class="error-message" v-if="ErrorMsg != ''">{{ ErrorMsg }}</p>
         </div>
 
         <div class="modal-footer">
@@ -135,8 +129,7 @@ function handleImageUpload(event) {
 
 const submitBoat = async () => {
   const fieldsok = checkFields();
-  if(fieldsok)
-  {
+  if (fieldsok) {
     try {
       const res = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat`, {
         method: 'POST',
@@ -160,12 +153,12 @@ const submitBoat = async () => {
       alert('Fehler beim Erstellen des Bootes');
     }
   }
-  else{
+  else {
     // Show ErrorFields
   }
 };
 
-function checkFields(){
+function checkFields() {
   const boatName = boat.value.name?.trim();
   const boatDescription = boat.value.description?.trim();
   const boatNumberplate = boat.value.numberplate?.trim();
@@ -176,14 +169,13 @@ function checkFields(){
   if (!boatName || !boatDescription || !boatNumberplate || isNaN(price) || !boatType || !boatStatus) {
     ErrorMsg.value = 'Bitte fülle alle Felder korrekt aus.';
     return false;
-  }else{
+  } else {
     return true
   }
 }
 </script>
 
 <style scoped>
-
 .upload-wrapper {
   margin-bottom: 2rem;
 }
@@ -240,7 +232,8 @@ function checkFields(){
 .image-preview img {
   max-width: 100%;
   height: auto;
-  border-radius: 6px; /* optional: remove for sharp corners */
+  border-radius: 6px;
+  /* optional: remove for sharp corners */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -248,6 +241,7 @@ function checkFields(){
   background: white;
   padding: 1.5rem;
   border-radius: 12px;
+  width: 20vw;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
@@ -334,10 +328,10 @@ textarea {
 
 <style scoped>
 .preview img {
-    max-width: 100%;
-    max-height: 200px;
-    border-radius: 8px;
-    margin-top: 1rem;
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  margin-top: 1rem;
 }
 
 .modal-overlay {
@@ -351,7 +345,8 @@ textarea {
   opacity: 1 !important;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* High z-index to appear above everything */
+  z-index: 1000;
+  /* High z-index to appear above everything */
 }
 
 .modal {
@@ -515,8 +510,13 @@ textarea {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .success-message {
@@ -543,5 +543,3 @@ textarea {
   border-radius: 4px;
 }
 </style>
-
-
