@@ -45,9 +45,9 @@ export const createBoat: RequestHandler = async (req, res) => {
 };
 
 
-export const getBoatById = async (req: Request, res: Response) => {
+export const getBoatById = async (req: Request, res: Response): Promise<void> => {
     const boatId = req.params.id;
     const boat = await BoatModel.getBoatById(boatId);
-    if (!boat) return res.status(404).json({ error: 'Not found' });
+    if (!boat) {res.status(404).json({ error: 'Not found' }); return;};
     res.status(200).json(boat);
 };

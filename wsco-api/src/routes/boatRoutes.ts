@@ -4,7 +4,7 @@ import Router from "express";
 const router = Router();
 
 router.get("/", getAllBoats);
-// router.get('/:id', getBoatById);
+router.get('/:id', getBoatById);
 router.post("/", createBoat);
 
-export default router;
+export default router
