@@ -128,6 +128,10 @@ class UserModel {
     }
 
     static async getUserBySessionKey(sessionKey: string): Promise<User | null> {
+        if (!sessionKey) {
+            throw new Error('sessionKey must be provided');
+        }
+
         const userDoc = await this.usersRef.where('Session_Key', '==', sessionKey).get();
         if (userDoc.empty) {
             return null;

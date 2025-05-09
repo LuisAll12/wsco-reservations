@@ -99,6 +99,31 @@ class ReservationModel {
         return reservations;
     }
 
+    static async getAllReservationsInRange(startDate: Date, endDate: Date): Promise<Reservation[]> {
+        const snapshot = await this.reservationsRef
+            .where('startDate', '<=', endDate)
+            .get();
+
+        const reservations: Reservation[] = [];
+
+        snapshot.forEach((doc) => {
+            const data = doc.data() as Reservation;
+
+            const resEnd = data.endDate instanceof Date ? data.endDate : new Date(data.endDate);
+
+            if (resEnd >= startDate) {
+                reservations.push({
+                    ...data,
+                    id: doc.id
+                });
+            }
+        });
+
+        return reservations;
+    }
+
+
+
     static async getReservationsByUserId(userId: string): Promise<Reservation[]> {
         const snapshot = await this.reservationsRef.where('FK_UserId', '==', userId).get();
         const reservations: Reservation[] = [];

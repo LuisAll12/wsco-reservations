@@ -9,7 +9,6 @@ import { useRouter } from "vue-router";
 import getReservations from '../services/GetAllRes';
 import getBoats from '../services/GetAllBoats'
 import getUserBySessionKey from '../services/GetUserInfo'
-import Cookies from 'js-cookie'
 import NewReservationModal from '../components/NewReservationModal.vue'
 import axios from "axios";
 

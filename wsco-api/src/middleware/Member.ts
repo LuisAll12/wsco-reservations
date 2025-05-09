@@ -1,18 +1,17 @@
-import UserModel, { Role, User } from "@/models/user";
+import UserModel, { User } from "@/models/user";
 import { NextFunction, Request, Response } from "express";
 
-export async function MemberMiddleware(req: Request, res: Response, next: NextFunction) {
+export async function memberMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {
     const Session = req.cookies;
 
     if (!Session) {
-        return res.status(401).json({ message: "Unauthorized" });
+        res.status(401).json({ message: "Unauthorized" });
+        return;
     }
 
-    const user = await UserModel.getUserBySessionKey(Session.Session_Key) as User;
+    const user = await UserModel.getUserBySessionKey(Session.session_key) as User;
 
-    if (user.Role !== Role.Member) {
-        return res.status(403).json({ message: "Forbidden" });
-    }
+    (req as any).user = user;
 
     next();
 }
