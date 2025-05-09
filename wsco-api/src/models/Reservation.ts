@@ -232,7 +232,7 @@ class ReservationModel {
     static async markReservationAsConfirmed(reservationId: string): Promise<void> {
         const reservationDocRef = this.reservationsRef.doc(reservationId);
         await reservationDocRef.update({
-            status: status.confirmed,
+            status: status.checkedin,
             updatedAt: admin.firestore.FieldValue.serverTimestamp()
         });
     }
