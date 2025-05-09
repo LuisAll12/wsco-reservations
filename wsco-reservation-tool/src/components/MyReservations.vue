@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import {
   CalendarIcon,
   ClockIcon,
@@ -7,30 +7,13 @@ import {
   XCircleIcon,
   ExclamationTriangleIcon
 } from '@heroicons/vue/24/outline'
+import { getUsersReservaitons } from '../services/GetUserRes'
 
-const reservations = ref([
-  {
-    id: '1',
-    boatName: 'Sea Explorer',
-    date: '2025-05-10',
-    time: '14:00',
-    status: 'Bestätigt'
-  },
-  {
-    id: '2',
-    boatName: 'Ocean Breeze',
-    date: '2025-05-12',
-    time: '10:00',
-    status: 'Ausstehend'
-  },
-  {
-    id: '3',
-    boatName: 'River Runner',
-    date: '2025-05-15',
-    time: '09:00',
-    status: 'Storniert'
-  }
-])
+const reservations = ref([])
+
+onMounted(async () => {
+  reservations.value = [...await getUsersReservaitons()]
+})
 
 const showModal = ref(false)
 const selectedReservationId = ref(null)
@@ -59,31 +42,31 @@ function closeModal() {
     <router-link to="/dashboard" class="back">Zurück</router-link>
     <h1 class="title">Meine Reservierungen</h1>
     <div class="reservation-list">
-      <div
-        class="reservation-card"
-        v-for="reservation in reservations"
-        :key="reservation.id"
-      >
+      <div class="reservation-card" v-for="reservation in reservations" :key="reservation.id">
         <h2 class="boat-name">{{ reservation.boatName }}</h2>
 
         <p>
           <CalendarIcon class="icon" />
-          <strong>Datum:</strong> {{ reservation.date }}
+          <strong>Datum:</strong> {{ new Date(reservation.startDate).toLocaleDateString() }}
         </p>
         <p>
           <ClockIcon class="icon" />
-          <strong>Uhrzeit:</strong> {{ reservation.time }}
+          <strong>Uhrzeit:</strong> {{ new Date(reservation.startDate).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          })
+          }} - {{ new Date(reservation.endDate).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          }) }}
         </p>
         <p :class="'status ' + reservation.status.toLowerCase()">
           <TagIcon class="icon" />
           <strong>Status:</strong> {{ reservation.status }}
         </p>
 
-        <button
-          class="cancel-button"
-          @click="openConfirmation(reservation.id)"
-          :disabled="reservation.status === 'Storniert'"
-        >
+        <button class="cancel-button" @click="openConfirmation(reservation.id)"
+          :disabled="reservation.status === 'Storniert'">
           <XCircleIcon class="icon-button" />
           Reservierung stornieren
         </button>
@@ -247,11 +230,12 @@ function closeModal() {
   border-radius: 6px;
   cursor: pointer;
 }
-.back{
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    font-size: 1.2em;
-    color: #007bff;
+
+.back {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-size: 1.2em;
+  color: #007bff;
 }
 </style>

@@ -130,7 +130,8 @@ class ReservationModel {
 
 
     static async getReservationsByUserId(userId: string): Promise<Reservation[]> {
-        const snapshot = await this.reservationsRef.where('FK_UserId', '==', userId).get();
+        const userRef = admin.firestore().doc(`users/${userId}`);
+        const snapshot = await this.reservationsRef.where('FK_UserId', '==', userRef).get();
         const reservations: Reservation[] = [];
 
         snapshot.forEach((doc) => {
@@ -139,6 +140,8 @@ class ReservationModel {
                 ...doc.data()
             } as Reservation);
         });
+
+        console.log(reservations);
 
         return reservations;
     }

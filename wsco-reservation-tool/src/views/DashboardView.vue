@@ -8,7 +8,7 @@ import { startOfWeek, addDays } from 'date-fns'
 import { useRouter } from "vue-router";
 import { getReservations } from '../services/GetAllRes';
 import getBoats from '../services/GetAllBoats'
-import getUserBySessionKey from '../services/GetUserInfo'
+import { getUserBySessionKey } from '../services/GetUserInfo'
 import NewReservationModal from '../components/NewReservationModal.vue'
 import axios from "axios";
 
@@ -104,12 +104,14 @@ function handleNewReservation() {
 async function submitReservation(reservationData) {
   isSubmitting.value = true;
   try {
-    const url = `${import.meta.env.VITE_APP_BACKEND_BASEURL}/reservation`;
+    const url = `${import.meta.env.VITE_APP_BACKEND_BASEURL}/reservation/create`;
 
-    await axios.post(url, reservationData, {
+    await fetch(url, {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json'
-      }
+      },
+      body: JSON.stringify(reservationData)
     });
 
     showReservationModal.value = false;
