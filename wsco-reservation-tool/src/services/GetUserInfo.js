@@ -1,4 +1,4 @@
-const getUserBySessionKey = async () => {
+export const getUserBySessionKey = async () => {
   try {
     const url = `${import.meta.env.VITE_APP_BACKEND_BASEURL}/auth/session`;
     const headers = {
@@ -15,8 +15,8 @@ const getUserBySessionKey = async () => {
       const data = await response.json();
 
       if (data && data.user) {
-        console.log("User data:", data.user);
-        return data.user;
+        console.log("User data:", data);
+        return data;
       }
     }
     return null;
@@ -26,4 +26,3 @@ const getUserBySessionKey = async () => {
   }
 };
 
-export default getUserBySessionKey;

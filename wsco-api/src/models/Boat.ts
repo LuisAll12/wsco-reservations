@@ -14,7 +14,7 @@ export interface Boat {
     // Boat details
     name: string;
     description: string;
-    numberplate: number;
+    numberplate: string;
     pricePerBlock: number;
     Type: string;
     status: BoatStatus;
