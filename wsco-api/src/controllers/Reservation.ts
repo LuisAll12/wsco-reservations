@@ -34,7 +34,7 @@ export const createReservation: RequestHandler = async (req: Request, res: Respo
             FK_BoatId: db.collection('boats').doc(FK_BoatId) as DocumentReference<Boat>,
             FK_UserId: db.collection('users').doc(FK_UserId) as DocumentReference<User>,
             PaymentStatus: PaymentStatus.unpaid,
-            status: status.pending,
+            status: status.created,
             NumBlocks: 0,
             TotalPrice: 0,
         };

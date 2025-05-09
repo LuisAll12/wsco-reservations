@@ -27,7 +27,7 @@
 
         <div class="form-group">
           <label for="numberplate">Nummernschild</label>
-          <input id="numberplate" v-model="boat.numberplate" type="number" placeholder="z. B. 123" />
+          <input id="numberplate" v-model="boat.numberplate" type="text" placeholder="z.B. OW 123" />
         </div>
 
         <div class="form-group">
@@ -70,7 +70,7 @@
             </div>
           </div>
         </div>
-
+        <p class="error-message" v-if="ErrorMsg != ''">{{ ErrorMsg }}</p>
         </div>
 
         <div class="modal-footer">
@@ -83,13 +83,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { XMarkIcon } from '@heroicons/vue/24/solid';
 
 const openDialog = ref(false);
 
 const profilepicture = ref(null);
 const previewUrl = ref(null);
+
+const ErrorMsg = ref('')
 
 const boat = ref({
   name: '',
@@ -98,6 +100,23 @@ const boat = ref({
   pricePerHour: '',
   Type: '',
   status: 'available',
+});
+
+
+watch(openDialog, (newVal) => {
+  if (newVal) {
+    boat.value = {
+      name: '',
+      description: '',
+      numberplate: '',
+      pricePerHour: '',
+      Type: '',
+      status: 'available'
+    };
+    ErrorMsg.value = '';
+    previewUrl.value = null;
+    profilepicture.value = null;
+  }
 });
 
 
@@ -115,29 +134,52 @@ function handleImageUpload(event) {
 }
 
 const submitBoat = async () => {
-  try {
-    const res = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        name: boat.value.name,
-        description: boat.value.description,
-        numberplate: parseInt(boat.value.numberplate),
-        pricePerBlock: parseFloat(boat.value.pricePerHour),
-        Type: boat.value.Type,
-        status: boat.value.status,
-      }),
-    });
-    if (!res.ok) throw new Error('Fehler beim Erstellen');
-    alert('Boot erfolgreich erstellt!');
-    openDialog.value = false;
-  } catch (err) {
-    console.error('Fehler:', err);
-    alert('Fehler beim Erstellen des Bootes');
+  const fieldsok = checkFields();
+  if(fieldsok)
+  {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: boat.value.name,
+          description: boat.value.description,
+          numberplate: boat.value.numberplate,
+          pricePerBlock: parseFloat(boat.value.pricePerHour),
+          Type: boat.value.Type,
+          status: boat.value.status,
+        }),
+      });
+      if (!res.ok) throw new Error('Fehler beim Erstellen');
+      alert('Boot erfolgreich erstellt!');
+      openDialog.value = false;
+    } catch (err) {
+      console.error('Fehler:', err);
+      alert('Fehler beim Erstellen des Bootes');
+    }
+  }
+  else{
+    // Show ErrorFields
   }
 };
+
+function checkFields(){
+  const boatName = boat.value.name?.trim();
+  const boatDescription = boat.value.description?.trim();
+  const boatNumberplate = boat.value.numberplate?.trim();
+  const price = parseFloat(boat.value.pricePerHour);
+  const boatType = boat.value.Type;
+  const boatStatus = boat.value.status;
+
+  if (!boatName || !boatDescription || !boatNumberplate || isNaN(price) || !boatType || !boatStatus) {
+    ErrorMsg.value = 'Bitte fülle alle Felder korrekt aus.';
+    return false;
+  }else{
+    return true
+  }
+}
 </script>
 
 <style scoped>
