@@ -82,9 +82,16 @@ class BoatModel {
         }
     }
 
-    static async deleteBoat(boatId: string): Promise<void> {
+    static async deleteBoat(boatId: string): Promise<boolean> {
         const boatDocRef = this.boatsRef.doc(boatId);
+        const doc = await boatDocRef.get();
+        
+        if (!doc.exists) {
+            return false;
+        }
+
         await boatDocRef.delete();
+        return true;
     }
 
     static async addReservationToBoat(boatId: string, reservationId: string): Promise<void> {

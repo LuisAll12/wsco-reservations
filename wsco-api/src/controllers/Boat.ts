@@ -71,3 +71,19 @@ export const getBoatById = async (req: Request, res: Response): Promise<void> =>
     if (!boat) { res.status(404).json({ error: 'Not found' }); return; };
     res.status(200).json(boat);
 };
+
+
+export const deleteBoat = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const boatId = req.params.id;
+    const deleted = await BoatModel.deleteBoat(boatId);
+    if (!deleted) {
+      res.status(404).json({ error: 'Boot nicht gefunden' });
+      return;
+    }
+    res.status(200).json({ message: 'Boot erfolgreich gelöscht' });
+  } catch (error) {
+    console.error('Fehler beim Löschen des Bootes:', error);
+    res.status(500).json({ error: 'Interner Serverfehler' });
+  }
+};

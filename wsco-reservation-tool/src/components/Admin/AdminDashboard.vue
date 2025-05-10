@@ -1,17 +1,17 @@
 <template>
-  <div class="dashboard">
     <h1>Admin Panel</h1>
-    <div class="grid">
+    <div class="box">
       <BoatStatsWidget />
       <BoatCreateDialog />
+      <DeleteBoat />
       <DamageReportsWidget />
       <UpcomingReservationsWidget />
     </div>
-  </div>
 </template>
 
 <script setup>
 import BoatCreateDialog from './BoatCreateDialog.vue';
+import DeleteBoat from './DeleteBoat.vue';
 import DamageReportsWidget from './DamageReportsWidget.vue';
 import BoatStatsWidget from './BoatStatsWidget.vue';
 import UpcomingReservationsWidget from './UpcomingReservationsWidget.vue';
@@ -26,7 +26,7 @@ import UpcomingReservationsWidget from './UpcomingReservationsWidget.vue';
   height: 100dvh;
 }
 
-.grid {
+.box {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;

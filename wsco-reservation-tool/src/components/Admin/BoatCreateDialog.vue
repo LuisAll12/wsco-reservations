@@ -152,7 +152,7 @@ const submitBoat = async () => {
   });
 
     if (!res.ok) throw new Error('Fehler beim Erstellen');
-    alert('Boot erfolgreich erstellt!');
+    ErrorMsg.value = 'Boot erfolgreich erstellt!';
     openDialog.value = false;
   } catch (err) {
     console.error('Fehler:', err);
