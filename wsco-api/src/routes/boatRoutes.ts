@@ -6,6 +6,6 @@ const router = Router();
 
 router.get("/", getAllBoats);
 router.get('/:id', getBoatById);
-router.post("/", upload.single('image'), createBoat);
+router.post("/", upload.single("image"), createBoat);
 
 export default router

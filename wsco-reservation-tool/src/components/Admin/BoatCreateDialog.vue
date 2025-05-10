@@ -123,32 +123,43 @@ function handleImageUpload(event) {
     previewUrl.value = e.target.result;
   };
   reader.readAsDataURL(file);
-
-  event.target.value = null; // reset input
 }
 
 const submitBoat = async () => {
   const fieldsok = checkFields();
-  if(fieldsok)
-  {
-    try {
-      const res = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat`, {
-        method: 'POST',
-        body: formData, // ← keine content-type nötig
-      });
+  if (!fieldsok) return;
 
-      if (!res.ok) throw new Error('Fehler beim Erstellen');
-      alert('Boot erfolgreich erstellt!');
-      openDialog.value = false;
-    } catch (err) {
-      console.error('Fehler:', err);
-      alert('Fehler beim Erstellen des Bootes');
-    }
+  const formData = new FormData();
+  formData.append('name', boat.value.name);
+  formData.append('description', boat.value.description);
+  formData.append('numberplate', boat.value.numberplate);
+  formData.append('pricePerBlock', boat.value.pricePerHour);
+  formData.append('Type', boat.value.Type);
+  formData.append('status', boat.value.status);
+
+  const file = profilepicture.value?.files?.[0];
+  if (file) {
+    formData.append('image', file);
+  } else {
+    console.warn("Kein Bild ausgewählt!");
   }
-  else{
-    // Show ErrorFields
+
+  try {
+
+  const res = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat`, {
+    method: 'POST',
+    body: formData,
+  });
+
+    if (!res.ok) throw new Error('Fehler beim Erstellen');
+    alert('Boot erfolgreich erstellt!');
+    openDialog.value = false;
+  } catch (err) {
+    console.error('Fehler:', err);
+    alert('Fehler beim Erstellen des Bootes');
   }
 };
+
 
 
 function checkFields() {

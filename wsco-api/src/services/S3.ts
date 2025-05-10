@@ -26,8 +26,11 @@ export async function uploadFile(
     ContentType: mimetype,
   });
 
+try {
   await s3.send(command);
-
-  // Construct the public S3 URL (adjust if your bucket is private or has CloudFront)
   return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_BUCKET_REGION}.amazonaws.com/${key}`;
+} catch (err) {
+  console.error('S3 upload failed:', err);
+  throw new Error('Upload to S3 failed');
+}
 }

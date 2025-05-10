@@ -32,7 +32,7 @@ onMounted(async() => {
   <div class="boat-detail-container" v-if="boat">
 
     <h1>{{ boat.name }}</h1>
-    <img :src="boat.image"
+    <img :src="boat.imgUrl"
         alt="Bootsbild"
         class="large-image"
         @click="openImageModal"/>
@@ -55,7 +55,7 @@ onMounted(async() => {
     </div>
   </div>
     <div v-if="showImageModal" class="modal-overlay" @click="closeImageModal">
-        <img :src="boat.image" alt="Originalbild" class="modal-image" />
+        <img :src="boat.imgUrl" alt="Originalbild" class="modal-image" />
     </div>
 </template>
 

@@ -75,7 +75,7 @@ onMounted(async () => {
   class="boat-item-link">
   <div class="boat-item">
     <img
-      :src="boat.image || 'https://i.pinimg.com/736x/14/25/47/142547271c036b14137604901d35e2c7.jpg'"
+      :src="boat.imgUrl || 'https://i.pinimg.com/736x/14/25/47/142547271c036b14137604901d35e2c7.jpg'"
       :alt="boat.name"
       class="boat-image"
     />
@@ -84,7 +84,7 @@ onMounted(async () => {
       <p class="desc">{{ boat.description }}</p>
       <p><strong>Nummernschild:</strong> {{ boat.numberplate }}</p>
       <p><strong>Status:</strong> {{ boat.status }}</p>
-      <p><strong>Preis:</strong> CHF {{ boat.pricePerBlock != null ? boat.pricePerBlock.toFixed(2) : '–' }} / Block</p>
+      <p><strong>Preis:</strong> CHF {{ Number(boat.pricePerBlock).toFixed(2) }} / Block</p>
 
     </div>
   </div>

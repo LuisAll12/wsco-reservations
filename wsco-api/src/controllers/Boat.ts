@@ -23,11 +23,10 @@ export const createBoat: RequestHandler = async (req, res) => {
             pricePerBlock,
             Type,
             pdfUrl,
-            imgUrl,
             status = BoatStatus.available
         } = req.body;
 
-        let imageUrl: string | undefined = undefined;
+        let imageUrl: string = "";
         
         if (req.file) {
             imageUrl = await uploadFile(
@@ -37,10 +36,10 @@ export const createBoat: RequestHandler = async (req, res) => {
             );
         }
 
-        const newBoat: Omit<Boat, 'id' | 'createdAt' | 'updatedAt'> = {
+        const newBoat: Partial<Omit<Boat, 'id' | 'createdAt' | 'updatedAt'>> = {
             name,
-            pdfUrl,
-            imgUrl,
+            pdfUrl: pdfUrl || '', // optional: leerer String oder weglassen
+            imgUrl: imageUrl,
             description,
             numberplate,
             pricePerBlock,
@@ -49,7 +48,15 @@ export const createBoat: RequestHandler = async (req, res) => {
             FK_ReservationId: []
         };
 
-        const createdBoat = await BoatModel.createBoat(newBoat);
+            // Entferne alle undefined-Werte (z. B. pdfUrl)
+        Object.keys(newBoat).forEach(key => {
+            if (newBoat[key as keyof typeof newBoat] === undefined) {
+                delete newBoat[key as keyof typeof newBoat];
+            }
+        });
+
+        const createdBoat = await BoatModel.createBoat(newBoat as Omit<Boat, 'id' | 'createdAt' | 'updatedAt'>);
+
         res.status(201).json(createdBoat);
     } catch (error) {
         console.error("Error creating boat:", error);
