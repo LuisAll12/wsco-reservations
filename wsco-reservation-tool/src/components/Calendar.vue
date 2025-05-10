@@ -110,7 +110,8 @@ async function submitReservation(reservationData) {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(reservationData)
+      body: JSON.stringify(reservationData),
+      credentials: 'include'
     });
 
     showReservationModal.value = false;
@@ -125,7 +126,7 @@ async function submitReservation(reservationData) {
     if (error.response?.status === 409) {
       alert('Das Boot ist in diesem Zeitraum bereits gebucht!');
     } else {
-      alert('Fehler bei der Buchung: ' + error.message);
+      //alert('Fehler bei der Buchung: ' + error.message);
     }
   } finally {
     isSubmitting.value = false;

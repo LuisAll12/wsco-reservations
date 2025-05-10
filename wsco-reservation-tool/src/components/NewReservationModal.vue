@@ -109,8 +109,15 @@ watch(
   { deep: true }
 );
 
+//get user sessionkey from cookies
+const sessionKey = document.cookie
+  .split('; ')
+  .find(row => row.startsWith('session_key='))
+  ?.split('=')[1];
+
 // 6. Finally component methods
 function handleSubmit() {
+  console.log("Sessionkey:", sessionKey);
   const fromDate = new Date(form.value.from);
   const toDate = new Date(form.value.to);
   const reservationData = {
@@ -203,7 +210,7 @@ onBeforeUnmount(() => {
 
       <div class="modal-footer">
         <button @click="$emit('close')" class="btn secondary">Abbrechen</button>
-        <button @click="handleSubmit" :disabled="isSubmitting" class="btn primary">
+        <button @click="handleSubmit" :disabled="isSubmitting || !canSubmit" class="btn primary">
           <span v-if="isSubmitting">Buchen...</span>
           <span v-else>Reservierung abschicken</span>
         </button>

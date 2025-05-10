@@ -2,14 +2,10 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import Sidebar from '../components/Sidebar.vue'
-import CalendarHeader from '../components/CalendarHeader.vue'
-import WeekGrid from '../components/WeekGrid.vue'
 import { startOfWeek, addDays } from 'date-fns'
 import { useRouter } from "vue-router";
 import { getReservations } from '../services/GetAllRes';
-import getBoats from '../services/GetAllBoats'
 import { getUserBySessionKey } from '../services/GetUserInfo'
-import NewReservationModal from '../components/NewReservationModal.vue'
 
 const showReservationModal = ref(false)
 const router = useRouter();
