@@ -29,7 +29,14 @@ const filteredBoats = computed(() => {
 
 onMounted(async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat`)
+    const response = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      })
     if (!response.ok) throw new Error('Network error')
     boats.value = await response.json()
     console.log('Boats:', boats.value)
@@ -84,7 +91,7 @@ onMounted(async () => {
       <p class="desc">{{ boat.description }}</p>
       <p><strong>Nummernschild:</strong> {{ boat.numberplate }}</p>
       <p><strong>Status:</strong> {{ boat.status }}</p>
-      <p><strong>Preis:</strong> CHF {{ Number(boat.pricePerBlock).toFixed(2) }} / Block</p>
+      <p><strong>Preis:</strong> CHF {{ Number(boat.pricePerBlock).toFixed(2) }} / Stunde</p>
 
     </div>
   </div>

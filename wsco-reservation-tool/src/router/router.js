@@ -26,6 +26,7 @@ const routes = [
         children: [
             {
                 path: '',
+                name: 'DashboardCalendar',
                 component: Calendar
             },
             {

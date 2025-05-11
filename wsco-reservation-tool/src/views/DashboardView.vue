@@ -7,14 +7,11 @@ import { useRouter } from "vue-router";
 import { getReservations } from '../services/GetAllRes';
 import { getUserBySessionKey } from '../services/GetUserInfo'
 
-const showReservationModal = ref(false)
-const router = useRouter();
 const reservations = ref([]);
-const boats = ref([])
 const currentUser = ref(null);
-const isSubmitting = ref(false);
 
-const baseId = "appzBNlFfIJC6865x";
+
+
 
 // Mock-Daten
 const user = reactive({
@@ -25,8 +22,6 @@ const user = reactive({
   isAdmin: false
 })
 
-const currentDate = ref(new Date())
-const selectedBoat = ref(null)
 
 const isSidebarOpen = ref(true);
 function toggleSidebar() {
@@ -34,118 +29,25 @@ function toggleSidebar() {
 }
 
 
-const handleBoatChange = (boatId) => {
-  selectedBoat.value = boatId || null
-}
-// Update weekDays calculation
-const weekDays = computed(() => {
-  const start = startOfWeek(currentDate.value, { weekStartsOn: 1 })
-  return Array.from({ length: 7 }).map((_, i) => addDays(start, i))
-})
 
 const currentWeek = ref(startOfWeek(new Date(), { weekStartsOn: 1 }))
 
-function prevWeek() {
-  const newDate = new Date(currentDate.value)
-  newDate.setDate(newDate.getDate() - 7)
-  currentDate.value = newDate
-  currentWeek.value = startOfWeek(newDate, { weekStartsOn: 1 })
-}
-
-function nextWeek() {
-  const newDate = new Date(currentDate.value)
-  newDate.setDate(newDate.getDate() + 7)
-  currentDate.value = newDate
-  currentWeek.value = startOfWeek(newDate, { weekStartsOn: 1 })
-}
 
 onMounted(async () => {
   try {
     currentUser.value = await getUserBySessionKey()
-    console.log("Current user:", currentUser.value);
-
-    user.name = currentUser.value?.firstName || "Gast";
-    user.id = currentUser.value?.id;
-    user.email = currentUser.value?.Email;
-    user.isAdmin = currentUser.value?.Role === "Admin";
 
     const start = currentWeek.value;
     const end = addDays(currentWeek.value, 7);
     reservations.value = [...await getReservations(start.toISOString(), end.toISOString())];
-    console.log("Reservierungen:", reservations.value);
 
-    try {
-      const response = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat`);
-      if (!response.ok) throw new Error("Fehler beim Abrufen der Boote");
-
-      const data = await response.json();
-      boats.value = data;
-      console.log("Boote:", boats.value);
-    } catch (error) {
-      console.error("Fetch-Fehler:", error);
-    }
 
   } catch (error) {
     console.error('Failed to load data:', error)
   }
 })
 
-function handleNewReservation() {
-  console.log("handleNewReservation called");
-  showReservationModal.value = true;
-  console.log("showReservationModal value:", showReservationModal.value);
-}
 
-async function submitReservation(reservationData) {
-  isSubmitting.value = true;
-  try {
-    const url = `${import.meta.env.VITE_APP_BACKEND_BASEURL}/reservation/create`;
-
-    await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(reservationData),
-      credentials: 'include'
-    });
-
-    showReservationModal.value = false;
-
-    const start = currentWeek.value;
-    const end = addDays(currentWeek.value, 7);
-    reservations.value = [...await getReservations(start.toISOString(), end.toISOString())];
-
-  } catch (error) {
-    console.error('Error creating reservation:', error);
-
-    if (error.response?.status === 409) {
-      alert('Das Boot ist in diesem Zeitraum bereits gebucht!');
-    } else {
-      alert('Fehler bei der Buchung: ' + error.message);
-    }
-  } finally {
-    isSubmitting.value = false;
-  }
-}
-
-
-
-function validateReservation(boatId, from, to) {
-  if (!boatId || !from || !to) {
-    return { valid: false, message: 'Bitte füllen Sie alle Felder aus' };
-  }
-
-  if (new Date(from) >= new Date(to)) {
-    return { valid: false, message: 'Endzeit muss nach Startzeit liegen' };
-  }
-
-  if (!isBoatAvailable(boatId, from, to)) {
-    return { valid: false, message: 'Boot in diesem Zeitraum bereits gebucht' };
-  }
-
-  return { valid: true };
-}
 
 </script>
 
@@ -155,17 +57,6 @@ function validateReservation(boatId, from, to) {
     <main class="main-content">
       <router-view />
     </main>
-    <!-- <main class="main-content">
-      <CalendarHeader :user="user" :boats="boats" :current-date="currentDate" :selected-boat="selectedBoat"
-        :currentUser="currentUser" @prev-week="prevWeek" @next-week="nextWeek" @new-reservation="handleNewReservation"
-        @boat-change="handleBoatChange" />
-
-      <WeekGrid :days="weekDays" :reservations="reservations" :selected-boat="selectedBoat" :boats="boats"
-        :current-user-id="currentUser?.id" />
-
-    </main>
-    <NewReservationModal v-if="showReservationModal" :show="showReservationModal" :boats="boats"
-      :current-user="currentUser" @close="showReservationModal = false" @submit="submitReservation" /> -->
   </div>
 </template>
 

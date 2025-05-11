@@ -79,7 +79,15 @@ onMounted(async () => {
     console.log("Reservierungen:", reservations.value);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat`);
+      const response = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
+        }
+      );
       if (!response.ok) throw new Error("Fehler beim Abrufen der Boote");
 
       const data = await response.json();
