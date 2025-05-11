@@ -113,4 +113,16 @@ export const getUsersReservations: RequestHandler = async (req: Request, res: Re
         console.error("Error fetching user's reservations:", error);
         res.status(500).json({ message: "Error fetching user's reservations", error: error instanceof Error ? error.message : error });
     }
-};
+}
+
+export const MarkReservationAsCheckedin = async (req: Request, res: Response): Promise<void> => {
+    const { ReservationId } = req.body as { ReservationId: string };
+
+    try {
+        await ReservationModel.markReservationAsConfirmed(ReservationId, new Date().toISOString());
+        res.status(200).json({ message: "success" });
+    } catch (error) {
+        res.status(409).json({ error: error });
+        return;
+    }
+}
