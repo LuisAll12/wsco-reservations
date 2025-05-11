@@ -7,7 +7,15 @@ const message = ref('');
 
 //fetch boats from backend
 onMounted(async () => {
-  const res = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat`);
+  const res = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    }
+  );
   boats.value = await res.json();
 });
 
@@ -19,6 +27,10 @@ async function deleteBoat(){
     try {
         const res = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat/${boatId}`, {
             method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include'
         });
         console.log('Response:', res);
     if (res.ok) {
