@@ -4,6 +4,7 @@ import BoatModel, { Boat } from '@/models/Boat';
 import UserModel, { User } from '@/models/user';
 import { DocumentReference, Timestamp } from 'firebase-admin/firestore';
 import { Request, Response, RequestHandler } from 'express';
+import logger from '@/services/logger';
 
 export const createReservation: RequestHandler = async (req: Request, res: Response): Promise<void> => {
     const { startDate, endDate, FK_BoatId } = req.body;
@@ -49,6 +50,7 @@ export const createReservation: RequestHandler = async (req: Request, res: Respo
         res.status(201).json(newReservation);
     } catch (error) {
         console.error("Error creating reservation:", error);
+        logger.error("Error creating reservation: " + error)
         res.status(500).json({ message: "Error creating reservation", error: error instanceof Error ? error.message : error });
     }
 };
@@ -99,7 +101,8 @@ export const getUsersReservations: RequestHandler = async (req: Request, res: Re
                     boatData = { id: boatSnap.id, ...boatSnap.data() };
                 }
             } catch (error) {
-                console.warn(`Fehler beim Laden des Boots für Reservation ${reservation.id}:`, error);
+                logger.error(`Fehler beim Laden des Boots für Reservation ${reservation.id}: ` + error)
+                console.error(`Fehler beim Laden des Boots für Reservation ${reservation.id}:`, error);
             }
 
             return {
@@ -111,6 +114,7 @@ export const getUsersReservations: RequestHandler = async (req: Request, res: Re
         res.status(200).json(reservationsWithBoat);
     } catch (error) {
         console.error("Error fetching user's reservations:", error);
+        logger.error("Error fetching user's reservations: " + error)
         res.status(500).json({ message: "Error fetching user's reservations", error: error instanceof Error ? error.message : error });
     }
 }
@@ -122,6 +126,7 @@ export const MarkReservationAsCheckedin = async (req: Request, res: Response): P
         await ReservationModel.markReservationAsConfirmed(ReservationId, new Date().toISOString());
         res.status(200).json({ message: "success" });
     } catch (error) {
+        logger.error("Error: " + error)
         res.status(409).json({ error: error });
         return;
     }

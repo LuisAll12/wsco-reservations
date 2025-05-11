@@ -1,4 +1,5 @@
 import UserModel, { State, User, Role } from "@/models/user";
+import logger from "@/services/logger";
 import { sendVerificationEmail } from "@/services/mail";
 import { randomInt } from "crypto";
 import { Request, RequestHandler, Response } from "express";
@@ -27,6 +28,7 @@ export const CreateUser: RequestHandler = async (req: Request, res: Response): P
         const newUser = await UserModel.createUser(user);
         res.status(201).json(newUser);
     } catch (error) {
+        logger.error("Error creating user: " + error)
         res.status(500).json({ message: "Error creating user", error });
     }
 }
@@ -55,12 +57,14 @@ export const AuthenticateUser: RequestHandler = async (req: Request, res: Respon
             await sendVerificationEmail(user.email, user.firstName, code);
         } catch (error) {
             console.error("Error sending email:", error);
+            logger.error("Error sending verification email: " + error)
             res.status(500).json({ message: "Error sending verification email", error });
             return;
         }
         res.status(200).json({ message: "success" });
     } catch (error) {
         console.error("Auth error:", error);
+        logger.error('Error during authetication: ' + error)
         res.status(500).json({ message: "Error during authentication", error });
     }
 };
@@ -94,6 +98,7 @@ export const FinishAuth: RequestHandler = async (req, res) => {
 
         res.status(200).json({ message: "success" });
     } catch (error) {
+        logger.error("Authentication failed: " + error)
         res.status(500).json({ message: "Authentication failed", error });
     }
 };
@@ -116,6 +121,7 @@ export const GetUserSession: RequestHandler = async (req, res) => {
 
         res.status(200).json(user);
     } catch (error) {
+        logger.error('Error fetching user session: ' + error)
         res.status(500).json({ message: "Error fetching user session", error });
     }
 };
@@ -134,6 +140,7 @@ export const LogoutUser: RequestHandler = async (req, res) => {
         res.clearCookie("session_key");
         res.status(200).json({ message: "Logged out successfully" });
     } catch (error) {
+        logger.error('Error logging out: ' + error)
         res.status(500).json({ message: "Error logging out", error });
     }
 };
@@ -143,6 +150,7 @@ export const GetAllUsers: RequestHandler = async (req: Request, res: Response): 
         const users = await UserModel.getAllUsers();
         res.status(200).json(users);
     } catch (error) {
+        logger.error('Error fetching users: ' + error)
         res.status(500).json({ message: "Error fetching users", error });
     }
 };
