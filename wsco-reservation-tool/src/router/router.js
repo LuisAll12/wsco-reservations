@@ -10,7 +10,7 @@ const ReportDamage = () => import(/* webpackChunkName: "ReportDamage" */ '../com
 const ClubBoats = () => import(/* webpackChunkName: "ClubBoats" */ '../components/ClubBoats.vue');
 const MyReservations = () => import(/* webpackChunkName: "MyReservations" */ '../components/MyReservations.vue');
 const BoatDetail = () => import(/* webpackChunkName: "BoatDetail" */ '../components/BoatDetail.vue');
-
+const Calendar = () => import(/* webpackChunkName: "Dashboard" */ '../components/Calendar.vue')
 const AdminDashboard = () => import(/* webpackChunkName: "AdminDashboard" */ '../components/Admin/AdminDashboard.vue');
 
 const routes = [
@@ -26,7 +26,7 @@ const routes = [
         children: [
             {
                 path: '',
-                component: () => import(/* webpackChunkName: "Dashboard" */ '../components/Calendar.vue')
+                component: Calendar
             },
             {
                 path: 'schaden-melden',

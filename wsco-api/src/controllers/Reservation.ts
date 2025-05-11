@@ -87,14 +87,30 @@ export const getUsersReservations: RequestHandler = async (req: Request, res: Re
             return;
         }
 
-        reservations.forEach((reservation) => {
+        // Fetch boot data for each reservation
+        const reservationsWithBoat = await Promise.all(reservations.map(async (reservation) => {
             reservation.startDate = (reservation.startDate as unknown as Timestamp).toDate();
             reservation.endDate = (reservation.endDate as unknown as Timestamp).toDate();
-        })
 
-        res.status(200).json(reservations)
+            let boatData = null;
+            try {
+                const boatSnap = await (reservation.FK_BoatId as DocumentReference).get();
+                if (boatSnap.exists) {
+                    boatData = { id: boatSnap.id, ...boatSnap.data() };
+                }
+            } catch (error) {
+                console.warn(`Fehler beim Laden des Boots für Reservation ${reservation.id}:`, error);
+            }
+
+            return {
+                ...reservation,
+                boat: boatData,
+            };
+        }));
+
+        res.status(200).json(reservationsWithBoat);
     } catch (error) {
         console.error("Error fetching user's reservations:", error);
         res.status(500).json({ message: "Error fetching user's reservations", error: error instanceof Error ? error.message : error });
     }
-}
+};

@@ -13,7 +13,15 @@ const reservations = ref([])
 
 onMounted(async () => {
   reservations.value = [...await getUsersReservaitons()]
+  console.log(reservations.value)
 })
+
+function canBeCheckedIn(reservation) {
+  const now = new Date()
+  const start = new Date(reservation.startDate)
+  const diffInMs = start.getTime() - now.getTime()
+  return diffInMs <= 60 * 60 * 1000 && reservation.status === 'created'
+}
 
 const showModal = ref(false)
 const selectedReservationId = ref(null)
@@ -35,6 +43,12 @@ function closeModal() {
   selectedReservationId.value = null
   showModal.value = false
 }
+const statusTranslation = {
+  created: 'Erstellt',
+  checkedin: 'Eingecheckt',
+  completed: 'Abgeschlossen',
+  cancelled: 'Storniert'
+};
 </script>
 
 <template>
@@ -42,33 +56,44 @@ function closeModal() {
     <h1 class="title">Meine Reservierungen</h1>
     <div class="reservation-list">
       <div class="reservation-card" v-for="reservation in reservations" :key="reservation.id">
-        <h2 class="boat-name">{{ reservation.boatName }}</h2>
+        <div class="card-header">
+          <img :src="reservation.boat.imgUrl || 'https://source.unsplash.com/400x200/?boat'" class="boat-img" />
+          <div class="boat-info">
+            <h2 class="boat-name">{{ reservation.boat.name }}</h2>
+            <p class="boat-type">Typ: {{ reservation.boat.Type }}</p>
+          </div>
+        </div>
 
-        <p>
-          <CalendarIcon class="icon" />
-          <strong>Datum:</strong> {{ new Date(reservation.startDate).toLocaleDateString() }}
-        </p>
-        <p>
-          <ClockIcon class="icon" />
-          <strong>Uhrzeit:</strong> {{ new Date(reservation.startDate).toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-          })
-          }} - {{ new Date(reservation.endDate).toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-          }) }}
-        </p>
-        <p :class="'status ' + reservation.status.toLowerCase()">
-          <TagIcon class="icon" />
-          <strong>Status:</strong> {{ reservation.status }}
-        </p>
-
-        <button class="cancel-button" @click="openConfirmation(reservation.id)"
-          :disabled="reservation.status === 'Storniert'">
-          <XCircleIcon class="icon-button" />
-          Reservierung stornieren
+        <div class="card-body">
+          <p>
+            <CalendarIcon class="icon" />
+            <strong>Datum:</strong> {{ new Date(reservation.startDate).toLocaleDateString() }}
+          </p>
+          <p>
+            <ClockIcon class="icon" />
+            <strong>Uhrzeit:</strong> {{ new Date(reservation.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }} -
+            {{ new Date(reservation.endDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+          </p>
+          <p :class="'status ' + reservation.status.toLowerCase()">
+            <TagIcon class="icon" />
+            <strong>Status:</strong> {{ statusTranslation[reservation.status] || reservation.status }}
+          </p>
+        </div>
+        <div class="card-buttons">
+          <button
+            class="checkin-button"
+            @click="checkIn(reservation.id)"
+            :disabled="!canBeCheckedIn(reservation)">
+            <ClockIcon class="icon-button" />
+            Reservierung entgegennehmen
+          </button>
+          <button class="cancel-button" @click=""
+            :disabled="reservation.status === 'Storniert'">
+            <XCircleIcon class="icon-button" />
+            Reservierung stornieren
         </button>
+        </div>
+          
       </div>
       <div v-if="!reservations">
         Sie haben noch keine Reservierungen.
@@ -90,6 +115,7 @@ function closeModal() {
 </template>
 
 <style scoped>
+
 .container {
   max-width: 800px;
   margin: 0 auto;
@@ -104,6 +130,39 @@ function closeModal() {
   text-align: center;
   font-size: 2em;
   margin-bottom: 30px;
+}
+
+.card-buttons {
+  display: flex;
+  justify-content: space-between;
+}
+.checkin-button {
+  margin-top: 12px;
+  padding: 10px 20px;
+  background-color: #10b981; /* Grün */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 15px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+}
+
+.checkin-button:hover:not(:disabled) {
+  background-color: #059669;
+  transform: translateY(-1px);
+}
+
+.checkin-button:disabled {
+  background-color: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 .reservation-list {
