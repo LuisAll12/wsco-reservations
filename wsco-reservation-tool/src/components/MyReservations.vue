@@ -8,12 +8,12 @@ import {
   ExclamationTriangleIcon
 } from '@heroicons/vue/24/outline'
 import { getUsersReservaitons } from '../services/GetUserRes'
+import checkBoatAvailability from '../services/CheckBoatAvailability'
 
 const reservations = ref([])
 
 onMounted(async () => {
   reservations.value = [...await getUsersReservaitons()]
-  console.log(reservations.value)
 })
 
 function canBeCheckedIn(reservation) {
@@ -23,12 +23,13 @@ function canBeCheckedIn(reservation) {
   return diffInMs <= 60 * 60 * 1000 && reservation.status === 'created'
 }
 
-const showModal = ref(false)
+const cancelshowModal = ref(false)
+const checkinshowModal = ref(false)
 const selectedReservationId = ref(null)
 
 function openConfirmation(id) {
   selectedReservationId.value = id
-  showModal.value = true
+  cancelshowModal.value = true
 }
 
 function confirmCancel() {
@@ -41,7 +42,7 @@ function confirmCancel() {
 
 function closeModal() {
   selectedReservationId.value = null
-  showModal.value = false
+  cancelshowModal.value = false
 }
 const statusTranslation = {
   created: 'Erstellt',
@@ -49,6 +50,12 @@ const statusTranslation = {
   completed: 'Abgeschlossen',
   cancelled: 'Storniert'
 };
+
+function checkIn(id) {
+  const reservation = reservations.value.find(r => r.id === id)
+  checkinshowModal.value = true
+
+}
 </script>
 
 <template>
@@ -87,7 +94,7 @@ const statusTranslation = {
             <ClockIcon class="icon-button" />
             Reservierung entgegennehmen
           </button>
-          <button class="cancel-button" @click=""
+          <button class="cancel-button" @click="openConfirmation(reservation.id)"
             :disabled="reservation.status === 'Storniert'">
             <XCircleIcon class="icon-button" />
             Reservierung stornieren
@@ -101,13 +108,22 @@ const statusTranslation = {
     </div>
 
     <!-- Modal -->
-    <div v-if="showModal" class="modal-overlay">
+    <div v-if="cancelshowModal" class="modal-overlay">
       <div class="modal">
         <ExclamationTriangleIcon class="modal-icon" />
         <p>Möchtest du diese Reservierung wirklich stornieren?</p>
         <div class="modal-actions">
           <button class="confirm-btn" @click="confirmCancel">Ja, stornieren</button>
           <button class="cancel-btn" @click="closeModal">Abbrechen</button>
+        </div>
+      </div>
+    </div>
+    <div v-if="checkinshowModal" class="modal-overlay">
+      <div class="checkin-modal">
+        <div class="header">
+          <XCircleIcon class="top-cancel-icon" @click="checkinshowModal = false"/>
+          <br>
+          <h3>Reservation entgegennehmen</h3>
         </div>
       </div>
     </div>
@@ -157,7 +173,15 @@ const statusTranslation = {
   background-color: #059669;
   transform: translateY(-1px);
 }
-
+.top-cancel-icon{
+  width: 25px;
+  height: 25px;
+  color: #e53935;
+  cursor: pointer;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
 .checkin-button:disabled {
   background-color: #e5e7eb;
   color: #9ca3af;
@@ -258,6 +282,16 @@ const statusTranslation = {
   text-align: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   width: 300px;
+  position: relative;
+}
+.checkin-modal {
+  background: white;
+  padding: 24px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 40%;
+  position: relative;
 }
 
 .modal-icon {

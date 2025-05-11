@@ -155,31 +155,46 @@ const EnterVerifyCode = async () => {
 
 <style scoped>
 .LoginContainer {
-  margin-top: 10%;
+  background-image: url('/background.jpg'); /* Pfad zum Bild */
+  background-size: cover;                   /* Bild skaliert auf gesamten Bereich */
+  background-position: center;              /* Bild zentrieren */
+  background-repeat: no-repeat;             /* Kein Wiederholen */
+  backdrop-filter: blur(2px);               /* Optional: leichter Blur */
+  height: 100vh;
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100%;
-  width: 100%;
 }
 
 .Login {
   width: 20%;
   padding: 30px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .Login h1 {
-  color: var(--text);
+  color: #ffffff;
   text-align: center;
 }
 
 form {
-  justify-self: center;
-  background-color: var(--primary);
-  border-radius: 24px;
-  padding: 25%;
-  box-shadow: 0px 12px 19px 0px rgba(0, 0, 0, 0.75);
+background: rgba(255, 255, 255, 0.22);
+border-radius: 16px;
+box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+backdrop-filter: blur(2.6px);
+-webkit-backdrop-filter: blur(2.6px);
+border: 1px solid rgba(255, 255, 255, 0.39);
+padding: 25%;
+min-width: 400px;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
 }
 
 .SubmitButton {
@@ -218,7 +233,7 @@ form {
 label.floated {
   top: -20px;
   font-size: 14px;
-  color: #22209b;
+  color: #cecdcd;
 }
 
 @keyframes spinner-fade9234 {
@@ -304,7 +319,7 @@ label.floated {
   display: block;
   width: 200px;
   border: none;
-  border-bottom: 1px solid #515151;
+  border-bottom: 1px solid #ffffff;
   background: transparent;
 }
 
@@ -313,7 +328,7 @@ label.floated {
 }
 
 label {
-  color: #999;
+  color: #ffffff;
   font-size: 18px;
   font-weight: normal;
   position: absolute;
@@ -327,7 +342,7 @@ label {
 .input:valid~label {
   top: -20px;
   font-size: 14px;
-  color: #22209b;
+  color: #cecdcd;
 }
 
 .bar {
@@ -343,7 +358,7 @@ label {
   width: 0;
   bottom: 1px;
   position: absolute;
-  background: #22209b;
+  background: #cecdcd;
   transition: 0.2s ease all;
 }
 
@@ -376,7 +391,7 @@ label {
 
 @keyframes inputHighlighter {
   from {
-    background: #22209b;
+    background: #cecdcd;
   }
 
   to {
