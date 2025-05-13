@@ -1,9 +1,8 @@
-import BoatModel, { Boat, BoatStatus } from "@/models/Boat";
-import { uploadFile } from "@/services/S3";
-import ReservationModel, { Reservation } from "@/models/Reservation";
+import BoatModel, { Boat, BoatStatus } from "../models/Boat";
+import { uploadFile } from "../services/S3";
+import ReservationModel, { Reservation } from "../models/Reservation";
 import { Request, Response, RequestHandler } from 'express';
 import { Timestamp } from "firebase-admin/firestore";
-import logger from "@/services/logger";
 
 export const getAllBoats: RequestHandler = async (req, res) => {
     try {
@@ -11,7 +10,6 @@ export const getAllBoats: RequestHandler = async (req, res) => {
         res.status(200).json(boats);
     } catch (error) {
         console.error("Error fetching boats:", error);
-        logger.error("Error fetching boats: " + error)
         res.status(500).json({ error: "Error fetching boats" });
     }
 };
@@ -63,7 +61,6 @@ export const createBoat: RequestHandler = async (req, res) => {
         res.status(201).json(createdBoat);
     } catch (error) {
         console.error("Error creating boat:", error);
-        logger.error("Error creating boat: " + error)
         res.status(500).json({ error: "Error creating boat" });
     }
 };
@@ -88,7 +85,6 @@ export const deleteBoat = async (req: Request, res: Response): Promise<void> => 
         res.status(200).json({ message: 'Boot erfolgreich gelöscht' });
     } catch (error) {
         console.error('Fehler beim Löschen des Bootes:', error);
-        logger.error('Fehler beim Löschen des Bootes: ' + error)
         res.status(500).json({ error: 'Interner Serverfehler' });
     }
 };

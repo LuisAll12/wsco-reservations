@@ -1,4 +1,4 @@
-import UserModel, { Role, User } from "@/models/user";
+import UserModel, { Role, User } from "../models/user";
 import { NextFunction, Request, Response } from "express";
 
 export async function BootManagerMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {

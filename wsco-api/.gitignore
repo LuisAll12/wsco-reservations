@@ -34,3 +34,4 @@ credentials/
 *.tsbuildinfo
 
 .vercel/
+.vercel

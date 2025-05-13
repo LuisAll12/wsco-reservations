@@ -1,4 +1,4 @@
-import UserModel, { User } from "@/models/user";
+import UserModel, { User } from "../models/user";
 import { NextFunction, Request, Response } from "express";
 
 export async function memberMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {

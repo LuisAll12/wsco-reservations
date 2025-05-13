@@ -1,7 +1,7 @@
 import * as admin from 'firebase-admin';
 import { Reservation } from './Reservation';
 import { User } from './user';
-import { db } from '@/config/db';
+import { db } from '../config/db';
 
 export enum DamageStatus {
     IN_PROGRESS = 'inProgress',
