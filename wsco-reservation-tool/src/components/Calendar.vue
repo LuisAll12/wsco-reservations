@@ -49,18 +49,28 @@ const weekDays = computed(() => {
 
 const currentWeek = ref(startOfWeek(new Date(), { weekStartsOn: 1 }))
 
-function prevWeek() {
+ async function prevWeek() {
   const newDate = new Date(currentDate.value)
   newDate.setDate(newDate.getDate() - 7)
   currentDate.value = newDate
   currentWeek.value = startOfWeek(newDate, { weekStartsOn: 1 })
+  const start = currentWeek.value;
+  const end = addDays(currentWeek.value, 7);
+  reservations.value = []
+  reservations.value = [...await getReservations(start.toISOString(), end.toISOString())];
+  console.log("Reservierungen:", reservations.value);
 }
 
-function nextWeek() {
+async function nextWeek() {
   const newDate = new Date(currentDate.value)
   newDate.setDate(newDate.getDate() + 7)
   currentDate.value = newDate
   currentWeek.value = startOfWeek(newDate, { weekStartsOn: 1 })
+  const start = currentWeek.value;
+  const end = addDays(currentWeek.value, 7);
+  reservations.value = []
+  reservations.value = [...await getReservations(start.toISOString(), end.toISOString())];
+  console.log("Reservierungen:", reservations.value);
 }
 
 onMounted(async () => {
@@ -75,6 +85,7 @@ onMounted(async () => {
 
     const start = currentWeek.value;
     const end = addDays(currentWeek.value, 7);
+    reservations.value = []
     reservations.value = [...await getReservations(start.toISOString(), end.toISOString())];
     console.log("Reservierungen:", reservations.value);
 
