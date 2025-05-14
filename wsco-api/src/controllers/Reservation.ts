@@ -7,7 +7,7 @@ import { Request, Response, RequestHandler } from 'express';
 
 export const createReservation: RequestHandler = async (req: Request, res: Response): Promise<void> => {
     const { startDate, endDate, FK_BoatId } = req.body;
-    const sessionKey = req.cookies.session_key;
+    const sessionKey = req.cookies.auth_token;
 
     const user = await UserModel.getUserBySessionKey(sessionKey) as User;
     const FK_UserId = user.id;
@@ -70,7 +70,7 @@ export const getAllReservations: RequestHandler = async (req: Request, res: Resp
 }
 
 export const getUsersReservations: RequestHandler = async (req: Request, res: Response): Promise<void> => {
-    const sessionKey = req.cookies.session_key;
+    const sessionKey = req.cookies.auth_token;
 
     const user = await UserModel.getUserBySessionKey(sessionKey) as User;
 

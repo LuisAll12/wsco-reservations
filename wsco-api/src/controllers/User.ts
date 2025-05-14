@@ -85,10 +85,10 @@ export const FinishAuth: RequestHandler = async (req, res) => {
         await UserModel.generateSessionKey(user.id);
         const sessionKey = await UserModel.getSessionKey(user.id);
 
-        res.cookie("session_key", sessionKey, {
+        res.cookie("auth_token", sessionKey, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
+            sameSite: "none",
             maxAge: 24 * 60 * 60 * 1000,
         });
 
@@ -99,7 +99,7 @@ export const FinishAuth: RequestHandler = async (req, res) => {
 };
 
 export const GetUserSession: RequestHandler = async (req, res) => {
-    const sessionKey = req.cookies.session_key;
+    const sessionKey = req.cookies.auth_token;
 
     if (!sessionKey) {
         res.status(401).json({ message: "Unauthorized" });
@@ -121,7 +121,7 @@ export const GetUserSession: RequestHandler = async (req, res) => {
 };
 
 export const LogoutUser: RequestHandler = async (req, res) => {
-    const sessionKey = req.cookies.session_key;
+    const sessionKey = req.cookies.auth_token;
 
     if (!sessionKey) {
         res.status(401).json({ message: "Unauthorized" });
