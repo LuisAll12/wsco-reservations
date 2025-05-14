@@ -11,7 +11,7 @@ import { ref, onMounted } from 'vue';
 const count = ref(0);
 
 onMounted(async () => {
-  const res = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat`);
+  const res = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat`, { credentials: "include" });
   const boats = await res.json();
   count.value = boats.length;
 });

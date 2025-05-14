@@ -88,9 +88,9 @@ export const FinishAuth: RequestHandler = async (req, res) => {
         res.cookie("auth_token", sessionKey, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: "none",
-            maxAge: 24 * 60 * 60 * 1000,
+            sameSite: "none"
         });
+
 
         res.status(200).json({ message: "success" });
     } catch (error) {
@@ -146,3 +146,24 @@ export const GetAllUsers: RequestHandler = async (req: Request, res: Response): 
         res.status(500).json({ message: "Error fetching users", error });
     }
 };
+
+export const RoleChange: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { id } = req.params as { id: string };
+        const { role } = req.query as { role: Role };
+
+        if (!id || !role) {
+            res.status(400).json({ error: "ID und neue Rolle sind erforderlich." });
+            return;
+        }
+
+        await UserModel.updateUser(id, { Role: role });
+
+        res.status(200).json({ message: "success" });
+        return;
+    } catch (e) {
+        console.error(e)
+        res.status(403).json({ error: e });
+        return;
+    }
+}

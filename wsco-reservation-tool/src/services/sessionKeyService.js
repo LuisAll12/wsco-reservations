@@ -3,7 +3,7 @@ import Cookies from "js-cookie";
 import { sha256 } from 'js-sha256';
 
 const baseId = "appzBNlFfIJC6865x";
-const tableName = "tblalxalwt9C0cFxl"; // Your Members/Users table
+const tableName = "tblalxalwt9C0cFxl";
 
 const hashData = (data) => sha256(data);
 

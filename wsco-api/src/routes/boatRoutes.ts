@@ -6,7 +6,7 @@ import Router from "express";
 
 const router = Router();
 
-router.delete("/:id", deleteBoat)
+router.delete("/:id", memberMiddleware, deleteBoat)
 router.get("/", memberMiddleware, getAllBoats);
 router.post("/", BootManagerMiddleware, upload.single("image"), createBoat);
 router.get('/isOccupied', memberMiddleware, isBoatOccupied);

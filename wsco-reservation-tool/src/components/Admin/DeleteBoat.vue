@@ -1,5 +1,6 @@
 <script setup>
-import {ref, onMounted} from 'vue';
+import { Trash } from 'lucide-vue-next';
+import { ref, onMounted } from 'vue';
 
 const boats = ref([]);
 const selectedBoat = ref(null);
@@ -7,32 +8,33 @@ const message = ref('');
 
 //fetch boats from backend
 onMounted(async () => {
-  const res = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat`);
+  const res = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat`, { credentials: "include" });
   boats.value = await res.json();
 });
 
-async function deleteBoat(){
-    if (!selectedBoat.value) return;
-    // get the boat id from the selectedBoat
-    const boatId = boats.value.find(boat => boat.id === selectedBoat.value).id;
-    console.log('Boat ID:', boatId);
-    try {
-        const res = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat/${boatId}`, {
-            method: 'DELETE',
-        });
-        console.log('Response:', res);
+async function deleteBoat() {
+  if (!selectedBoat.value) return;
+  // get the boat id from the selectedBoat
+  const boatId = boats.value.find(boat => boat.id === selectedBoat.value).id;
+  console.log('Boat ID:', boatId);
+  try {
+    const res = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat/${boatId}`, {
+      method: 'DELETE',
+      credentials: "include"
+    });
+    console.log('Response:', res);
     if (res.ok) {
-        message.value = 'Boot erfolgreich gelöscht!';
-        boats.value = boats.value.filter(boat => boat.id !== selectedBoat.value);
-        selectedBoat.value = null;
+      message.value = 'Boot erfolgreich gelöscht!';
+      boats.value = boats.value.filter(boat => boat.id !== selectedBoat.value);
+      selectedBoat.value = null;
     } else {
-        message.value = 'Fehler beim Löschen des Bootes!';
+      message.value = 'Fehler beim Löschen des Bootes!';
     }
-        
-    } catch (error) {
-        console.error('Fehler beim Löschen des Bootes:', error);
-        message.value = 'Fehler beim Löschen des Bootes!';
-    }
+
+  } catch (error) {
+    console.error('Fehler beim Löschen des Bootes:', error);
+    message.value = 'Fehler beim Löschen des Bootes!';
+  }
 }
 </script>
 
@@ -45,6 +47,7 @@ async function deleteBoat(){
       <label for="boat-select">Boot auswählen</label>
       <select id="boat-select" v-model="selectedBoat" @change="onBoatSelect">
         <option disabled value="">-- Bitte Boot wählen --</option>
+        <option value="">Kein Boot</option>
         <option v-for="boat in boats" :key="boat.id" :value="boat.id">
           {{ boat.name }}
         </option>
@@ -52,7 +55,8 @@ async function deleteBoat(){
     </div>
 
     <button class="btn danger" @click="deleteBoat" :disabled="!selectedBoat">
-      🚨 Boot löschen
+      <Trash style="width: 1rem; height: 1rem; transform: translateY(2px);" />
+      Boot löschen
     </button>
 
     <p v-if="message" class="feedback-message">{{ message }}</p>
@@ -60,8 +64,6 @@ async function deleteBoat(){
 </template>
 
 <style scoped>
-
-
 .title {
   font-size: 24px;
   margin-bottom: 0.5rem;

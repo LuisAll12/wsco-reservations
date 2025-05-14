@@ -11,7 +11,7 @@ export enum State {
 export enum Role {
     Admin = "admin",
     Member = "member",
-    Bootmanager = "Bootmanager",
+    Bootmanager = "bootmanager",
     Cashier = "cashier",
 }
 
