@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, nextTick } from "vue";
 import { useRouter } from "vue-router";
 import { setSessionKey } from '../services/sessionKeyService.js';
 
@@ -13,6 +13,7 @@ const VerifyTry = ref(3);
 const inputcode = ref();
 const isLoading = ref(false);
 const isSending = ref(false);
+const load = ref(false);  
 
 
 const Login = async () => {
@@ -56,10 +57,27 @@ const Login = async () => {
   }
 };
 
-const EnterVerifyCode = async () => {
-  if (!inputcode.value || VerifyTry.value <= 0) return;
+const code = ref(["", "", "", "", "", ""]);
+const inputs = ref(null)
 
-  const enteredCode = inputcode.value.toString().trim();
+function handleInput(index) {
+   if (code.value[index].length === 1 && index < 5) {
+      nextTick(() => inputs.value[index + 1]?.focus()); // Move to next input
+   }
+}
+
+// Handle delete (backspace)
+function handleDelete(index) {
+   if (index > 0 && !code.value[index]) {
+      nextTick(() => inputs.value[index - 1]?.focus()); // Move back
+  }
+}
+
+
+const EnterVerifyCode = async () => {
+  if (!inputs.value || VerifyTry.value <= 0) return;
+
+  const enteredCode = code.value.join("");
 
   try {
     const res = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/auth/finish`, {
@@ -126,29 +144,39 @@ const EnterVerifyCode = async () => {
         <p v-if="successMessage" style="color: green;">{{ successMessage }}</p>
       </form>
 
-      <!-- Verifizierungsformular -->
-      <form @submit.prevent="EnterVerifyCode" v-if="VerifyCodeSent">
-        <h2>Verifizierungscode eingeben</h2>
-        <p>Wir haben einen Code an {{ LoginEmail }} gesendet</p>
-        <br>
-        <div class="Field group">
-          <input class="input" id="code" v-model="inputcode" placeholder="" type="number" required
-            :disabled="VerifyTry <= 0" />
-          <span class="highlight"></span>
-          <span class="bar"></span>
-          <label>6-stelliger Code</label>
-        </div>
-        <br />
-        <button class="SubmitButton" type="submit" :disabled="VerifyTry <= 0">
-          {{ VerifyTry > 0 ? 'Bestätigen' : 'Keine Versuche übrig' }}
-        </button>
-        <p v-if="errorMessage" style="color: red;">{{ errorMessage }}</p>
-        <p v-if="successMessage" style="color: green;">{{ successMessage }}</p>
+      
+      <form @submit.prevent="EnterVerifyCode" v-else>
+        <!-- Verifizierungsformular -->
+    <h1 class="verification-title">Enter Verification Code</h1>
+    <p class="verification-description">
+      We have sent a verification code to your email. Please check your
+      <strong>inbox</strong> and <strong>spam</strong> folder.
+    </p>
+    <div class="code-input-wrapper">
+      <input
+        v-for="(digit, index) in code"
+        :key="index"
+        ref="inputs"
+        type="text"
+        maxlength="1"
+        pattern="[0-9]*"
+        inputmode="numeric"
+        v-model="code[index]"
+        class="code-input"
+        @input="handleInput(index)"
+        @keydown.delete="handleDelete(index)"
+      />
+    </div>
+    <button class="verify-button" type="submit">
+      <span v-if="!load">Verifizieren</span>
+      <span v-else class="loading-wrapper">
+        <div v-if="load" class="inline-spinner">
+            <div v-for="i in 12" :key="i" class="spinner-blade"></div>
+        </div> Warten...
+      </span>
+    </button>
+  </form>
 
-        <p v-if="VerifyTry <= 0" style="margin-top: 20px;">
-          <a href="#" @click.prevent="VerifyCodeSent = false">Neuen Code anfordern</a>
-        </p>
-      </form>
     </div>
   </div>
 </template>
@@ -460,4 +488,75 @@ button:hover .arrow {
 button:hover .arrow:before {
   right: 0;
 }
+
+.verification-title {
+  font-size: 1.875rem; /* text-3xl */
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #fff;
+}
+
+.verification-description {
+  text-align: center;
+  color: #fff; /* text-gray-600 */
+  margin-bottom: 1.5rem;
+}
+
+.code-input-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.code-input {
+  width: 3rem;   /* w-12 */
+  height: 3rem;  /* h-12 */
+  font-size: 1.5rem; /* text-2xl */
+  text-align: center;
+  border: 2px solid #d1d5db; /* border-gray-300 */
+  border-radius: 0.375rem; /* rounded */
+  background-color: #f3f4f6; /* bg-gray-100 */
+  outline: none;
+}
+
+.code-input:focus {
+  border-color: #e8e6e6; /* focus:border-[#77aca2] */
+}
+
+.verify-button {
+  background-color: #fff;
+  color: #002152;
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  width: 100%;
+  border: none;
+  border-radius: 0.375rem; /* rounded */
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.3s;
+}
+
+.verify-button:hover {
+  background-color: #e8e6e6;
+}
+
+.loading-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.loader {
+  animation: spin 1s linear infinite;
+}
+
+/* Spinner animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 </style>
