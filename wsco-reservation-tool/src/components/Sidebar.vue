@@ -4,7 +4,7 @@ import { HomeIcon, ExclamationTriangleIcon, LifebuoyIcon, Cog6ToothIcon, UserCir
 import { ref } from 'vue'
 import { authCheck, logoutUser } from '../services/auth';
 import router from '../router/router';
-const isAdmin = ref(false);
+const isAdmin = ref(router.hasRoute('admin'));
 
 
 const isLoggedin = async () => { return await authCheck(); }
@@ -60,7 +60,7 @@ async function logout() {
           </router-link>
         </div>
 
-        <div class="action-item" v-if="!isAdmin">
+        <div class="action-item" v-if="isAdmin">
           <router-link to="/dashboard/admin" class="router-link">
             <WrenchScrewdriverIcon class="icon" /> Admin Dashboard
           </router-link>
@@ -68,12 +68,12 @@ async function logout() {
 
         <br>
 
-        <div class="action-item" v-if="!isAdmin">
+        <div class="action-item">
           <router-link to="/dashboard/hilfe" class="router-link">
             <QuestionMarkCircleIcon class="icon" /> Hilfe
           </router-link>
         </div>
-        <div class="action-item" v-if="!isAdmin">
+        <div class="action-item">
           <router-link to="/dashboard/settings" class="router-link">
             <Cog6ToothIcon class="icon" /> Einstellungen
           </router-link>

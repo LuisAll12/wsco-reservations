@@ -45,3 +45,17 @@ export async function logoutUser() {
         return false;
     }
 }
+
+export async function getUserRole() {
+    try {
+
+        const res = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/auth/role`, {
+            credentials: "include",
+        });
+
+        const data = await res.json();
+        return data.role;
+    } catch (e) {
+        console.error(e);
+    }
+}

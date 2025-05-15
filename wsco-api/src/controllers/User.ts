@@ -167,3 +167,20 @@ export const RoleChange: RequestHandler = async (req: Request, res: Response): P
         return;
     }
 }
+
+export const GetRole: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const session = req.cookies.auth_token;
+
+        const user = await UserModel.getUserBySessionKey(session);
+
+        res.status(200).json({ message: "success", role: user.Role });
+        return;
+
+    } catch (e: unknown) {
+        e as Error;
+        console.error(e);
+        res.status(402).json({ message: "error", error: e });
+        return;
+    }
+}

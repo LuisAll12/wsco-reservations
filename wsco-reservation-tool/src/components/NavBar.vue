@@ -1,11 +1,12 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { authCheck, logoutUser } from '../services/auth';
-import router from '../router/router';
+import { useRouter } from 'vue-router';
 
 const isAdmin = ref(false);
 const isLoggedin = async () => { return await authCheck(); }
 const isBurgerActive = ref(false);
+const router = useRouter();
 
 const closeDropdown = (e) => {
     if (!e.target.closest('.Burger')) {
@@ -97,21 +98,7 @@ async function logout() {
 @import '../assets/css/global.css';
 @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-p,
-a,
-span,
-div,
-li,
-ul,
-ol,
-input,
-button {
+* {
     font-family: "Roboto", serif;
     font-optical-sizing: auto;
     font-weight: 600;
