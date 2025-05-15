@@ -203,7 +203,7 @@ justify-content: center;
   background-color: var(--secondary);
   border-style: none;
   border-radius: 30px;
-  color: var(--text);
+  color: #fff;
   font-size: large;
 }
 
@@ -321,6 +321,7 @@ label.floated {
   border: none;
   border-bottom: 1px solid #ffffff;
   background: transparent;
+  color: #fff;
 }
 
 .input:focus {
