@@ -1,13 +1,13 @@
 import ReservationModel, { Reservation, PaymentStatus, status } from '../models/Reservation';
-import { db } from '@/config/db';
-import BoatModel, { Boat } from '@/models/Boat';
-import UserModel, { User } from '@/models/user';
+import { db } from '../config/db';
+import BoatModel, { Boat } from '../models/Boat';
+import UserModel, { User } from '../models/user';
 import { DocumentReference, Timestamp } from 'firebase-admin/firestore';
 import { Request, Response, RequestHandler } from 'express';
 
 export const createReservation: RequestHandler = async (req: Request, res: Response): Promise<void> => {
     const { startDate, endDate, FK_BoatId } = req.body;
-    const sessionKey = req.cookies.session_key;
+    const sessionKey = req.cookies.auth_token;
 
     const user = await UserModel.getUserBySessionKey(sessionKey) as User;
     const FK_UserId = user.id;
@@ -70,7 +70,7 @@ export const getAllReservations: RequestHandler = async (req: Request, res: Resp
 }
 
 export const getUsersReservations: RequestHandler = async (req: Request, res: Response): Promise<void> => {
-    const sessionKey = req.cookies.session_key;
+    const sessionKey = req.cookies.auth_token;
 
     const user = await UserModel.getUserBySessionKey(sessionKey) as User;
 
@@ -99,7 +99,7 @@ export const getUsersReservations: RequestHandler = async (req: Request, res: Re
                     boatData = { id: boatSnap.id, ...boatSnap.data() };
                 }
             } catch (error) {
-                console.warn(`Fehler beim Laden des Boots für Reservation ${reservation.id}:`, error);
+                console.error(`Fehler beim Laden des Boots für Reservation ${reservation.id}:`, error);
             }
 
             return {

@@ -3,7 +3,7 @@ import Cookies from "js-cookie";
 import { sha256 } from 'js-sha256';
 
 const baseId = "appzBNlFfIJC6865x";
-const tableName = "tblalxalwt9C0cFxl"; // Your Members/Users table
+const tableName = "tblalxalwt9C0cFxl";
 
 const hashData = (data) => sha256(data);
 
@@ -11,12 +11,12 @@ export const setSessionKey = async (userEmail) => {
   console.log('Raw email input:', userEmail);
   console.log('Type of email:', typeof userEmail);
   const sessionKey = Math.random().toString(36).substring(2, 15) +
-                    Math.random().toString(36).substring(2, 15);
+    Math.random().toString(36).substring(2, 15);
   const hashedSessionKey = hashData(sessionKey);
 
   // Set cookie
-  Cookies.set("sessionKey", hashedSessionKey, { 
-    expires: 1, 
+  Cookies.set("SSessionKey", hashedSessionKey, {
+    expires: 1,
     secure: true,
     sameSite: 'strict'
   });
@@ -48,7 +48,7 @@ export const setSessionKey = async (userEmail) => {
 
     // Update session key
     await axios.patch(`${url}/${userRecord.id}`, {
-      fields: { 
+      fields: {
         SessionKey: hashedSessionKey,
         State: "Active" // Optional: Update user state
       }
@@ -81,7 +81,7 @@ export const checkSessionKey = async () => {
     });
 
     const isValid = response.data.records.length > 0;
-    
+
     // Optional: Check if user is still active
     if (isValid && response.data.records[0].fields.State !== "Active") {
       console.warn("User account is not active");

@@ -1,5 +1,5 @@
-import UserModel, { State, User, Role } from "@/models/user";
-import { sendVerificationEmail } from "@/services/mail";
+import UserModel, { State, User, Role } from "../models/user";
+import { sendVerificationEmail } from "../services/mail";
 import { randomInt } from "crypto";
 import { Request, RequestHandler, Response } from "express";
 
@@ -85,12 +85,12 @@ export const FinishAuth: RequestHandler = async (req, res) => {
         await UserModel.generateSessionKey(user.id);
         const sessionKey = await UserModel.getSessionKey(user.id);
 
-        res.cookie("session_key", sessionKey, {
+        res.cookie("auth_token", sessionKey, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            maxAge: 24 * 60 * 60 * 1000,
+            sameSite: "none"
         });
+
 
         res.status(200).json({ message: "success" });
     } catch (error) {
@@ -99,7 +99,7 @@ export const FinishAuth: RequestHandler = async (req, res) => {
 };
 
 export const GetUserSession: RequestHandler = async (req, res) => {
-    const sessionKey = req.cookies.session_key;
+    const sessionKey = req.cookies.auth_token;
 
     if (!sessionKey) {
         res.status(401).json({ message: "Unauthorized" });
@@ -121,7 +121,7 @@ export const GetUserSession: RequestHandler = async (req, res) => {
 };
 
 export const LogoutUser: RequestHandler = async (req, res) => {
-    const sessionKey = req.cookies.session_key;
+    const sessionKey = req.cookies.auth_token;
 
     if (!sessionKey) {
         res.status(401).json({ message: "Unauthorized" });
@@ -146,3 +146,24 @@ export const GetAllUsers: RequestHandler = async (req: Request, res: Response): 
         res.status(500).json({ message: "Error fetching users", error });
     }
 };
+
+export const RoleChange: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { id } = req.params as { id: string };
+        const { role } = req.query as { role: Role };
+
+        if (!id || !role) {
+            res.status(400).json({ error: "ID und neue Rolle sind erforderlich." });
+            return;
+        }
+
+        await UserModel.updateUser(id, { Role: role });
+
+        res.status(200).json({ message: "success" });
+        return;
+    } catch (e) {
+        console.error(e)
+        res.status(403).json({ error: e });
+        return;
+    }
+}

@@ -1,6 +1,6 @@
-import BoatModel, { Boat, BoatStatus } from "@/models/Boat";
-import { uploadFile } from "@/services/S3";
-import ReservationModel, { Reservation } from "@/models/Reservation";
+import BoatModel, { Boat, BoatStatus } from "../models/Boat";
+import { uploadFile } from "../services/S3";
+import ReservationModel, { Reservation } from "../models/Reservation";
 import { Request, Response, RequestHandler } from 'express';
 import { Timestamp } from "firebase-admin/firestore";
 
@@ -28,12 +28,12 @@ export const createBoat: RequestHandler = async (req, res) => {
         } = req.body;
 
         let imageUrl: string = "";
-        
-        if (req.file) {
+
+        if ((req as any).file) {
             imageUrl = await uploadFile(
-                req.file.buffer, 
-                req.file.originalname, 
-                req.file.mimetype
+                (req as any).file.buffer,
+                (req as any).file.originalname,
+                (req as any).file.mimetype
             );
         }
 
@@ -49,7 +49,7 @@ export const createBoat: RequestHandler = async (req, res) => {
             FK_ReservationId: []
         };
 
-            // Entferne alle undefined-Werte (z. B. pdfUrl)
+        // Entferne alle undefined-Werte (z. B. pdfUrl)
         Object.keys(newBoat).forEach(key => {
             if (newBoat[key as keyof typeof newBoat] === undefined) {
                 delete newBoat[key as keyof typeof newBoat];
@@ -75,18 +75,18 @@ export const getBoatById = async (req: Request, res: Response): Promise<void> =>
 
 
 export const deleteBoat = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const boatId = req.params.id;
-    const deleted = await BoatModel.deleteBoat(boatId);
-    if (!deleted) {
-      res.status(404).json({ error: 'Boot nicht gefunden' });
-      return;
+    try {
+        const boatId = req.params.id;
+        const deleted = await BoatModel.deleteBoat(boatId);
+        if (!deleted) {
+            res.status(404).json({ error: 'Boot nicht gefunden' });
+            return;
+        }
+        res.status(200).json({ message: 'Boot erfolgreich gelöscht' });
+    } catch (error) {
+        console.error('Fehler beim Löschen des Bootes:', error);
+        res.status(500).json({ error: 'Interner Serverfehler' });
     }
-    res.status(200).json({ message: 'Boot erfolgreich gelöscht' });
-  } catch (error) {
-    console.error('Fehler beim Löschen des Bootes:', error);
-    res.status(500).json({ error: 'Interner Serverfehler' });
-  }
 };
 export const isBoatOccupied = async (req: Request, res: Response): Promise<void> => {
     const { boatId, startCheckTime, endCheckTime } = req.query as {

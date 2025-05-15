@@ -1,5 +1,5 @@
-import { createReservation, getAllReservations, getUsersReservations, MarkReservationAsCheckedin } from "@/controllers/Reservation";
-import { memberMiddleware } from "@/middleware/Member";
+import { createReservation, getAllReservations, getUsersReservations, MarkReservationAsCheckedin } from "../controllers/Reservation";
+import { memberMiddleware } from "../middleware/Member";
 import { Router } from "express";
 
 const router = Router();

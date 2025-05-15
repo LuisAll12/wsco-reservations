@@ -1,5 +1,5 @@
 import * as admin from 'firebase-admin';
-import { db } from '@/config/db';
+import { db } from '../config/db';
 import { Boat } from './Boat';
 import { User } from './user';
 import { Damage } from './Damage';

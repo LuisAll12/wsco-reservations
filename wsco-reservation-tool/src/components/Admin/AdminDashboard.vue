@@ -1,12 +1,13 @@
 <template>
-    <h1>Admin Panel</h1>
-    <div class="box">
-      <BoatStatsWidget />
-      <BoatCreateDialog />
-      <DeleteBoat />
-      <DamageReportsWidget />
-      <UpcomingReservationsWidget />
-    </div>
+  <h1>Admin Panel</h1>
+  <div class="box">
+    <BoatStatsWidget />
+    <BoatCreateDialog />
+    <DeleteBoat />
+    <DamageReportsWidget />
+    <UpcomingReservationsWidget />
+    <UserListWidget />
+  </div>
 </template>
 
 <script setup>
@@ -15,6 +16,7 @@ import DeleteBoat from './DeleteBoat.vue';
 import DamageReportsWidget from './DamageReportsWidget.vue';
 import BoatStatsWidget from './BoatStatsWidget.vue';
 import UpcomingReservationsWidget from './UpcomingReservationsWidget.vue';
+import UserListWidget from './UserListWidget.vue';
 
 
 </script>

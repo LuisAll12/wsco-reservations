@@ -1,5 +1,5 @@
 import * as admin from 'firebase-admin';
-import { db } from '@/config/db';
+import { db } from '../config/db';
 import Crypto from 'crypto';
 
 export enum State {
@@ -11,7 +11,7 @@ export enum State {
 export enum Role {
     Admin = "admin",
     Member = "member",
-    Bootmanager = "Bootmanager",
+    Bootmanager = "bootmanager",
     Cashier = "cashier",
 }
 
