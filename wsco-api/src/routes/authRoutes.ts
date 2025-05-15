@@ -1,4 +1,4 @@
-import { AuthenticateUser, FinishAuth, GetUserSession, LogoutUser } from '../controllers/User';
+import { AuthenticateUser, FinishAuth, GetRole, GetUserSession, LogoutUser } from '../controllers/User';
 import { memberMiddleware } from '../middleware/Member';
 import Router from 'express';
 
@@ -8,5 +8,6 @@ router.post('/', AuthenticateUser);
 router.post('/finish', FinishAuth);
 router.get('/session', memberMiddleware, GetUserSession);
 router.get('/logout', memberMiddleware, LogoutUser);
+router.get('/role', memberMiddleware, GetRole);
 
 export default router;

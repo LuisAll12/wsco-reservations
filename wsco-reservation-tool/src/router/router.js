@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Cookies from 'js-cookie';
-import { authCheck } from '../services/auth';
+import { authCheck, getUserRole } from '../services/auth';
 
 
 const HomeView = () => import(/* webpackChunkName: "Home" */ '../views/Home.vue');
@@ -11,7 +11,6 @@ const ClubBoats = () => import(/* webpackChunkName: "ClubBoats" */ '../component
 const MyReservations = () => import(/* webpackChunkName: "MyReservations" */ '../components/MyReservations.vue');
 const BoatDetail = () => import(/* webpackChunkName: "BoatDetail" */ '../components/BoatDetail.vue');
 const Calendar = () => import(/* webpackChunkName: "Dashboard" */ '../components/Calendar.vue')
-const AdminDashboard = () => import(/* webpackChunkName: "AdminDashboard" */ '../components/Admin/AdminDashboard.vue');
 
 const routes = [
     {
@@ -46,16 +45,12 @@ const routes = [
                 component: BoatDetail
             },
             {
-                path: 'admin',
-                component: AdminDashboard
-            },
-            {
                 path: 'hilfe',
-                component: AdminDashboard
+                component: MyReservations
             },
             {
                 path: 'settings',
-                component: AdminDashboard
+                component: MyReservations
             }
         ]
     },
@@ -66,9 +61,24 @@ const router = createRouter({
     routes,
 });
 
+let adminRouteAdded = false;
+
 router.beforeEach(async (to, from, next) => {
     const isAuthenticated = await authCheck();
     const isLoginPage = to.name === 'Login';
+
+    if (isAuthenticated && !adminRouteAdded) {
+        const role = await getUserRole();
+        if (role === 'admin') {
+            router.addRoute('Dashboard', {
+                name: 'admin',
+                path: 'admin',
+                component: () => import('../components/Admin/AdminDashboard.vue')
+            });
+        }
+        adminRouteAdded = true;
+        return next({ ...to, replace: true });
+    }
 
     if (isAuthenticated && isLoginPage) {
         next({ name: 'Dashboard' });
@@ -77,7 +87,7 @@ router.beforeEach(async (to, from, next) => {
     } else {
         next();
     }
-}
-);
+});
+
 
 export default router;
