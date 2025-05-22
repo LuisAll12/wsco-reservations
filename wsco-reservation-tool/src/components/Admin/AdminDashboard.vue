@@ -7,6 +7,7 @@
     <DamageReportsWidget />
     <UpcomingReservationsWidget />
     <UserListWidget />
+    <CreateChecklist />
   </div>
 </template>
 
@@ -17,6 +18,7 @@ import DamageReportsWidget from './DamageReportsWidget.vue';
 import BoatStatsWidget from './BoatStatsWidget.vue';
 import UpcomingReservationsWidget from './UpcomingReservationsWidget.vue';
 import UserListWidget from './UserListWidget.vue';
+import CreateChecklist from './CreateChecklist.vue';
 
 
 </script>

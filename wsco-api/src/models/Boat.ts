@@ -1,6 +1,7 @@
 import * as admin from 'firebase-admin';
 import { db } from '../config/db';
 import { Reservation } from './Reservation';
+import { Checklist } from './Checklist';
 
 export enum BoatStatus {
     available = 'available',
@@ -21,6 +22,7 @@ export interface Boat {
     Type: string;
     status: BoatStatus;
     FK_ReservationId: admin.firestore.DocumentReference<Reservation>[];
+    FK_checklist_id: admin.firestore.DocumentReference<Checklist>;
 
     // Timestamps
     createdAt: admin.firestore.Timestamp;

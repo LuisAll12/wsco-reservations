@@ -51,6 +51,7 @@ const baseEvents = computed(() => {
       const height = (endMinutes - startMinutes) * MINUTE_HEIGHT
 
       const isCurrentUser = reservation.FK_UserId?.[0] === props.currentUserId
+      const isCanceled = reservation.status === 'cancelled'
       const boat = props.boats.find(b => b.id === reservation.FK_Boat?.[0])
 
       return {
@@ -61,7 +62,7 @@ const baseEvents = computed(() => {
         top: top,
         height: height,
         dayIndex: dayIndex,
-        color: isCurrentUser ? '#4CAF50' : '#2196F3',
+        color: !isCanceled ? (isCurrentUser ? '#4CAF50' : '#2196F3') : '#FF9800',
         isCurrentUser: isCurrentUser,
         boat: boat
       }

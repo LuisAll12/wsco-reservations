@@ -4,6 +4,8 @@ import BoatModel, { Boat } from '../models/Boat';
 import UserModel, { User } from '../models/user';
 import { DocumentReference, Timestamp } from 'firebase-admin/firestore';
 import { Request, Response, RequestHandler } from 'express';
+import { firestore } from 'firebase-admin';
+import ChecklistModel from '@/models/Checklist';
 
 export const createReservation: RequestHandler = async (req: Request, res: Response): Promise<void> => {
     const { startDate, endDate, FK_BoatId } = req.body;
@@ -37,6 +39,8 @@ export const createReservation: RequestHandler = async (req: Request, res: Respo
             endDate: new Date(endDate),
             FK_BoatId: db.collection('boats').doc(FK_BoatId) as DocumentReference<Boat>,
             FK_UserId: db.collection('users').doc(FK_UserId) as DocumentReference<User>,
+            isChecklistCompleted: false,
+            ReadyToCheckin: false,
             PaymentStatus: PaymentStatus.unpaid,
             status: status.created,
             NumBlocks: 0,
@@ -94,10 +98,7 @@ export const getUsersReservations: RequestHandler = async (req: Request, res: Re
 
             let boatData = null;
             try {
-                const boatSnap = await (reservation.FK_BoatId as DocumentReference).get();
-                if (boatSnap.exists) {
-                    boatData = { id: boatSnap.id, ...boatSnap.data() };
-                }
+                boatData = { id: (await reservation.FK_BoatId.get()).id };
             } catch (error) {
                 console.error(`Fehler beim Laden des Boots für Reservation ${reservation.id}:`, error);
             }
@@ -121,8 +122,74 @@ export const MarkReservationAsCheckedin = async (req: Request, res: Response): P
     try {
         await ReservationModel.markReservationAsConfirmed(ReservationId, new Date().toISOString());
         res.status(200).json({ message: "success" });
+    } catch (error: any) {
+        res.status(409).json({ error: error.message });
+        return;
+    }
+}
+
+export const setReservationAsCancelled = async (req: Request, res: Response): Promise<void> => {
+    const id = req.params.id;
+
+    try {
+        await ReservationModel.markReservationAsCancelled(id);
+        res.status(200).json({ message: "success" });
     } catch (error) {
         res.status(409).json({ error: error });
         return;
     }
 }
+
+export const getReservationsTasklist = async (req: Request, res: Response): Promise<void> => {
+    const id = req.params.id;
+
+    try {
+        const reservation = await ReservationModel.getReservationById(id);
+        if (!reservation) {
+            res.status(404).json({ message: "Reservation not found" });
+            return;
+        }
+
+        // Check and get boat reference
+        const boatRef = reservation.FK_BoatId;
+        if (!boatRef || typeof boatRef.get !== 'function') {
+            res.status(400).json({ message: "Invalid or missing FK_BoatId" });
+            return;
+        }
+
+        const boatDoc = await boatRef.get();
+        if (!boatDoc.exists) {
+            res.status(404).json({ message: "Boat not found" });
+            return;
+        }
+
+        const boat = boatDoc.data();
+        const checklistRef = boat?.FK_checklist_id;
+
+        if (!checklistRef) {
+            res.status(400).json({ message: "Missing FK_checklist_id in boat document" });
+            return;
+        }
+
+        if (typeof checklistRef.get !== 'function') {
+            console.error("Expected FK_checklist_id to be a DocumentReference, but got:", checklistRef);
+            res.status(400).json({ message: "FK_checklist_id is not a valid Firestore DocumentReference" });
+            return;
+        }
+
+        const checklistDoc = await checklistRef.get();
+
+        if (!checklistDoc.exists) {
+            res.status(404).json({ message: "Checklist not found" });
+            return;
+        }
+
+        const data = checklistDoc.data();
+
+        res.status(200).json({ checklist: data, reservation: reservation });
+    } catch (error: any) {
+        console.error("Error in getReservationsTasklist:", error);
+        res.status(409).json({ error: error.message });
+    }
+}
+

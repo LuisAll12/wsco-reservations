@@ -5,6 +5,7 @@ import { User } from './user';
 import { Damage } from './Damage';
 import { Timestamp } from 'firebase-admin/firestore';
 import { ConversationListInstance } from 'twilio/lib/rest/conversations/v1/conversation';
+import { Checklist } from './Checklist';
 
 export enum status {
     created = 'created',         // Reservation wurde erstellt
@@ -28,6 +29,15 @@ export interface Reservation {
     NumBlocks: number;
     PaymentStatus: PaymentStatus;
     TotalPrice: number;
+    // Checklist
+    isChecklistCompleted: boolean;
+    CompletedChecklistTasks?: string[];
+    TotalChecklistTasks?: number;
+    checklistCompletedAt?: admin.firestore.Timestamp;
+    checklistCompletedBy?: admin.firestore.DocumentReference<User>;
+    ReadyToCheckin: boolean;
+
+    // Foreign keys
     FK_BoatId: admin.firestore.DocumentReference<Boat>;
     FK_UserId: admin.firestore.DocumentReference<User>;
     FK_DamageId?: admin.firestore.DocumentReference<Damage>;
@@ -80,6 +90,64 @@ class ReservationModel {
 
         await reservationDocRef.update({
             status: status.completed,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+    }
+
+    static async markReservationAsReadyToCheckin(reservationId: string): Promise<void> {
+        const reservationDocRef = this.reservationsRef.doc(reservationId);
+        const reservationDoc = await reservationDocRef.get();
+
+        if (!reservationDoc.exists) {
+            throw new Error('Reservation not found');
+        }
+
+        const reservationData = reservationDoc.data() as Reservation;
+        const reservationStartTime = (reservationData.startDate as unknown as Timestamp).toDate();
+
+        if (reservationStartTime.getTime() - new Date().getTime() > 60 * 60 * 1000) {
+            throw new Error('Reservation can only be marked as ready to checkin one hour or less before the start time');
+        }
+
+        await reservationDocRef.update({
+            ReadyToCheckin: true,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+    }
+
+    static async CompleteTaskfromChecklist(reservationId: string, taskId: string): Promise<void> {
+        const reservationDocRef = this.reservationsRef.doc(reservationId);
+        const reservationDoc = await reservationDocRef.get();
+
+        if (!reservationDoc.exists) {
+            throw new Error('Reservation not found');
+        }
+
+        const reservationData = reservationDoc.data() as Reservation;
+        const completedTasks = reservationData.CompletedChecklistTasks || [];
+        const totalTasks = reservationData.TotalChecklistTasks || 0;
+        const completedTaskCount = completedTasks.length;
+        const isChecklistCompleted = completedTaskCount + 1 === totalTasks;
+        completedTasks.push(taskId);
+
+        await reservationDocRef.update({
+            CompletedChecklistTasks: completedTasks,
+            TotalChecklistTasks: totalTasks,
+            isChecklistCompleted: isChecklistCompleted,
+            checklistCompletedAt: isChecklistCompleted ? admin.firestore.FieldValue.serverTimestamp() : null,
+            checklistCompletedBy: isChecklistCompleted ? reservationData.FK_UserId : null,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+    }
+
+    static async CompleteChecklist(reservationId: string, userId: string): Promise<void> {
+        const reservationDocRef = this.reservationsRef.doc(reservationId);
+        const userDocRef = db.collection('users').doc(userId);
+
+        await reservationDocRef.update({
+            isChecklistCompleted: true,
+            checklistCompletedAt: admin.firestore.FieldValue.serverTimestamp(),
+            checklistCompletedBy: userDocRef,
             updatedAt: admin.firestore.FieldValue.serverTimestamp()
         });
     }
@@ -145,13 +213,12 @@ class ReservationModel {
         const reservations: Reservation[] = [];
 
         snapshot.forEach((doc) => {
+            const data = doc.data() as Reservation;
             reservations.push({
+                ...data,
                 id: doc.id,
-                ...doc.data()
-            } as Reservation);
+            });
         });
-
-        console.log(reservations);
 
         return reservations;
     }

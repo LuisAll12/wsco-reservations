@@ -109,6 +109,9 @@ export const isBoatOccupied = async (req: Request, res: Response): Promise<void>
 
         console.log('Overlap check:', start > eEnd, end < eStart);
         if (start < eEnd && end > eStart) {
+            if (reservation.status === 'cancelled') {
+                continue;
+            }
             res.status(200).json({ isOccupied: true });
             return;
         }
