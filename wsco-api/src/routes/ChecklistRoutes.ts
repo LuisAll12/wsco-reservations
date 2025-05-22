@@ -1,5 +1,5 @@
-import { createChecklist } from "@/controllers/Tasklist";
-import { adminMiddleware } from "@/middleware/Admin";
+import { createChecklist } from "../controllers/Tasklist";
+import { adminMiddleware } from "../middleware/Admin";
 import { Router } from "express";
 
 const router = Router();

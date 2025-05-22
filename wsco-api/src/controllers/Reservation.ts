@@ -4,8 +4,6 @@ import BoatModel, { Boat } from '../models/Boat';
 import UserModel, { User } from '../models/user';
 import { DocumentReference, Timestamp } from 'firebase-admin/firestore';
 import { Request, Response, RequestHandler } from 'express';
-import { firestore } from 'firebase-admin';
-import ChecklistModel from '@/models/Checklist';
 
 export const createReservation: RequestHandler = async (req: Request, res: Response): Promise<void> => {
     const { startDate, endDate, FK_BoatId } = req.body;

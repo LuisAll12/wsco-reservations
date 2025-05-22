@@ -164,8 +164,9 @@ function canBeCheckedOut(reservation) {
           <button v-else-if="reservation.status === 'checkedin' && !canBeCheckedOut(reservation)" class="checkin-button"
             disabled>
             <ClockIcon class="icon-button" />
-            can be checked out in {{ Math.floor((new Date(reservation.endDate) - new Date()) / (1000 * 60 * 60))
+            Reservierung kann in {{ Math.floor((new Date(reservation.endDate) - new Date()) / (1000 * 60 * 60))
             }} Stunden {{ Math.ceil((new Date(reservation.endDate) - new Date()) / (1000 * 60)) % 60 }} Minuten
+            abgegeben werden
           </button>
           <button v-else-if="reservation.status === 'completed'" class="checkin-button" disabled>
             <ClockIcon class="icon-button" />

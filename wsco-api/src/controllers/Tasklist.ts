@@ -1,6 +1,6 @@
-import { admin } from "@/config/db";
-import BoatModel from "@/models/Boat";
-import ChecklistModel, { Checklist } from "@/models/Checklist";
+import { admin } from "../config/db";
+import BoatModel from "../models/Boat";
+import ChecklistModel, { Checklist } from "../models/Checklist";
 import { Request, RequestHandler, Response } from "express";
 
 export const createChecklist: RequestHandler = async (req: Request, res: Response): Promise<void> => {
