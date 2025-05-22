@@ -38,8 +38,11 @@ function toggleSidebar() {
 }
 
 
-const handleBoatChange = (boatId) => {
+const handleBoatChange = async (boatId) => {
   selectedBoat.value = boatId || null
+  const start = currentWeek.value;
+  const end = addDays(currentWeek.value, 7);
+  reservations.value = [...await getReservations(start.toISOString(), end.toISOString(), boatId)];
 }
 // Update weekDays calculation
 const weekDays = computed(() => {
@@ -49,7 +52,7 @@ const weekDays = computed(() => {
 
 const currentWeek = ref(startOfWeek(new Date(), { weekStartsOn: 1 }))
 
- async function prevWeek() {
+async function prevWeek() {
   const newDate = new Date(currentDate.value)
   newDate.setDate(newDate.getDate() - 7)
   currentDate.value = newDate
@@ -173,17 +176,17 @@ function validateReservation(boatId, from, to) {
 </script>
 
 <template>
-    <main class="main-content">
-      <CalendarHeader :user="user" :boats="boats" :current-date="currentDate" :selected-boat="selectedBoat"
-        :currentUser="currentUser" @prev-week="prevWeek" @next-week="nextWeek" @new-reservation="handleNewReservation"
-        @boat-change="handleBoatChange" />
+  <main class="main-content">
+    <CalendarHeader :user="user" :boats="boats" :current-date="currentDate" :selected-boat="selectedBoat"
+      :currentUser="currentUser" @prev-week="prevWeek" @next-week="nextWeek" @new-reservation="handleNewReservation"
+      @boat-change="handleBoatChange" />
 
-      <WeekGrid :days="weekDays" :reservations="reservations" :selected-boat="selectedBoat" :boats="boats"
-        :current-user-id="currentUser?.id" />
+    <WeekGrid :days="weekDays" :reservations="reservations" :selected-boat="selectedBoat" :boats="boats"
+      :current-user-id="currentUser?.id" />
 
-    </main>
-    <NewReservationModal v-if="showReservationModal" :show="showReservationModal" :boats="boats"
-      :current-user="currentUser" @close="showReservationModal = false" @submit="submitReservation" />
+  </main>
+  <NewReservationModal v-if="showReservationModal" :show="showReservationModal" :boats="boats"
+    :current-user="currentUser" @close="showReservationModal = false" @submit="submitReservation" />
 </template>
 
 <style>

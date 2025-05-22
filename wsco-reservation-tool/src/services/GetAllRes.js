@@ -1,6 +1,6 @@
-export const getReservations = async (startDate, endDate) => {
+export const getReservations = async (startDate, endDate, boatId = null) => {
   try {
-    const url = `${import.meta.env.VITE_APP_BACKEND_BASEURL}/reservation?start=${startDate}&end=${endDate}`;
+    const url = `${import.meta.env.VITE_APP_BACKEND_BASEURL}/reservation?start=${startDate}&end=${endDate}${boatId ? `&boatId=${boatId}` : ''}`;
     const headers = {
       "Content-Type": "application/json"
     };

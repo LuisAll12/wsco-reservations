@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, watch, ref } from 'vue'
 import { isSameWeek, format } from 'date-fns'
 import { de } from 'date-fns/locale'
 
@@ -22,6 +22,13 @@ const timeSlots = computed(() => {
   }
   return slots
 })
+const reservations = ref([...props.reservations])
+
+watch(() => props.selectedBoat, (newValue) => {
+  if (newValue) {
+    console.log('Selected boat:', newValue)
+  }
+}, { immediate: true })
 
 const baseEvents = computed(() => {
   return props.reservations
@@ -29,10 +36,7 @@ const baseEvents = computed(() => {
       const reservationDate = new Date(reservation.startDate)
       const isSameWeekCheck = isSameWeek(reservationDate, props.days[0], { weekStartsOn: 1 })
 
-      const boatMatch = !props.selectedBoat ||
-        (reservation.FK_Boat &&
-          reservation.FK_Boat[0] === props.selectedBoat)
-      return isSameWeekCheck && boatMatch
+      return isSameWeekCheck
     })
     .map(reservation => {
       const fromDate = new Date(reservation.startDate)
@@ -50,9 +54,10 @@ const baseEvents = computed(() => {
       const top = startMinutes * MINUTE_HEIGHT
       const height = (endMinutes - startMinutes) * MINUTE_HEIGHT
 
-      const isCurrentUser = reservation.FK_UserId?.[0] === props.currentUserId
+      const isCurrentUser = reservation.FK_UserId?._path[0] === props.currentUserId
       const isCanceled = reservation.status === 'cancelled'
-      const boat = props.boats.find(b => b.id === reservation.FK_Boat?.[0])
+      const boat = props.boats.find(b => b.id === reservation.FK_Boat?._path[0])
+
 
       return {
         id: reservation.id,

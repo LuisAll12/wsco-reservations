@@ -56,12 +56,28 @@ export const createReservation: RequestHandler = async (req: Request, res: Respo
 };
 
 export const getAllReservations: RequestHandler = async (req: Request, res: Response): Promise<void> => {
-    const { start, end } = req.query as { start: string, end: string };
+    const { start, end, boatId = null } = req.query as { start: string, end: string, boatId: string | null };
 
     const startDate = new Date(start).toISOString();
     const endDate = new Date(end).toISOString();
 
+    if (!startDate || !endDate) {
+        res.status(400).json({ message: "Start and end dates are required" });
+        return;
+    }
+
     const Reservations = await ReservationModel.getAllReservationsInRange(startDate, endDate) as Reservation[];
+
+    if (boatId) {
+        const filteredReservations = Reservations.filter(reservation => reservation.FK_BoatId.id === boatId);
+        if (filteredReservations.length > 0) {
+            res.status(200).json(filteredReservations);
+            return;
+        } else {
+            res.status(200).json({ message: "No reservations found for this boat" });
+            return;
+        }
+    }
 
     if (!Reservations) {
         res.status(200).json({ message: "No reservations found" });
