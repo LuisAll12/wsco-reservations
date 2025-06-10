@@ -21,6 +21,16 @@
                 "Sie haben das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung Ihrer personenbezogenen Daten.",
                 "Wenden Sie sich dazu bitte an die im Impressum genannte Kontaktadresse."
             ]
+        },
+        {
+            "title": "Cookies & Lokaler Speicher",
+            "content": [
+                "Wir verwenden ein Authentifizierungs-Cookie (auth_token), das nach dem Login gesetzt wird und ausschließlich zur sicheren Identifikation dient.",
+                "Wir speichern die gewählte Sprache (lang) im Local Storage Ihres Browsers.",
+                "Zusätzlich speichern wir Sitzungsdaten wie den Namen, E-Mail-Adresse sowie Anwendungsfortschritt im Local Storage (userData), um Ihnen die Benutzeroberfläche personalisiert bereitzustellen.",
+                "Alle lokal gespeicherten Daten sind nur innerhalb der laufenden Sitzung sichtbar und werden nicht an Dritte weitergegeben.",
+                "Sie können die lokal gespeicherten Informationen jederzeit in den Browser-Einstellungen löschen."
+            ]
         }
     ]
 }
