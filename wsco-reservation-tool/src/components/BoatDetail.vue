@@ -18,7 +18,13 @@ onMounted(async() => {
 
   const id = route.params.id
   try {
-    const response = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat/${id}`)
+    const response = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat/${id}`,{
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
     boat.value = await response.json()
     console.log('Response:', boat.value)
   } catch (error) {

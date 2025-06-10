@@ -55,19 +55,51 @@ async function submitDamageReport() {
   }
 }
 
+async function getBoatById(id) {
+  const res = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat/${id}`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include'
+  });
+  return await res.json();
+}
+
+
 onMounted(async () => {
-  isLoading.value = true
-  const user = await getCurrentUserFromSession()
-  console.log('Aktueller Benutzer:', user)
-  if (user) {
-    // ACHTUNG: hier schreiben wir _in_ die reactive ref, nicht in eine neue Variable
-    reservations.value = await getUserReservations(user.fields.MemberNR)
-    console.log('gefilterte Reservations:', reservations.value)
-  } else {
-    console.warn('Kein eingeloggter Benutzer gefunden')
+  try {
+    isLoading.value = true;
+
+    const res = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/reservation/user?status=active`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include'
+    });
+
+    const rawData = await res.json();
+    const records = rawData.records || rawData;
+
+    // Bootsdaten nachladen
+    const enriched = await Promise.all(records.map(async (res) => {
+      const boatId = res.FK_BoatId._path.segments[1];
+      const boat = await getBoatById(boatId);
+      return {
+        ...res,
+        boatName: boat.name,
+        boatPlate: boat.numberplate
+      };
+    }));
+
+    reservations.value = enriched;
+  } catch (error) {
+    console.error("Fehler beim Laden der Reservationen:", error);
+    alert("Fehler beim Laden der Reservationen.");
+  } finally {
+    isLoading.value = false;
   }
-  isLoading.value = false
-})
+});
+
 </script>
 
 <template>
@@ -84,10 +116,11 @@ onMounted(async () => {
           <option
             v-for="res in reservations"
             :key="res.id"
-            :value="res.id"
-          >
-            Reservation #{{ res.fields.ReservationNr }} –
-            {{ new Date(res.fields.From).toLocaleString() }}
+            :value="res.id">
+            {{ res.boatName }} ({{ res.boatPlate }}) –
+            {{ new Date(res.startDate).toLocaleDateString('de-CH') }},
+            {{ new Date(res.startDate).toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' }) }} bis
+            {{ new Date(res.endDate).toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' }) }}
           </option>
         </select>
       </div>
