@@ -34,22 +34,15 @@
         :view="currentView" 
         :events="events" 
         :calendars="calendars"
-        :use-detail-popup="false" 
+        :use-detail-popup="true" 
         :isReadOnly="true" 
         :week="calendarOptions.week" 
         :day="calendarOptions.day"
         :timezone="calendarOptions.timezone" 
-        :theme="calendarOptions.theme" 
-        @clickSchedule="onClickEvent"/>
+        :theme="calendarOptions.theme"/>
     </div>
   </div>
 
-  <EventDetailModal 
-    v-if="showModal" 
-    :event="selectedEvent" 
-    @close="showModal = false"
-    @edit="editEvent"
-  />
 </template>
 
 
@@ -63,7 +56,6 @@ import 'toast-ui-calendar-vue3/styles.css';
 import { getReservations } from '../services/GetAllRes.js'
 import { getUserID, getBoatName } from '../services/auth.js'
 import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/24/outline';
-import EventDetailModal from './EventDetailModal.vue';
 
 // Reactive States
 const currentView = ref('week');        // aktuelle Ansicht: 'day' oder 'week'
@@ -93,11 +85,6 @@ const currentMonthLabel = computed(() => {
     year: 'numeric'
   });
 });
-
-function onClickEvent({ schedule }) {
-  selectedEvent.value = schedule
-  showModal.value = true
-}
 
 // Dynamisch den View an Bildschirm anpassen
 function updateResponsiveView() {
