@@ -39,7 +39,7 @@ async function logout() {
     <div>
       <div class="px-4 py-4 border-b border-slate-700 flex items-center justify-between">
         <h1 v-if="open" class="text-lg font-semibold whitespace-nowrap">WSCO Reservationen</h1>
-        <span v-else class="text-sm font-bold tracking-wide">WS</span>
+        <span v-else class="text-sm font-bold tracking-wide">WSCO</span>
       </div>
 
       <!-- Navigation -->
