@@ -52,10 +52,22 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="dashboard">
-    <Sidebar :user="user" />
-    <main class="main-content overflow-hidden">
-      <router-view class="overflow-hidden" />
+  <div class="flex h-screen">
+    <!-- Immer sichtbarer Toggle-Button -->
+    <button
+      class="fixed top-4 left-4 z-50 bg-slate-800 text-white p-2 rounded-full shadow-lg"
+      @click="toggleSidebar"
+    >
+      <span v-if="!isSidebarOpen">☰</span>
+      <span v-else>✕</span>
+    </button>
+
+    <!-- Sidebar -->
+    <Sidebar :user="user" :isSidebarOpen="isSidebarOpen" @update:isSidebarOpen="isSidebarOpen = $event" />
+
+    <!-- Hauptbereich -->
+    <main :class="[isSidebarOpen ? 'ml-64 md:ml-72' : 'ml-14', 'flex-1 overflow-hidden transition-all duration-300']">
+      <router-view />
     </main>
   </div>
 </template>
@@ -63,12 +75,11 @@ onMounted(async () => {
 <style scoped>
 /* Globale Styles */
 .dashboard {
-  display: grid;
-  grid-template-columns: 288px 1fr;
-  background: #f5f6fa;
-  transition: all 0.3s ease;
+  /* display: grid; */
+  /* grid-template-columns: 288px 1fr; */
+  display: flex;
+  height: 100vh;
 }
-
 
 
 .main-content {
