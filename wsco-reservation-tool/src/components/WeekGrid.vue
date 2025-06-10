@@ -28,19 +28,9 @@
 
     <!-- Kalender -->
     <div class="calendar-container flex-1 overflow-hidden">
-      <TuiCalendar
-        ref="calendarRef"
-        class="w-full h-full"
-        :view="currentView"
-        :events="events"
-        :calendars="calendars"
-        :use-detail-popup="true"
-        :isReadOnly="true"
-        :week="calendarOptions.week"
-        :day="calendarOptions.day"
-        :timezone="calendarOptions.timezone"
-        :theme="calendarOptions.theme"
-      />
+      <TuiCalendar ref="calendarRef" class="w-full h-full" :view="currentView" :events="events" :calendars="calendars"
+        :use-detail-popup="true" :isReadOnly="true" :week="calendarOptions.week" :day="calendarOptions.day"
+        :timezone="calendarOptions.timezone" :theme="calendarOptions.theme" />
     </div>
   </div>
 </template>
@@ -246,7 +236,8 @@ function delayedRefresh() {
 <style scoped>
 .calendar-container {
   flex-grow: 1;
-  height: calc(100vh - 48px); /* assuming 48px für controls oben */
+  height: calc(100vh - 48px);
+  /* assuming 48px für controls oben */
   overflow: hidden;
 }
 

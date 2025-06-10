@@ -1,6 +1,7 @@
 <!-- src/components/CalendarHeader.vue -->
 <script setup>
 import { ref, watch, onMounted } from 'vue'
+import { getUserName } from '../services/auth.js'
 
 const props = defineProps({
   user: Object,
@@ -10,6 +11,7 @@ const props = defineProps({
   currentUser: Object
 })
 
+const name = ref(null);
 const emit = defineEmits(['prev-week', 'next-week', 'new-reservation', 'boat-change'])
 
 const selectedBoatId = ref(props.selectedBoat || '')
@@ -18,33 +20,29 @@ watch(selectedBoatId, (newVal) => {
   emit('boat-change', newVal)
 })
 
-onMounted(() => {
-  console.log('Mounted CalendarHeader with user:', props.boats)
-})
+onMounted(async () => {
+  name.value = await getUserName();
+});
 </script>
 
 <template>
-<header class="calendar-header">
+  <header class="calendar-header">
     <div class="header-top">
-      <h2>Ahoi, {{ user.name }}</h2>
+      <h2>Ahoi, {{ name }}</h2>
       <div class="controls">
         <div class="filter-display" v-if="selectedBoatId">
           <span class="filter-value">
             {{
               selectedBoatId
-                ? `${boats.find(b => b.id === selectedBoatId)?.name} (${boats.find(b => b.id === selectedBoatId)?.numberplate})`
+                ? `${boats.find(b => b.id === selectedBoatId)?.name} (${boats.find(b => b.id ===
+                  selectedBoatId)?.numberplate})`
                 : 'Alle Boote'
             }}
           </span>
         </div>
         <select v-model="selectedBoatId">
           <option value="">Alle Boote</option>
-          <option 
-            v-for="boat in boats" 
-            :key="boat.id" 
-            :value="boat.id"
-            :disabled="boat.status === 'unavailable'"
-          >
+          <option v-for="boat in boats" :key="boat.id" :value="boat.id" :disabled="boat.status === 'unavailable'">
             {{ boat.name }} ({{ boat.numberplate }})
             <span v-if="boat.status === 'unavailable'"> - Nicht verfügbar</span>
           </option>
@@ -53,12 +51,6 @@ onMounted(() => {
           Neue Reservation
         </button>
       </div>
-    </div>
-
-    <div class="week-navigation">
-      <button @click="$emit('prev-week')">&lt;</button>
-      <span>{{ currentDate.toLocaleDateString('de-CH', { month: 'long', year: 'numeric' }) }}</span>
-      <button @click="$emit('next-week')">&gt;</button>
     </div>
   </header>
 </template>
@@ -71,6 +63,7 @@ onMounted(() => {
   margin-right: 1rem;
   font-size: 0.9em;
 }
+
 .calendar-header {
   margin-bottom: 2rem;
 }
@@ -108,6 +101,7 @@ button {
   border-radius: 6px;
   cursor: pointer;
 }
+
 .filter-status {
   display: flex;
   align-items: center;
