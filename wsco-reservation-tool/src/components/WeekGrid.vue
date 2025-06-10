@@ -1,26 +1,10 @@
 <template>
-  <div class="calendar-wrapper h-screen flex flex-col">
-    <div class="controls flex justify-between p-2">
-      <!-- Navigationselemente -->
+  <div class="calendar-wrapper h-full flex flex-col">
+    <div class="calendar-container h-full overflow-hidden">
+      <TuiCalendar ref="calendarRef" class="w-full h-[calc(100%-175px)]" :view="currentView" :events="events"
+        :calendars="calendars" :use-detail-popup="true" :isReadOnly="true" :week="calendarOptions.week"
+        :timezone="calendarOptions.timezone" :theme="calendarOptions.theme" />
     </div>
-    <div class="calendar-container flex-1 overflow-auto">
-      <TuiCalendar
-        ref="calendarRef"
-        class="w-full h-[calc(100vh-48px)]"
-        :view="currentView"
-        :events="events"
-        :calendars="calendars"
-        :use-detail-popup="true"
-        :isReadOnly="true"
-        :week="calendarOptions.week"
-        :timezone="calendarOptions.timezone"
-        :theme="calendarOptions.theme"
-      />
-    </div>
-
-    <TuiCalendar ref="calendarRef" :view="currentView" :events="events" :calendars="calendars" :use-detail-popup="true"
-      :isReadOnly="true" :week="calendarOptions.week" :timezone="calendarOptions.timezone"
-      :theme="calendarOptions.theme" class="w-full" />
   </div>
 </template>
 
@@ -178,7 +162,8 @@ function today() {
 <style scoped>
 .calendar-container {
   flex-grow: 1;
-  height: calc(100vh - 48px); /* assuming 48px für controls oben */
+  height: calc(100vh - 48px);
+  /* assuming 48px für controls oben */
   overflow: hidden;
 }
 </style>

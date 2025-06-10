@@ -253,7 +253,7 @@ function validateReservation(boatId, from, to) {
   width: 500px;
   max-width: 90vw;
   max-height: 90vh;
-  overflow-y: auto;
+  overflow-y: hidden;
   position: relative;
   z-index: 1001;
   display: block !important;

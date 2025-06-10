@@ -54,8 +54,8 @@ onMounted(async () => {
 <template>
   <div class="dashboard">
     <Sidebar :user="user" />
-    <main class="main-content">
-      <router-view />
+    <main class="main-content overflow-hidden">
+      <router-view class="overflow-hidden" />
     </main>
   </div>
 </template>
