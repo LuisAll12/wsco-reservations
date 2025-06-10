@@ -17,6 +17,10 @@
         :theme="calendarOptions.theme"
       />
     </div>
+
+    <TuiCalendar ref="calendarRef" :view="currentView" :events="events" :calendars="calendars" :use-detail-popup="true"
+      :isReadOnly="true" :week="calendarOptions.week" :timezone="calendarOptions.timezone"
+      :theme="calendarOptions.theme" class="w-full" />
   </div>
 </template>
 
@@ -26,7 +30,7 @@ import { ref, onMounted, watch } from 'vue';
 import TuiCalendar from 'toast-ui-calendar-vue3';
 import 'toast-ui-calendar-vue3/styles.css';
 import { getReservations } from '../services/GetAllRes.js'
-import { getUserID } from '../services/auth.js'
+import { getUserID, getBoatName } from '../services/auth.js'
 
 
 // Reactive States
@@ -130,15 +134,20 @@ async function refreshEvents() {
   console.log(rangeStart + "+" + rangeEnd)
 
   const data = await getReservations(rangeStart, rangeEnd, selectedBoatId.value ? selectedBoatId.value : null)
-  events.value = data.map(res => ({
-    id: res.id,
-    calendarId: res.status === 'cancelled' ? 'cancelled'
-      : (res.FK_UserId._path.segments[1] === currentUserId.value ? 'mine' : 'others'),
-    title: "test",  // z.B. "Boot ABC – ZH1234"
-    start: res.startDate,  // ISO-Strings oder Date-Objekte
-    end: res.endDate,
-    isReadOnly: true
+
+  events.value = await Promise.all(data.map(async res => {
+    const boat = await getBoatName(res.FK_BoatId._path.segments[1]);
+    return {
+      id: res.id,
+      calendarId: res.status === 'cancelled' ? 'cancelled'
+        : (res.FK_UserId._path.segments[1] === currentUserId.value ? 'mine' : 'others'),
+      title: boat,
+      start: res.startDate,
+      end: res.endDate,
+      isReadOnly: true
+    };
   }));
+
 }
 
 
