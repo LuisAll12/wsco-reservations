@@ -1,272 +1,129 @@
-<script setup>
-import { computed, watch, ref } from 'vue'
-import { isSameWeek, format } from 'date-fns'
-import { de } from 'date-fns/locale'
-
-const props = defineProps({
-  days: Array,
-  reservations: Array,
-  selectedBoat: [String, Number],
-  boats: Array,
-  currentUserId: String
-})
-
-const HOUR_HEIGHT = 60
-const MINUTE_HEIGHT = HOUR_HEIGHT / 60
-const START_HOUR = 6
-
-const timeSlots = computed(() => {
-  const slots = []
-  for (let hour = START_HOUR; hour <= 22; hour++) {
-    slots.push(`${hour.toString().padStart(2, '0')}h`)
-  }
-  return slots
-})
-const reservations = ref([...props.reservations])
-
-watch(() => props.selectedBoat, (newValue) => {
-  if (newValue) {
-    console.log('Selected boat:', newValue)
-  }
-}, { immediate: true })
-
-const baseEvents = computed(() => {
-  return props.reservations
-    .filter(reservation => {
-      const reservationDate = new Date(reservation.startDate)
-      const isSameWeekCheck = isSameWeek(reservationDate, props.days[0], { weekStartsOn: 1 })
-
-      return isSameWeekCheck
-    })
-    .map(reservation => {
-      const fromDate = new Date(reservation.startDate)
-      const toDate = new Date(reservation.endDate)
-
-      if (isNaN(fromDate) || isNaN(toDate)) return null
-
-      const dayIndex = props.days.findIndex(day =>
-        format(day, 'yyyy-MM-dd') === format(fromDate, 'yyyy-MM-dd')
-      )
-
-      const startMinutes = (fromDate.getHours() - START_HOUR) * 60 + fromDate.getMinutes()
-      const endMinutes = (toDate.getHours() - START_HOUR) * 60 + toDate.getMinutes()
-
-      const top = startMinutes * MINUTE_HEIGHT
-      const height = (endMinutes - startMinutes) * MINUTE_HEIGHT
-
-      const isCurrentUser = reservation.FK_UserId?._path[0] === props.currentUserId
-      const isCanceled = reservation.status === 'cancelled'
-      const boat = props.boats.find(b => b.id === reservation.FK_Boat?._path[0])
-
-
-      return {
-        id: reservation.id,
-        title: boat ? `${boat.fields.Name} (${boat.fields.Numberplate})` : 'Reservation',
-        start: format(fromDate, 'HH:mm'),
-        end: format(toDate, 'HH:mm'),
-        top: top,
-        height: height,
-        dayIndex: dayIndex,
-        color: !isCanceled ? (isCurrentUser ? '#4CAF50' : '#2196F3') : '#FF9800',
-        isCurrentUser: isCurrentUser,
-        boat: boat
-      }
-    })
-    .filter(Boolean)
-})
-
-const positionedEvents = computed(() => {
-  const results = []
-
-  const eventsByDay = {}
-  props.days.forEach((day, index) => {
-    eventsByDay[index] = []
-  })
-
-  baseEvents.value.forEach(event => {
-    if (eventsByDay[event.dayIndex]) {
-      eventsByDay[event.dayIndex].push({ ...event })
-    }
-  })
-
-  Object.keys(eventsByDay).forEach(dayIndex => {
-    const dayEvents = eventsByDay[dayIndex]
-    dayEvents.sort((a, b) => a.top - b.top)
-
-    const columns = []
-
-    dayEvents.forEach(event => {
-      let placed = false
-      for (let i = 0; i < columns.length; i++) {
-        const lastEventInColumn = columns[i][columns[i].length - 1]
-        if (event.top >= (lastEventInColumn.top + lastEventInColumn.height)) {
-          columns[i].push(event)
-          event.column = i
-          placed = true
-          break
-        }
-      }
-      if (!placed) {
-        event.column = columns.length
-        columns.push([event])
-      }
-    })
-
-    dayEvents.forEach(event => {
-      const totalColumns = columns.length
-      event.width = 100 / totalColumns
-      event.left = event.column * event.width
-      results.push(event)
-    })
-  })
-
-  return results
-})
-</script>
-
-
 <template>
-  <div class="calendar-grid">
-    <div class="time-scale">
-      <div v-for="(time, index) in timeSlots" :key="index" class="time-slot" :style="{ height: `${HOUR_HEIGHT}px` }">
-        {{ time }}
+  <div class="calendar-container">
+    <!-- Optional: Steuerelemente für Navigation und View-Wechsel -->
+    <div class="controls flex justify-between mb-2">
+      <div>
+        <button @click="prev">&laquo; Zurück</button>
+        <button @click="today">Heute</button>
+        <button @click="next">Vor &raquo;</button>
+      </div>
+      <div>
+        <select v-model="currentView">
+          <option value="day">Tag</option>
+          <option value="week">Woche</option>
+        </select>
       </div>
     </div>
 
-    <div v-for="(day, dayIndex) in days" :key="dayIndex" class="day-column">
-      <div class="day-header">
-        {{ format(day, 'EEE d', { locale: de }) }}
-      </div>
-
-      <div class="day-content" :style="{ height: `${(22 - START_HOUR) * HOUR_HEIGHT}px` }">
-        <div v-for="event in positionedEvents.filter(e => e.dayIndex === dayIndex)" :key="event.id"
-          class="calendar-event" :class="{ 'current-user': event.isCurrentUser, 'other-user': !event.isCurrentUser }"
-          :style="{
-            top: `${event.top}px`,
-            height: `${event.height}px`,
-            left: `${event.left}%`,
-            width: `${event.width}%`,
-            backgroundColor: event.color
-          }">
-          <div class="event-time">{{ event.start }} - {{ event.end }}</div>
-          <div class="event-title">
-            {{ event.title }}
-            <span v-if="!event.isCurrentUser" class="user-label">(Anderer Nutzer)</span>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- Kalender-Komponente -->
+    <TuiCalendar ref="calendarRef"
+                :view="currentView"
+                :events="events"
+                :calendars="calendars"
+                :use-detail-popup="true"
+                :isReadOnly="true"
+                :week="calendarOptions.week"
+                :timezone="calendarOptions.timezone"
+                class="w-full" />
   </div>
 </template>
 
-<style scoped>
-.calendar-grid {
-  display: grid;
-  grid-template-columns: 60px repeat(7, 1fr);
-  font-family: Arial, sans-serif;
-}
+<script setup>
+// Importe
+import { ref, onMounted, watch } from 'vue';
+import TuiCalendar from 'toast-ui-calendar-vue3';
+import 'toast-ui-calendar-vue3/styles.css';
 
-@media (max-width: 1100px) {
-  .calendar-grid {
-    grid-template-columns: 40px repeat(auto-fit, minmax(120px, 1fr));
+// Reactive States
+const currentView = ref('week');        // aktuelle Ansicht: 'day' oder 'week'
+const events = ref([]);                // Reservierungs-Events für den Kalender
+const selectedBoatId = ref(null);      // Filter: gewählte Boots-ID (oder null für alle)
+const calendarRef = ref(null);         // Ref auf das Calendar-Instanz-Objekt
+
+// Kalender-Optionen (z.B. Wochenansicht-Einstellungen, Zeitzone)
+const calendarOptions = {
+  week: {
+    startDayOfWeek: 1,       // Wochenstart am Montag
+    hourStart: 6, hourEnd: 22, // Zeige Zeitachse von 6:00 bis 22:00
+    narrowWeekend: false     // Wochenenden normal breit anzeigen (true würde sie schmaler darstellen)
+  },
+  timezone: {
+    zones: [ 
+      { timezoneName: 'Europe/Berlin', displayLabel: 'MEZ' } 
+    ]
   }
+};
 
-  .day-header {
-    font-size: 10px;
-    padding: 4px;
+// Kalender-"Kalender" definieren (für Farbzuweisung nach Kategorie)
+const calendars = [
+  {
+    id: 'mine',
+    name: 'Meine Reservierungen',
+    backgroundColor: '#34d399',   // grün (Tailwind emerald-400) für eigene Reservierungen
+    borderColor: '#34d399'
+  },
+  {
+    id: 'others',
+    name: 'Andere Reservierungen',
+    backgroundColor: '#3b82f6',   // blau (Tailwind blue-500) für Reservierungen anderer Nutzer
+    borderColor: '#3b82f6'
+  },
+  {
+    id: 'cancelled',
+    name: 'Storniert',
+    backgroundColor: '#9ca3af',   // grau (Tailwind gray-400) für stornierte Einträge
+    borderColor: '#9ca3af'
   }
+];
 
-  .time-slot {
-    font-size: 10px;
-    padding-right: 4px;
-  }
-
-  .event-time,
-  .event-title {
-    font-size: 10px;
-  }
+// Hilfsfunktion: Events von API laden basierend auf sichtbarem Zeitraum
+async function loadEventsForRange(rangeStart, rangeEnd) {
+  const boatFilter = selectedBoatId.value ? `&boatId=${selectedBoatId.value}` : '';
+  const url = `/api/reservations?start=${rangeStart.toISOString()}&end=${rangeEnd.toISOString()}${boatFilter}`;
+  const response = await fetch(url);
+  const data = await response.json();
+  // API-Daten in Calendar-Event-Objekte umwandeln:
+  events.value = data.map(res => ({
+    id: res.id,
+    calendarId: res.status === 'cancelled' ? 'cancelled' 
+                  : (res.userId === currentUserId ? 'mine' : 'others'), 
+    title: res.boatName + ' – ' + res.licensePlate,  // z.B. "Boot ABC – ZH1234"
+    start: res.startDate,  // ISO-Strings oder Date-Objekte
+    end: res.endDate,
+    isReadOnly: true       // sicherstellen, dass dieser Termin nicht bearbeitbar ist
+  }));
 }
 
-.time-scale {
-  grid-column: 1;
-  position: sticky;
-  left: 0;
-  background: white;
-  z-index: 2;
+// Funktion, um basierend auf aktueller View den Zeitraum zu ermitteln und Events zu laden
+function refreshEvents() {
+  const calInstance = calendarRef.value?.getInstance();
+  if (!calInstance) return;
+  const rangeStart = calInstance.getDateRangeStart();
+  const rangeEnd   = calInstance.getDateRangeEnd();
+  loadEventsForRange(rangeStart, rangeEnd);
 }
 
-.time-slot {
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-end;
-  padding-right: 8px;
-  box-sizing: border-box;
-  border-bottom: 1px solid #eee;
-  font-size: 12px;
-  color: #666;
-}
+// Initial laden beim Mounten der Komponente:
+onMounted(() => {
+  refreshEvents();
+});
 
-.day-column {
-  border-right: 1px solid #eee;
-}
+// Neuladen, wenn die gefilterte Boots-ID wechselt:
+watch(selectedBoatId, () => {
+  refreshEvents();
+});
 
-.day-header {
-  padding: 8px;
-  text-align: center;
-  font-weight: bold;
-  border-bottom: 1px solid #eee;
-  position: sticky;
-  top: 0;
-  background: white;
-  z-index: 1;
+// Navigations- und View-Wechsel-Methoden:
+function prev() {
+  calendarRef.value.getInstance().prev();
+  refreshEvents();
 }
-
-.day-content {
-  position: relative;
+function next() {
+  calendarRef.value.getInstance().next();
+  refreshEvents();
 }
-
-.calendar-event {
-  position: absolute;
-  left: 2px;
-  right: 2px;
-  border-radius: 4px;
-  padding: 4px;
-  color: white;
-  font-size: 12px;
-  overflow: hidden;
-  box-sizing: border-box;
-  transition: all 0.2s ease;
+function today() {
+  calendarRef.value.getInstance().today();
+  refreshEvents();
 }
-
-.calendar-event:hover {
-  transform: scale(1.01);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  z-index: 2;
-}
-
-.current-user {
-  background-color: #4CAF50;
-  /* Green */
-}
-
-.other-user {
-  background-color: #2196F3;
-  /* Blue */
-}
-
-.event-time {
-  font-weight: bold;
-  font-size: 11px;
-}
-
-.event-title {
-  margin-top: 2px;
-  font-size: 11px;
-}
-
-.user-label {
-  font-style: italic;
-  font-size: 10px;
-  opacity: 0.8;
-}
-</style>
+</script>

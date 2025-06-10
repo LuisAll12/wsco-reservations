@@ -87,8 +87,8 @@ export const FinishAuth: RequestHandler = async (req, res) => {
 
         res.cookie("auth_token", sessionKey, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "none"
+            secure: process.env.NODE_ENV === "production" || false,
+            sameSite: "strict",
         });
 
 
