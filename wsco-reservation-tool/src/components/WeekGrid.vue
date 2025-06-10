@@ -8,7 +8,7 @@
           <span>Heute</span>
         </button>
 
-        <button @click="prev" class="btn-icon" aria-label="Zurück">
+        <button @click="prev" class="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition" aria-label="Zurück">
           <ChevronLeftIcon class="w-5 h-5" />
         </button>
 
@@ -16,7 +16,7 @@
           {{ currentMonthLabel }}
         </div>
 
-        <button @click="next" class="btn-icon" aria-label="Weiter">
+        <button @click="next" class="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition" aria-label="Weiter">
           <ChevronRightIcon class="w-5 h-5" />
         </button>
       </div>
@@ -247,11 +247,4 @@ function delayedRefresh() {
   overflow: hidden;
 }
 
-.btn {
-  @apply inline-flex items-center px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-sm rounded-md transition;
-}
-
-.btn-icon {
-  @apply p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition;
-}
 </style>
