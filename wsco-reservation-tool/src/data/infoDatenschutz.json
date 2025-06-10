@@ -1,0 +1,26 @@
+{
+    "title": "Datenschutzerklärung",
+    "sections": [
+        {
+            "title": "1. Allgemeine Hinweise",
+            "content": [
+                "Der Schutz Ihrer persönlichen Daten ist uns ein besonderes Anliegen.",
+                "Wir behandeln Ihre personenbezogenen Daten vertraulich und entsprechend der gesetzlichen Datenschutzvorschriften."
+            ]
+        },
+        {
+            "title": "2. Erhebung und Verarbeitung von Daten",
+            "content": [
+                "Personenbezogene Daten werden nur erhoben, wenn Sie uns diese im Rahmen einer Anfrage mitteilen.",
+                "Diese Daten werden ohne Ihre ausdrückliche Zustimmung nicht an Dritte weitergegeben."
+            ]
+        },
+        {
+            "title": "3. Rechte der betroffenen Person",
+            "content": [
+                "Sie haben das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung Ihrer personenbezogenen Daten.",
+                "Wenden Sie sich dazu bitte an die im Impressum genannte Kontaktadresse."
+            ]
+        }
+    ]
+}
