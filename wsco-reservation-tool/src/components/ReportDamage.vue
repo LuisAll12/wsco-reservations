@@ -31,15 +31,25 @@ async function submitDamageReport() {
     const selected = reservations.value.find(r => r.id === selectedReservationId.value)
     const user = await getCurrentUserFromSession()
 
-    const fields = {
-        Type:          type.value,
-        Reason:        reason.value.trim(),
-        Description:   description.value.trim(),
-        Reservation:   [ selected.id ],   // Link zu Reservation-Tabelle
-        CreatedPerson: [ user.id ]        // Link zu User-Tabelle
-        };
+    const payload = {
+      Type: type.value,
+      Reason: reason.value.trim(),
+      Description: description.value.trim(),
+      Reservation: [selected.id],   // Referenz auf Reservation
+      CreatedPerson: [user.id]      // Referenz auf User
+    }
 
-    await createDamageReport(fields)
+    const res = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/damage-report`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify(payload)
+    })
+
+    if (!res.ok) throw new Error(`Serverantwort: ${res.status}`)
+
     alert('Schadensmeldung erfolgreich gesendet.')
 
     // Reset
@@ -48,12 +58,13 @@ async function submitDamageReport() {
     description.value = ''
     selectedReservationId.value = ''
   } catch (err) {
-    console.error(err)
+    console.error('Fehler beim Senden der Schadensmeldung:', err)
     alert('Fehler beim Senden der Schadensmeldung.')
   } finally {
     isSubmitting.value = false
   }
 }
+
 
 async function getBoatById(id) {
   const res = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat/${id}`, {
