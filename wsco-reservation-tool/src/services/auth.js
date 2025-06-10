@@ -102,3 +102,27 @@ export async function getBoatName(boatID) {
     }
     return false;
 }
+
+export async function getUserName() {
+    try {
+        const url = `${import.meta.env.VITE_APP_BACKEND_BASEURL}/auth/session`;
+        const headers = {
+            "Content-Type": "application/json"
+        };
+
+        const response = await fetch(url, {
+            method: "GET",
+            headers,
+            credentials: "include",
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            return data ? data.firstName : null;
+        }
+        return false;
+    } catch (error) {
+        console.error("Error checking authentication:", error);
+        return false;
+    }
+}
