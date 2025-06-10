@@ -33,11 +33,16 @@
 import { ref, onMounted, watch } from 'vue';
 import TuiCalendar from 'toast-ui-calendar-vue3';
 import 'toast-ui-calendar-vue3/styles.css';
+import { getReservations } from '../services/GetAllRes.js'
+import { getUserID } from '../services/auth.js'
 
-const currentView = ref('week');
-const events = ref([]);
-const selectedBoatId = ref(null);
+
+// Reactive States
+const currentView = ref('week');        // aktuelle Ansicht: 'day' oder 'week'
+const events = ref([]);                // Reservierungs-Events für den Kalender
+const selectedBoatId = ref(null);      // Filter: gewählte Boots-ID (oder null für alle)
 const calendarRef = ref(null);
+const currentUserId = ref(null)
 
 // Dynamisch den View an Bildschirm anpassen
 function updateResponsiveView() {
@@ -51,13 +56,13 @@ window.addEventListener('resize', updateResponsiveView);
 const calendarOptions = {
   week: {
     startDayOfWeek: 1,
-    hourStart: 6,
-    hourEnd: 22,
+    hourStart: 4,
+    hourEnd: 23,
     narrowWeekend: false,
     showTimezoneCollapseButton: false,
-    eventView: ['time'],       // nur Zeitansicht
-    taskView: false,           // keine Tasks
-    milestoneView: false,      // keine Meilensteine
+    eventView: ['time'],
+    taskView: false,
+    milestoneView: false,
     dayNames: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa']
   },
   day: {
@@ -107,38 +112,31 @@ const calendars = [
   }
 ];
 
-// Events laden
-async function loadEventsForRange(rangeStart, rangeEnd) {
-  const start = rangeStart instanceof Date ? rangeStart : new Date(rangeStart.toDate?.() || rangeStart);
-  const end = rangeEnd instanceof Date ? rangeEnd : new Date(rangeEnd.toDate?.() || rangeEnd);
 
-  const boatFilter = selectedBoatId.value ? `&boatId=${selectedBoatId.value}` : '';
-  const url = `${import.meta.env.VITE_APP_BACKEND_BASEURL}/reservation?start=${start.toISOString()}&end=${end.toISOString()}${boatFilter}`;
-  const response = await fetch(url);
-  const data = await response.json();
-  console.log('Loaded events:', data);
+// Funktion, um basierend auf aktueller View den Zeitraum zu ermitteln und Events zu laden
+async function refreshEvents() {
+  const calInstance = calendarRef.value?.getInstance();
+  if (!calInstance) return;
+  const rangeStart = calInstance.getDateRangeStart();
+  const rangeEnd = calInstance.getDateRangeEnd();
+  console.log(rangeStart + "+" + rangeEnd)
+
+  const data = await getReservations(rangeStart, rangeEnd, selectedBoatId.value ? selectedBoatId.value : null)
   events.value = data.map(res => ({
     id: res.id,
-    calendarId: res.status === 'cancelled' ? 'cancelled' : (res.userId === currentUserId ? 'mine' : 'others'),
-    title: `${res.boatName} – ${res.licensePlate}`,
-    start: res.startDate,
+    calendarId: res.status === 'cancelled' ? 'cancelled'
+      : (res.FK_UserId._path.segments[1] === currentUserId.value ? 'mine' : 'others'),
+    title: "test",  // z.B. "Boot ABC – ZH1234"
+    start: res.startDate,  // ISO-Strings oder Date-Objekte
     end: res.endDate,
     isReadOnly: true
   }));
 }
 
 
-// Sichtbaren Zeitraum bestimmen und Events laden
-function refreshEvents() {
-  const calInstance = calendarRef.value?.getInstance();
-  if (!calInstance) return;
-  const rangeStart = calInstance.getDateRangeStart();
-  const rangeEnd = calInstance.getDateRangeEnd();
-  loadEventsForRange(rangeStart, rangeEnd);
-}
-
-onMounted(() => {
-  updateResponsiveView(); // Initialer Check
+// Initial laden beim Mounten der Komponente:
+onMounted(async () => {
+  currentUserId.value = (await getUserID())
   refreshEvents();
 });
 
