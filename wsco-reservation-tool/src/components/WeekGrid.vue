@@ -44,7 +44,6 @@ function updateResponsiveView() {
 
 window.addEventListener('resize', updateResponsiveView);
 
-// Kalender-Konfiguration
 const calendarOptions = {
   week: {
     startDayOfWeek: 1,
@@ -55,14 +54,30 @@ const calendarOptions = {
     eventView: ['time'],
     taskView: false,
     milestoneView: false,
-    dayNames: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa']
+    dayNames: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
+    template: {
+      time: schedule => {
+        const start = new Date(schedule.start);
+        const h = String(start.getHours()).padStart(2, '0');
+        const m = String(start.getMinutes()).padStart(2, '0');
+        return `${h}:${m}`;
+      }
+    }
   },
   day: {
     hourStart: 4,
     hourEnd: 23,
     eventView: ['time'],
     taskView: false,
-    milestoneView: false
+    milestoneView: false,
+    template: {
+      time: schedule => {
+        const start = new Date(schedule.start);
+        const h = String(start.getHours()).padStart(2, '0');
+        const m = String(start.getMinutes()).padStart(2, '0');
+        return `${h}:${m}`;
+      }
+    }
   },
   timezone: {
     zones: [{ timezoneName: 'Europe/Berlin', displayLabel: 'MEZ' }]
@@ -80,6 +95,7 @@ const calendarOptions = {
     }
   }
 };
+
 
 
 // Kalender-Definitionen
