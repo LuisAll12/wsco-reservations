@@ -54,6 +54,21 @@ const routes = [
             }
         ]
     },
+    {
+        path: '/impressum',
+        name: 'Impressum',
+        component: () => import(/* webpackChunkName: "Impressum" */ '../views/Impressum.vue')
+    },
+    {
+        path: '/datenschutz',
+        name: 'Datenschutz',
+        component: () => import(/* webpackChunkName: "Datenschutz" */ '../views/Datenschutz.vue')
+    },
+    {
+        path: '/agb',
+        name: 'AGB',
+        component: () => import(/* webpackChunkName: "AGB" */ '../views/AGB.vue')
+    }
 ];
 
 const router = createRouter({
