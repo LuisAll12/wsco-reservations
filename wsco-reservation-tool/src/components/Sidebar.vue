@@ -11,12 +11,13 @@ import {
 } from '@heroicons/vue/24/outline'
 
 import { defineProps, defineEmits, ref } from 'vue'
-import router from '../router/router'
+import { useRouter } from 'vue-router'
 import { logoutUser } from '../services/auth'
 
 const props = defineProps({ open: Boolean })
 const emit = defineEmits(['toggle'])
 
+const router = useRouter()
 const isAdmin = ref(router.hasRoute('admin'))
 
 async function logout() {
@@ -41,27 +42,41 @@ async function logout() {
         <span v-else class="text-sm font-bold tracking-wide">WS</span>
       </div>
 
+      <!-- Navigation -->
       <nav class="mt-4 px-2 space-y-1 text-sm">
-        <router-link to="/dashboard" class="sidebar-link">
-          <HomeIcon class="sidebar-icon" /> <span v-if="open">Dashboard</span>
+        <router-link to="/dashboard" class="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-slate-700 transition font-medium">
+          <HomeIcon class="w-6 h-6 text-slate-300" />
+          <span v-if="open">Dashboard</span>
         </router-link>
-        <router-link to="/dashboard/schaden-melden" class="sidebar-link">
-          <ExclamationTriangleIcon class="sidebar-icon" /> <span v-if="open">Schaden melden</span>
+
+        <router-link to="/dashboard/schaden-melden" class="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-slate-700 transition font-medium">
+          <ExclamationTriangleIcon class="w-6 h-6 text-slate-300" />
+          <span v-if="open">Schaden melden</span>
         </router-link>
-        <router-link to="/dashboard/unsere-boote" class="sidebar-link">
-          <LifebuoyIcon class="sidebar-icon" /> <span v-if="open">Unsere Boote</span>
+
+        <router-link to="/dashboard/unsere-boote" class="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-slate-700 transition font-medium">
+          <LifebuoyIcon class="w-6 h-6 text-slate-300" />
+          <span v-if="open">Unsere Boote</span>
         </router-link>
-        <router-link to="/dashboard/meine-reservierungen" class="sidebar-link">
-          <UserCircleIcon class="sidebar-icon" /> <span v-if="open">Meine Reservierungen</span>
+
+        <router-link to="/dashboard/meine-reservierungen" class="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-slate-700 transition font-medium">
+          <UserCircleIcon class="w-6 h-6 text-slate-300" />
+          <span v-if="open">Meine Reservierungen</span>
         </router-link>
-        <router-link v-if="isAdmin" to="/dashboard/admin" class="sidebar-link">
-          <WrenchScrewdriverIcon class="sidebar-icon" /> <span v-if="open">Admin Dashboard</span>
+
+        <router-link v-if="isAdmin" to="/dashboard/admin" class="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-slate-700 transition font-medium">
+          <WrenchScrewdriverIcon class="w-6 h-6 text-slate-300" />
+          <span v-if="open">Admin Dashboard</span>
         </router-link>
-        <router-link to="/dashboard/hilfe" class="sidebar-link">
-          <QuestionMarkCircleIcon class="sidebar-icon" /> <span v-if="open">Hilfe</span>
+
+        <router-link to="/dashboard/hilfe" class="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-slate-700 transition font-medium">
+          <QuestionMarkCircleIcon class="w-6 h-6 text-slate-300" />
+          <span v-if="open">Hilfe</span>
         </router-link>
-        <router-link to="/dashboard/settings" class="sidebar-link">
-          <Cog6ToothIcon class="sidebar-icon" /> <span v-if="open">Einstellungen</span>
+
+        <router-link to="/dashboard/settings" class="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-slate-700 transition font-medium">
+          <Cog6ToothIcon class="w-6 h-6 text-slate-300" />
+          <span v-if="open">Einstellungen</span>
         </router-link>
       </nav>
     </div>
@@ -72,23 +87,15 @@ async function logout() {
         @click="logout"
         class="w-full flex items-center gap-2 px-4 py-2 rounded-md bg-slate-700 hover:bg-slate-600 text-sm font-semibold"
       >
-        <ArrowLeftOnRectangleIcon class="sidebar-icon" /> <span v-if="open">Ausloggen</span>
+        <ArrowLeftOnRectangleIcon class="w-5 h-5 text-slate-300" />
+        <span v-if="open">Ausloggen</span>
       </button>
 
       <div class="mt-4 text-xs text-slate-400 border-t border-slate-700 pt-3 space-y-1">
-        <a v-if="open" href="/impressum" target="_blank" class="block hover:underline hover:text-slate-200">Impressum ↗</a>
-        <a v-if="open" href="/datenschutz" target="_blank" class="block hover:underline hover:text-slate-200">Datenschutz ↗</a>
-        <a v-if="open" href="/agb" target="_blank" class="block hover:underline hover:text-slate-200">Reservierungs-AGB ↗</a>
+        <router-link v-if="open" to="/impressum" class="block hover:underline hover:text-slate-200">Impressum ↗</router-link>
+        <router-link v-if="open" to="/datenschutz" class="block hover:underline hover:text-slate-200">Datenschutz ↗</router-link>
+        <router-link v-if="open" to="/agb" class="block hover:underline hover:text-slate-200">Reservierungs-AGB ↗</router-link>
       </div>
     </div>
   </aside>
 </template>
-
-<style scoped>
-.sidebar-link {
-  @apply flex items-center gap-3 px-4 py-2 rounded-md hover:bg-slate-700 transition font-medium;
-}
-.sidebar-icon {
-  @apply w-5 h-5 text-slate-300;
-}
-</style>

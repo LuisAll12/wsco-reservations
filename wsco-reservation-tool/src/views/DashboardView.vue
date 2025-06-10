@@ -16,40 +16,32 @@ onMounted(() => {
   handleResize()
   window.addEventListener('resize', handleResize)
 })
-
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
 })
 </script>
 
 <template>
-  <div class="relative min-h-screen bg-gray-100">
-    <div class="flex">
-      <Sidebar :open="isSidebarOpen" @toggle="toggleSidebar" />
+  <div class="relative min-h-screen bg-gray-100 flex">
+    <Sidebar :open="isSidebarOpen" @toggle="toggleSidebar" />
 
-      <!-- Main Content -->
-      <div class="flex-1 relative">
-        <!-- Toggle Button in der Mitte zwischen Sidebar und Content -->
-        <div
-          class="absolute z-40 top-4 transition-all duration-300"
-          :class="[
-            isSidebarOpen ? 'left-[280px]' : 'left-[60px]',
-            'md:left-[calc(50%-12px)]'
-          ]"
-        >
-          <button
-            @click="toggleSidebar"
-            class="bg-slate-800 text-white p-2 rounded-full shadow-lg"
-          >
-            <span v-if="!isSidebarOpen">☰</span>
-            <span v-else>✕</span>
-          </button>
-        </div>
-
-        <main class="p-4 transition-all duration-300 ease-in-out">
-          <router-view />
-        </main>
-      </div>
+    <!-- Toggle Button zwischen Sidebar und Main -->
+    <div
+      class="absolute top-4 z-50 transition-all duration-300"
+      :class="isSidebarOpen ? 'left-[270px]' : 'left-[60px]'"
+    >
+      <button
+        @click="toggleSidebar"
+        class="bg-slate-700 text-white p-2 rounded-full shadow-lg"
+      >
+        <span v-if="!isSidebarOpen">☰</span>
+        <span v-else>✕</span>
+      </button>
     </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-4 transition-all duration-300 ease-in-out">
+      <router-view />
+    </main>
   </div>
 </template>
