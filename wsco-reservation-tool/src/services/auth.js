@@ -59,3 +59,27 @@ export async function getUserRole() {
         console.error(e);
     }
 }
+
+export async function getUserID() {
+    try {
+        const url = `${import.meta.env.VITE_APP_BACKEND_BASEURL}/auth/session`;
+        const headers = {
+            "Content-Type": "application/json"
+        };
+
+        const response = await fetch(url, {
+            method: "GET",
+            headers,
+            credentials: "include",
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            return data ? data.id : null;
+        }
+        return false;
+    } catch (error) {
+        console.error("Error checking authentication:", error);
+        return false;
+    }
+}

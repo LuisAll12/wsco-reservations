@@ -26,78 +26,102 @@
 import { ref, onMounted, watch } from 'vue';
 import TuiCalendar from 'toast-ui-calendar-vue3';
 import 'toast-ui-calendar-vue3/styles.css';
+import { getReservations } from '../services/GetAllRes.js'
+import { getUserID } from '../services/auth.js'
+
 
 // Reactive States
 const currentView = ref('week');        // aktuelle Ansicht: 'day' oder 'week'
 const events = ref([]);                // Reservierungs-Events für den Kalender
 const selectedBoatId = ref(null);      // Filter: gewählte Boots-ID (oder null für alle)
-const calendarRef = ref(null);         // Ref auf das Calendar-Instanz-Objekt
+const calendarRef = ref(null);
+const currentUserId = ref(null)
 
 // Kalender-Optionen (z.B. Wochenansicht-Einstellungen, Zeitzone)
 const calendarOptions = {
   week: {
-    startDayOfWeek: 1,       // Wochenstart am Montag
-    hourStart: 6, hourEnd: 22, // Zeige Zeitachse von 6:00 bis 22:00
-    narrowWeekend: false     // Wochenenden normal breit anzeigen (true würde sie schmaler darstellen)
+    startDayOfWeek: 1,
+    hourStart: 4,
+    hourEnd: 23,
+    narrowWeekend: false,
+    showTimezoneCollapseButton: false,
+    eventView: ['time'],
+    taskView: false,
+    milestoneView: false,
+    dayNames: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa']
+  },
+  day: {
+    hourStart: 4,
+    hourEnd: 23,
+    eventView: ['time'],
+    taskView: false,
+    milestoneView: false
   },
   timezone: {
-    zones: [
-      { timezoneName: 'Europe/Berlin', displayLabel: 'MEZ' }
-    ]
+    zones: [{ timezoneName: 'Europe/Berlin', displayLabel: 'MEZ' }]
+  },
+  theme: {
+    week: {
+      eventView: ['time'],
+      taskView: false,
+      milestone: false
+    },
+    day: {
+      eventView: ['time'],
+      taskView: false,
+      milestone: false
+    }
   }
 };
 
-// Kalender-"Kalender" definieren (für Farbzuweisung nach Kategorie)
+
+// Kalender-Definitionen
 const calendars = [
   {
     id: 'mine',
     name: 'Meine Reservierungen',
-    backgroundColor: '#34d399',   // grün (Tailwind emerald-400) für eigene Reservierungen
+    backgroundColor: '#34d399',
     borderColor: '#34d399'
   },
   {
     id: 'others',
     name: 'Andere Reservierungen',
-    backgroundColor: '#3b82f6',   // blau (Tailwind blue-500) für Reservierungen anderer Nutzer
+    backgroundColor: '#3b82f6',
     borderColor: '#3b82f6'
   },
   {
     id: 'cancelled',
     name: 'Storniert',
-    backgroundColor: '#9ca3af',   // grau (Tailwind gray-400) für stornierte Einträge
+    backgroundColor: '#9ca3af',
     borderColor: '#9ca3af'
   }
 ];
 
-// Hilfsfunktion: Events von API laden basierend auf sichtbarem Zeitraum
-async function loadEventsForRange(rangeStart, rangeEnd) {
-  const boatFilter = selectedBoatId.value ? `&boatId=${selectedBoatId.value}` : '';
-  const url = `/api/reservations?start=${rangeStart.toISOString()}&end=${rangeEnd.toISOString()}${boatFilter}`;
-  const response = await fetch(url);
-  const data = await response.json();
-  // API-Daten in Calendar-Event-Objekte umwandeln:
+
+// Funktion, um basierend auf aktueller View den Zeitraum zu ermitteln und Events zu laden
+async function refreshEvents() {
+  const calInstance = calendarRef.value?.getInstance();
+  if (!calInstance) return;
+  const rangeStart = calInstance.getDateRangeStart();
+  const rangeEnd = calInstance.getDateRangeEnd();
+  console.log(rangeStart + "+" + rangeEnd)
+
+  const data = await getReservations(rangeStart, rangeEnd, selectedBoatId.value ? selectedBoatId.value : null)
   events.value = data.map(res => ({
     id: res.id,
     calendarId: res.status === 'cancelled' ? 'cancelled'
-      : (res.userId === currentUserId ? 'mine' : 'others'),
-    title: res.boatName + ' – ' + res.licensePlate,  // z.B. "Boot ABC – ZH1234"
+      : (res.FK_UserId._path.segments[1] === currentUserId.value ? 'mine' : 'others'),
+    title: "test",  // z.B. "Boot ABC – ZH1234"
     start: res.startDate,  // ISO-Strings oder Date-Objekte
     end: res.endDate,
     isReadOnly: true       // sicherstellen, dass dieser Termin nicht bearbeitbar ist
   }));
 }
 
-// Funktion, um basierend auf aktueller View den Zeitraum zu ermitteln und Events zu laden
-function refreshEvents() {
-  const calInstance = calendarRef.value?.getInstance();
-  if (!calInstance) return;
-  const rangeStart = calInstance.getDateRangeStart();
-  const rangeEnd = calInstance.getDateRangeEnd();
-  loadEventsForRange(rangeStart, rangeEnd);
-}
 
 // Initial laden beim Mounten der Komponente:
-onMounted(() => {
+onMounted(async () => {
+  currentUserId.value = (await getUserID())
   refreshEvents();
 });
 
