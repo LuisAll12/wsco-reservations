@@ -1,33 +1,25 @@
 <template>
-  <div class="calendar-container">
-    <div class="controls flex justify-between mb-2">
-      <div class="flex gap-2">
-        <button @click="prev">&laquo; Zurück</button>
-        <button @click="today">Heute</button>
-        <button @click="next">Vor &raquo;</button>
-      </div>
-      <div>
-        <select v-model="currentView">
-          <option value="day">Tagesansicht</option>
-          <option value="week">Wochenansicht</option>
-        </select>
-      </div>
+  <div class="calendar-wrapper h-screen flex flex-col">
+    <div class="controls flex justify-between p-2">
+      <!-- Navigationselemente -->
     </div>
-
-    <TuiCalendar
-      ref="calendarRef"
-      :view="currentView"
-      :events="events"
-      :calendars="calendars"
-      :use-detail-popup="true"
-      :isReadOnly="true"
-      :week="calendarOptions.week"
-      :timezone="calendarOptions.timezone"
-      :theme="calendarOptions.theme"
-      class="w-full"
-    />
+    <div class="calendar-container flex-1 overflow-auto">
+      <TuiCalendar
+        ref="calendarRef"
+        class="w-full h-[calc(100vh-48px)]"
+        :view="currentView"
+        :events="events"
+        :calendars="calendars"
+        :use-detail-popup="true"
+        :isReadOnly="true"
+        :week="calendarOptions.week"
+        :timezone="calendarOptions.timezone"
+        :theme="calendarOptions.theme"
+      />
+    </div>
   </div>
 </template>
+
 
 <script setup>
 import { ref, onMounted, watch } from 'vue';
@@ -136,8 +128,9 @@ async function refreshEvents() {
 
 // Initial laden beim Mounten der Komponente:
 onMounted(async () => {
-  currentUserId.value = (await getUserID())
-  refreshEvents();
+  currentUserId.value = await getUserID();
+  await refreshEvents();
+  calendarRef.value.getInstance().render(); // erzwinge Neuberechnung
 });
 
 watch(selectedBoatId, () => {
@@ -157,3 +150,10 @@ function today() {
   refreshEvents();
 }
 </script>
+<style scoped>
+.calendar-container {
+  flex-grow: 1;
+  height: calc(100vh - 48px); /* assuming 48px für controls oben */
+  overflow: hidden;
+}
+</style>
