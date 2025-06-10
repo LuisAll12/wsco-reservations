@@ -2,8 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Cookies from 'js-cookie';
 import { authCheck, getUserRole } from '../services/auth';
 
-
-const HomeView = () => import(/* webpackChunkName: "Home" */ '../views/Home.vue');
 const Login = () => import(/* webpackChunkName: "Login" */ '../views/Login.vue');
 const Dashboard = () => import(/* webpackChunkName: "Dashboard" */ '../views/DashboardView.vue');
 const ReportDamage = () => import(/* webpackChunkName: "ReportDamage" */ '../components/ReportDamage.vue');
@@ -11,6 +9,7 @@ const ClubBoats = () => import(/* webpackChunkName: "ClubBoats" */ '../component
 const MyReservations = () => import(/* webpackChunkName: "MyReservations" */ '../components/MyReservations.vue');
 const BoatDetail = () => import(/* webpackChunkName: "BoatDetail" */ '../components/BoatDetail.vue');
 const Calendar = () => import(/* webpackChunkName: "Dashboard" */ '../components/Calendar.vue')
+const Settings = () => import(/* webpackChunkName: "Settings" */ '../components/Settings.vue');
 
 const routes = [
     {
@@ -50,8 +49,8 @@ const routes = [
             },
             {
                 path: 'settings',
-                component: MyReservations
-            }
+                component: Settings
+            },
         ]
     },
     {
@@ -69,6 +68,7 @@ const routes = [
         name: 'AGB',
         component: () => import(/* webpackChunkName: "AGB" */ '../views/AGB.vue')
     }
+
 ];
 
 const router = createRouter({

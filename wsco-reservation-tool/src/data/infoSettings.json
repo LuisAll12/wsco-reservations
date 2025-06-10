@@ -1,0 +1,46 @@
+{
+    "title": "Einstellungen",
+    "sections": [
+        {
+            "title": "Allgemein",
+            "items": [
+                "Sprache wählen (Dropdown)",
+                "Theme umschalten (Hell / Dunkel)",
+                "Benutzerinformationen anzeigen"
+            ]
+        },
+        {
+            "title": "Datenschutz",
+            "items": [
+                "Lokale Daten anzeigen",
+                "Lokale Daten löschen",
+                "Cookies anzeigen",
+                "Datenschutzerklärung öffnen",
+                "Impressum öffnen"
+            ]
+        },
+        {
+            "title": "Sicherheit",
+            "items": [
+                "Passwort ändern (optional)",
+                "2-Faktor-Authentifizierung aktivieren (zukünftig)",
+                "Session-Details anzeigen"
+            ]
+        },
+        {
+            "title": "Benachrichtigungen",
+            "items": [
+                "E-Mail-Benachrichtigungen ein-/ausschalten",
+                "Push-Nachrichten aktivieren (zukünftig)"
+            ]
+        },
+        {
+            "title": "Account",
+            "items": [
+                "Profilbild ändern (optional)",
+                "Konto löschen (mit Warnung)",
+                "Logout"
+            ]
+        }
+    ]
+}
