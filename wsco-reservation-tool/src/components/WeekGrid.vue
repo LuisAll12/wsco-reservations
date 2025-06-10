@@ -166,8 +166,6 @@ async function refreshEvents() {
   if (!calInstance) return;
   const rangeStart = calInstance.getDateRangeStart();
   const rangeEnd = calInstance.getDateRangeEnd();
-  console.log(rangeStart + "+" + rangeEnd)
-console.log('Start:', rangeStart.toDate?.(), 'End:', rangeEnd.toDate?.());
   const data = await getReservations(rangeStart, rangeEnd, selectedBoatId.value ? selectedBoatId.value : null)
 
   events.value = await Promise.all(data.map(async res => {
