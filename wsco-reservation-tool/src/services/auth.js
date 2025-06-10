@@ -83,3 +83,22 @@ export async function getUserID() {
         return false;
     }
 }
+
+export async function getBoatName(boatID) {
+    const url = `${import.meta.env.VITE_APP_BACKEND_BASEURL}/boat/${boatID}`;
+    const headers = {
+        "Content-Type": "application/json"
+    };
+
+    const response = await fetch(url, {
+        method: "GET",
+        headers,
+        credentials: "include",
+    });
+
+    if (response.ok) {
+        const data = await response.json();
+        return data ? data.name : null;
+    }
+    return false;
+}
