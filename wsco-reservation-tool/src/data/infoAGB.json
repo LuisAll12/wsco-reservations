@@ -1,0 +1,48 @@
+{
+    "title": "Allgemeine Geschäftsbedingungen (AGB)",
+    "sections": [
+        {
+            "title": "1. Geltungsbereich",
+            "content": [
+                "Diese Allgemeinen Geschäftsbedingungen (AGB) regeln die Nutzung und die Buchung über die Webseite WSCO Reservationen durch Besucher, Nutzer und Kunden.",
+                "Betreiber der Plattform ist eine Privatperson mit Sitz in Luzern, Schweiz."
+            ]
+        },
+        {
+            "title": "2. Leistungen",
+            "content": [
+                "Über diese Webseite können Boote oder andere Freizeitressourcen reserviert werden.",
+                "Die Verfügbarkeit wird über das System angezeigt und ist nach Bestätigung verbindlich."
+            ]
+        },
+        {
+            "title": "3. Reservierung und Stornierung",
+            "content": [
+                "Reservierungen können über die Webseite vorgenommen werden.",
+                "Eine Stornierung ist bis 24 Stunden vor Terminbeginn kostenlos möglich.",
+                "Spätere Absagen oder Nichterscheinen können zu einer Sperrung führen."
+            ]
+        },
+        {
+            "title": "4. Haftung",
+            "content": [
+                "Der Betreiber haftet nicht für Schäden, die durch unsachgemäße Nutzung entstehen.",
+                "Der Nutzer verpflichtet sich zur pfleglichen Behandlung der gemieteten Ressourcen."
+            ]
+        },
+        {
+            "title": "5. Datenschutz",
+            "content": [
+                "Es gelten die Datenschutzbestimmungen gemäß DSG/DSGVO.",
+                "Personenbezogene Daten werden nur zur Abwicklung der Reservierung verwendet."
+            ]
+        },
+        {
+            "title": "6. Schlussbestimmungen",
+            "content": [
+                "Es gilt Schweizer Recht. Gerichtsstand ist Luzern.",
+                "Sollten einzelne Klauseln unwirksam sein, bleibt die Wirksamkeit der übrigen Bestimmungen unberührt."
+            ]
+        }
+    ]
+}
