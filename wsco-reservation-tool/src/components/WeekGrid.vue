@@ -28,11 +28,28 @@
 
     <!-- Kalender -->
     <div class="calendar-container flex-1 overflow-hidden">
-      <TuiCalendar ref="calendarRef" class="w-full h-full" :view="currentView" :events="events" :calendars="calendars"
-        :use-detail-popup="true" :isReadOnly="true" :week="calendarOptions.week" :day="calendarOptions.day"
-        :timezone="calendarOptions.timezone" :theme="calendarOptions.theme" />
+      <TuiCalendar 
+        ref="calendarRef" 
+        class="w-full h-full" 
+        :view="currentView" 
+        :events="events" 
+        :calendars="calendars"
+        :use-detail-popup="false" 
+        :isReadOnly="true" 
+        :week="calendarOptions.week" 
+        :day="calendarOptions.day"
+        :timezone="calendarOptions.timezone" 
+        :theme="calendarOptions.theme" 
+        @clickSchedule="onClickEvent"/>
     </div>
   </div>
+
+  <EventDetailModal 
+    v-if="showModal" 
+    :event="selectedEvent" 
+    @close="showModal = false"
+    @edit="editEvent"
+  />
 </template>
 
 
@@ -46,6 +63,7 @@ import 'toast-ui-calendar-vue3/styles.css';
 import { getReservations } from '../services/GetAllRes.js'
 import { getUserID, getBoatName } from '../services/auth.js'
 import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/24/outline';
+import EventDetailModal from './EventDetailModal.vue';
 
 // Reactive States
 const currentView = ref('week');        // aktuelle Ansicht: 'day' oder 'week'
@@ -54,6 +72,9 @@ const selectedBoatId = ref(null);      // Filter: gewählte Boots-ID (oder null 
 const calendarRef = ref(null);
 const currentUserId = ref(null)
 const currentDate = ref(new Date());
+const selectedEvent = ref(null)
+const showModal = ref(false)
+
 
 const currentViewLabel = computed(() => {
   switch (currentView.value) {
@@ -72,6 +93,11 @@ const currentMonthLabel = computed(() => {
     year: 'numeric'
   });
 });
+
+function onClickEvent({ schedule }) {
+  selectedEvent.value = schedule
+  showModal.value = true
+}
 
 // Dynamisch den View an Bildschirm anpassen
 function updateResponsiveView() {
