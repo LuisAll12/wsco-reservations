@@ -90,7 +90,6 @@ function deleteAccount() {
     <section>
       <h2 class="text-xl font-semibold mb-3">Account</h2>
       <div class="space-y-3">
-        <button disabled class="settings-btn opacity-50 cursor-not-allowed">Profilbild ändern (bald verfügbar)</button>
         <button @click="deleteAccount" class="settings-btn bg-red-600 hover:bg-red-700 text-white">Konto löschen</button>
         <button @click="logout" class="settings-btn bg-slate-800 text-white hover:bg-slate-700">Logout</button>
       </div>
