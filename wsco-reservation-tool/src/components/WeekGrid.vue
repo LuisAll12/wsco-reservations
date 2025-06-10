@@ -16,15 +16,8 @@
     </div>
 
     <!-- Kalender-Komponente -->
-    <TuiCalendar ref="calendarRef"
-                :view="currentView"
-                :events="events"
-                :calendars="calendars"
-                :use-detail-popup="true"
-                :isReadOnly="true"
-                :week="calendarOptions.week"
-                :timezone="calendarOptions.timezone"
-                class="w-full" />
+    <TuiCalendar ref="calendarRef" :view="currentView" :events="events" :calendars="calendars" :use-detail-popup="true"
+      :isReadOnly="true" :week="calendarOptions.week" :timezone="calendarOptions.timezone" class="w-full" />
   </div>
 </template>
 
@@ -48,8 +41,8 @@ const calendarOptions = {
     narrowWeekend: false     // Wochenenden normal breit anzeigen (true würde sie schmaler darstellen)
   },
   timezone: {
-    zones: [ 
-      { timezoneName: 'Europe/Berlin', displayLabel: 'MEZ' } 
+    zones: [
+      { timezoneName: 'Europe/Berlin', displayLabel: 'MEZ' }
     ]
   }
 };
@@ -85,8 +78,8 @@ async function loadEventsForRange(rangeStart, rangeEnd) {
   // API-Daten in Calendar-Event-Objekte umwandeln:
   events.value = data.map(res => ({
     id: res.id,
-    calendarId: res.status === 'cancelled' ? 'cancelled' 
-                  : (res.userId === currentUserId ? 'mine' : 'others'), 
+    calendarId: res.status === 'cancelled' ? 'cancelled'
+      : (res.userId === currentUserId ? 'mine' : 'others'),
     title: res.boatName + ' – ' + res.licensePlate,  // z.B. "Boot ABC – ZH1234"
     start: res.startDate,  // ISO-Strings oder Date-Objekte
     end: res.endDate,
@@ -99,7 +92,7 @@ function refreshEvents() {
   const calInstance = calendarRef.value?.getInstance();
   if (!calInstance) return;
   const rangeStart = calInstance.getDateRangeStart();
-  const rangeEnd   = calInstance.getDateRangeEnd();
+  const rangeEnd = calInstance.getDateRangeEnd();
   loadEventsForRange(rangeStart, rangeEnd);
 }
 

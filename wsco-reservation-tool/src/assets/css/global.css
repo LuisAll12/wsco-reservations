@@ -1,18 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
-body, html {
-    font-family: "Roboto", serif;
-    font-optical-sizing: auto;
-    font-weight: 700;
-    font-style: normal;
-    margin: 0;
-    padding: 0;
-}
-#app {
-    margin: 0;
-    padding: 0;
-  }
+@import "tailwindcss";
 
-  :root {
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
+body,
+html {
+  font-family: "Roboto", serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+  margin: 0;
+  padding: 0;
+}
+
+#app {
+  margin: 0;
+  padding: 0;
+}
+
+:root {
   --sidebar-width: 240px;
 }
 
