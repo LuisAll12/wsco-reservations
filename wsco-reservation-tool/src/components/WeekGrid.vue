@@ -61,8 +61,8 @@ const calendarOptions = {
     dayNames: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa']
   },
   day: {
-    hourStart: 6,
-    hourEnd: 22,
+    hourStart: 4,
+    hourEnd: 23,
     eventView: ['time'],
     taskView: false,
     milestoneView: false
@@ -109,11 +109,14 @@ const calendars = [
 
 // Events laden
 async function loadEventsForRange(rangeStart, rangeEnd) {
+  const start = rangeStart instanceof Date ? rangeStart : new Date(rangeStart.toDate?.() || rangeStart);
+  const end = rangeEnd instanceof Date ? rangeEnd : new Date(rangeEnd.toDate?.() || rangeEnd);
+
   const boatFilter = selectedBoatId.value ? `&boatId=${selectedBoatId.value}` : '';
-  const url = `/api/reservations?start=${rangeStart.toISOString()}&end=${rangeEnd.toISOString()}${boatFilter}`;
+  const url = `${import.meta.env.VITE_APP_BACKEND_BASEURL}/reservation?start=${start.toISOString()}&end=${end.toISOString()}${boatFilter}`;
   const response = await fetch(url);
   const data = await response.json();
-
+  console.log('Loaded events:', data);
   events.value = data.map(res => ({
     id: res.id,
     calendarId: res.status === 'cancelled' ? 'cancelled' : (res.userId === currentUserId ? 'mine' : 'others'),
@@ -123,6 +126,7 @@ async function loadEventsForRange(rangeStart, rangeEnd) {
     isReadOnly: true
   }));
 }
+
 
 // Sichtbaren Zeitraum bestimmen und Events laden
 function refreshEvents() {
