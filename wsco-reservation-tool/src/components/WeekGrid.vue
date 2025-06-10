@@ -2,14 +2,20 @@
   <div class="calendar-wrapper h-screen flex flex-col bg-gray-50">
     <!-- UI-konforme Navigation -->
     <nav class="calendar-controls flex justify-between items-center px-6 py-3 bg-white border-b shadow-sm">
-      <div class="flex items-center space-x-2">
+      <div class="flex items-center space-x-4">
         <button @click="today" class="flex items-center gap-2 px-3 py-1.5 rounded-md bg-gray-100 hover:bg-gray-200 text-sm font-medium transition">
           <CalendarIcon class="w-4 h-4" />
           <span>Heute</span>
         </button>
+
         <button @click="prev" class="btn-icon" aria-label="Zurück">
           <ChevronLeftIcon class="w-5 h-5" />
         </button>
+
+        <div class="min-w-[120px] text-center text-sm font-semibold text-gray-800">
+          {{ currentMonthLabel }}
+        </div>
+
         <button @click="next" class="btn-icon" aria-label="Weiter">
           <ChevronRightIcon class="w-5 h-5" />
         </button>
@@ -44,7 +50,7 @@
 
 
 <script setup>
-import { ref, onMounted, watch, computed  } from 'vue';
+import { ref, onMounted, watch, computed, nextTick  } from 'vue';
 import TuiCalendar from 'toast-ui-calendar-vue3';
 import 'toast-ui-calendar-vue3/styles.css';
 import { getReservations } from '../services/GetAllRes.js'
@@ -67,6 +73,18 @@ const currentViewLabel = computed(() => {
     default:
       return currentView.value;
   }
+});
+
+const currentMonthLabel = computed(() => {
+  const calInstance = calendarRef.value?.getInstance();
+  if (!calInstance) return '';
+  const momentDate = calInstance.getDate();
+  const jsDate = momentDate.toDate(); // moment → Date
+
+  return jsDate.toLocaleDateString('de-DE', {
+    month: 'long',
+    year: 'numeric'
+  });
 });
 
 
@@ -158,12 +176,13 @@ const calendars = [
 
 // Funktion, um basierend auf aktueller View den Zeitraum zu ermitteln und Events zu laden
 async function refreshEvents() {
+  
   const calInstance = calendarRef.value?.getInstance();
   if (!calInstance) return;
   const rangeStart = calInstance.getDateRangeStart();
   const rangeEnd = calInstance.getDateRangeEnd();
   console.log(rangeStart + "+" + rangeEnd)
-
+console.log('Start:', rangeStart.toDate?.(), 'End:', rangeEnd.toDate?.());
   const data = await getReservations(rangeStart, rangeEnd, selectedBoatId.value ? selectedBoatId.value : null)
 
   events.value = await Promise.all(data.map(async res => {
@@ -195,16 +214,34 @@ watch(selectedBoatId, () => {
 
 function prev() {
   calendarRef.value.getInstance().prev();
-  refreshEvents();
+  delayedRefresh();
 }
+
 function next() {
   calendarRef.value.getInstance().next();
-  refreshEvents();
+  delayedRefresh();
 }
+
 function today() {
   calendarRef.value.getInstance().today();
-  refreshEvents();
+  delayedRefresh();
 }
+
+function delayedRefresh() {
+  // Nach kurzer Verzögerung den neuen Bereich holen
+  setTimeout(() => {
+    const calInstance = calendarRef.value?.getInstance();
+    if (!calInstance) return;
+
+    const currentStart = calInstance.getDateRangeStart();
+    const currentEnd = calInstance.getDateRangeEnd();
+
+    console.log('New range:', currentStart?.toDate?.(), '-', currentEnd?.toDate?.());
+
+    refreshEvents(); // Jetzt korrekt
+  }, 50); // 50ms ist ausreichend
+}
+
 </script>
 <style scoped>
 .calendar-container {
