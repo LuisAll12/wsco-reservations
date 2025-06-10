@@ -24,23 +24,32 @@ onUnmounted(() => {
 
 <template>
   <div class="relative min-h-screen bg-gray-100">
-    <!-- Toggle Button (immer sichtbar, mittig) -->
-    <div class="fixed z-50 top-1/2 -translate-y-1/2 left-2">
-      <button
-        @click="toggleSidebar"
-        class="bg-slate-800 text-white p-2 rounded-full shadow-lg"
-      >
-        <span v-if="!isSidebarOpen">☰</span>
-        <span v-else>✕</span>
-      </button>
-    </div>
-
-    <!-- Layout -->
     <div class="flex">
-      <Sidebar :open="isSidebarOpen" />
-      <main class="flex-1 p-4 transition-all duration-300 ease-in-out">
-        <router-view />
-      </main>
+      <Sidebar :open="isSidebarOpen" @toggle="toggleSidebar" />
+
+      <!-- Main Content -->
+      <div class="flex-1 relative">
+        <!-- Toggle Button in der Mitte zwischen Sidebar und Content -->
+        <div
+          class="absolute z-40 top-4 transition-all duration-300"
+          :class="[
+            isSidebarOpen ? 'left-[280px]' : 'left-[60px]',
+            'md:left-[calc(50%-12px)]'
+          ]"
+        >
+          <button
+            @click="toggleSidebar"
+            class="bg-slate-800 text-white p-2 rounded-full shadow-lg"
+          >
+            <span v-if="!isSidebarOpen">☰</span>
+            <span v-else>✕</span>
+          </button>
+        </div>
+
+        <main class="p-4 transition-all duration-300 ease-in-out">
+          <router-view />
+        </main>
+      </div>
     </div>
   </div>
 </template>
