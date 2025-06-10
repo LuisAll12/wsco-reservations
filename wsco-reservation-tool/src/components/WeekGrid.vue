@@ -53,6 +53,7 @@ const events = ref([]);                // Reservierungs-Events für den Kalender
 const selectedBoatId = ref(null);      // Filter: gewählte Boots-ID (oder null für alle)
 const calendarRef = ref(null);
 const currentUserId = ref(null)
+const currentDate = ref(new Date());
 
 const currentViewLabel = computed(() => {
   switch (currentView.value) {
@@ -66,17 +67,11 @@ const currentViewLabel = computed(() => {
 });
 
 const currentMonthLabel = computed(() => {
-  const calInstance = calendarRef.value?.getInstance();
-  if (!calInstance) return '';
-  const momentDate = calInstance.getDate();
-  const jsDate = momentDate.toDate(); // moment → Date
-
-  return jsDate.toLocaleDateString('de-DE', {
+  return currentDate.value.toLocaleDateString('de-DE', {
     month: 'long',
     year: 'numeric'
   });
 });
-
 
 // Dynamisch den View an Bildschirm anpassen
 function updateResponsiveView() {
@@ -195,7 +190,7 @@ console.log('Start:', rangeStart.toDate?.(), 'End:', rangeEnd.toDate?.());
 onMounted(async () => {
   currentUserId.value = await getUserID();
   await refreshEvents();
-  calendarRef.value.getInstance().render(); // erzwinge Neuberechnung
+  calendarRef.value.getInstance().render(); 
 });
 
 watch(selectedBoatId, () => {
@@ -218,20 +213,20 @@ function today() {
 }
 
 function delayedRefresh() {
-  // Nach kurzer Verzögerung den neuen Bereich holen
   setTimeout(() => {
     const calInstance = calendarRef.value?.getInstance();
     if (!calInstance) return;
 
-    const currentStart = calInstance.getDateRangeStart();
-    const currentEnd = calInstance.getDateRangeEnd();
+    const currentMoment = calInstance.getDate(); 
+    const currentJsDate = currentMoment.toDate();
 
-    console.log('New range:', currentStart?.toDate?.(), '-', currentEnd?.toDate?.());
+    currentDate.value = currentJsDate; 
+
+    console.log('New range:', calInstance.getDateRangeStart()?.toDate?.(), '-', calInstance.getDateRangeEnd()?.toDate?.());
 
     refreshEvents(); // Jetzt korrekt
-  }, 50); // 50ms ist ausreichend
+  }, 50);
 }
-
 </script>
 <style scoped>
 .calendar-container {
