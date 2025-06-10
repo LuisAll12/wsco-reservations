@@ -1,37 +1,55 @@
 <template>
-  <div class="calendar-wrapper h-screen flex flex-col">
-    <div class="controls flex justify-between p-2">
-      <!-- Navigationselemente -->
-    </div>
-    <div class="calendar-container flex-1 overflow-auto">
+  <div class="calendar-wrapper h-screen flex flex-col bg-gray-50">
+    <!-- UI-konforme Navigation -->
+    <nav class="calendar-controls flex justify-between items-center px-6 py-3 bg-white border-b shadow-sm">
+      <div class="flex items-center space-x-2">
+        <button @click="today" class="flex items-center gap-2 px-3 py-1.5 rounded-md bg-gray-100 hover:bg-gray-200 text-sm font-medium transition">
+          <CalendarIcon class="w-4 h-4" />
+          <span>Heute</span>
+        </button>
+        <button @click="prev" class="btn-icon" aria-label="Zurück">
+          <ChevronLeftIcon class="w-5 h-5" />
+        </button>
+        <button @click="next" class="btn-icon" aria-label="Weiter">
+          <ChevronRightIcon class="w-5 h-5" />
+        </button>
+      </div>
+
+      <div class="text-sm text-gray-700 font-medium">
+        Ansicht: <span>{{ currentViewLabel }}</span>
+      </div>
+    </nav>
+
+    <!-- Kalender -->
+    <div class="calendar-container flex-1 overflow-hidden">
       <TuiCalendar
         ref="calendarRef"
-        class="w-full h-[calc(100vh-48px)]"
+        class="w-full h-full"
         :view="currentView"
         :events="events"
         :calendars="calendars"
         :use-detail-popup="true"
         :isReadOnly="true"
         :week="calendarOptions.week"
+        :day="calendarOptions.day"
         :timezone="calendarOptions.timezone"
         :theme="calendarOptions.theme"
       />
     </div>
-
-    <TuiCalendar ref="calendarRef" :view="currentView" :events="events" :calendars="calendars" :use-detail-popup="true"
-      :isReadOnly="true" :week="calendarOptions.week" :timezone="calendarOptions.timezone"
-      :theme="calendarOptions.theme" class="w-full" />
   </div>
 </template>
 
 
+
+
+
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed  } from 'vue';
 import TuiCalendar from 'toast-ui-calendar-vue3';
 import 'toast-ui-calendar-vue3/styles.css';
 import { getReservations } from '../services/GetAllRes.js'
 import { getUserID, getBoatName } from '../services/auth.js'
-
+import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/24/outline';
 
 // Reactive States
 const currentView = ref('week');        // aktuelle Ansicht: 'day' oder 'week'
@@ -39,6 +57,18 @@ const events = ref([]);                // Reservierungs-Events für den Kalender
 const selectedBoatId = ref(null);      // Filter: gewählte Boots-ID (oder null für alle)
 const calendarRef = ref(null);
 const currentUserId = ref(null)
+
+const currentViewLabel = computed(() => {
+  switch (currentView.value) {
+    case 'week':
+      return 'Woche';
+    case 'day':
+      return 'Tag';
+    default:
+      return currentView.value;
+  }
+});
+
 
 // Dynamisch den View an Bildschirm anpassen
 function updateResponsiveView() {
@@ -99,6 +129,7 @@ const calendarOptions = {
     }
   }
 };
+
 
 
 
@@ -180,5 +211,13 @@ function today() {
   flex-grow: 1;
   height: calc(100vh - 48px); /* assuming 48px für controls oben */
   overflow: hidden;
+}
+
+.btn {
+  @apply inline-flex items-center px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-sm rounded-md transition;
+}
+
+.btn-icon {
+  @apply p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition;
 }
 </style>
