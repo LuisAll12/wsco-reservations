@@ -67,6 +67,9 @@ async function checkIn(id) {
   console.log('Tasklist:', tasklistItems.value);
 }
 
+async function finish(id) {
+  await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/reservation/finish/${id}`, { method: "PUT", credentials: 'include' })
+}
 
 const taskStatus = ref([])
 
@@ -157,7 +160,8 @@ function canBeCheckedOut(reservation) {
             <ClockIcon class="icon-button" />
             Reservierung entgegennehmen
           </button>
-          <button v-else-if="reservation.status === 'checkedin' && canBeCheckedOut(reservation)" class="checkin-button">
+          <button v-else-if="reservation.status === 'checkedin' && canBeCheckedOut(reservation)"
+            @click="finish(reservation.id)" class="checkin-button">
             <ClockIcon class="icon-button" />
             Reservation Abgeben und Beenden
           </button>
