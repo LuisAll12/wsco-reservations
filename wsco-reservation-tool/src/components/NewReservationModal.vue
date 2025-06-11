@@ -186,7 +186,7 @@ const totalPrice = computed(() => {
                 </span>
               </ListboxButton>
               <ListboxOptions
-                class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white text-base shadow-lg  focus:outline-none sm:text-sm">
+                class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white text-base shadow-lg ring-1 ring-black/10 focus:outline-none sm:text-sm">
                 <ListboxOption v-for="boat in props.boats" :key="boat.id" :value="boat.id"
                   :disabled="boat.status !== 'available'" v-slot="{ active, selected, disabled }">
                   <li :class="[
