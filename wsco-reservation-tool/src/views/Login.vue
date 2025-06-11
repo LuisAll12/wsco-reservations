@@ -78,6 +78,8 @@ const EnterVerifyCode = async () => {
   if (!inputs.value || VerifyTry.value <= 0) return;
 
   const enteredCode = code.value.join("");
+  load.value = true;
+  errorMessage.value = "";
 
   try {
     const res = await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/auth/finish`, {
@@ -87,17 +89,19 @@ const EnterVerifyCode = async () => {
       },
       body: JSON.stringify({ email: LoginEmail.value, code: enteredCode }),
       credentials: "include",
-    }
-    );
+    });
+
     const data = await res.json();
 
     if (data.message === "success") {
-      VerifyCodeSent.value = false;
       successMessage.value = "Erfolgreich verifiziert!";
-      errorMessage.value = "";
+      // nicht mehr zurückspringen
+      await new Promise((resolve) => setTimeout(resolve, 1500)); // optional: kurzer UX-Delay
       router.push("/dashboard");
     } else {
       VerifyTry.value -= 1;
+      load.value = false;
+
       if (VerifyTry.value > 0) {
         errorMessage.value = `Falscher Code. Noch ${VerifyTry.value} Versuch${VerifyTry.value !== 1 ? 'e' : ''} übrig.`;
       } else {
@@ -105,13 +109,16 @@ const EnterVerifyCode = async () => {
         VerifyCodeSent.value = false;
         LoginEmail.value = "";
       }
+
       inputcode.value = "";
     }
   } catch (error) {
     console.error("Verification Error:", error.response ? error.response.data : error.message);
     errorMessage.value = "Ein Fehler ist aufgetreten. Bitte versuchen Sie es später noch einmal.";
+    load.value = false;
   }
 };
+
 </script>
 
 <template>
@@ -175,6 +182,9 @@ const EnterVerifyCode = async () => {
           </div>
 
           <p v-if="errorMessage" class="text-red-200 text-sm">{{ errorMessage }}</p>
+          <p v-if="successMessage && load" class="text-green-200 text-sm text-center">
+            {{ successMessage }} Weiterleitung...
+          </p>
 
           <button
             type="submit"
