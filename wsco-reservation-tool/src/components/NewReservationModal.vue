@@ -1,10 +1,9 @@
 <script setup>
 import { ref, computed, watch, onBeforeUnmount } from "vue";
-import { debounce } from 'lodash'
+import { debounce } from 'lodash';
 import { XMarkIcon, CheckIcon } from "@heroicons/vue/24/solid";
 import checkBoatAvailability from '../services/CheckBoatAvailability';
 
-// 1. First declare all reactive variables
 const availabilityError = ref("");
 const isCheckingAvailability = ref(false);
 const isSubmitting = ref(false);
@@ -23,42 +22,41 @@ const form = ref({
   notes: "",
 });
 
-// 2. Then declare props and emits
-const props = defineProps({
-  boats: Array,
-  currentUser: Object,
-  show: Boolean,
-});
+const props = defineProps({ boats: Array, currentUser: Object, show: Boolean });
 const emit = defineEmits(["close", "submit"]);
 
 const canSubmit = computed(() => {
-  const allChecklistChecked = form.value.checklist.every(item => item.checked)
-  const fromValid = !!form.value.from
-  const toValid = !!form.value.to
-  const boatSelected = !!form.value.boatId
-  const noAvailabilityError = availabilityError.value === ''
-  return allChecklistChecked && fromValid && toValid && boatSelected && noAvailabilityError
-})
-
-// 3. Then computed properties
-const totalPrice = computed(() => {
-  if (!form.value.boatId || !form.value.from || !form.value.to) return 0;
-
-  const from = new Date(form.value.from);
-  const to = new Date(form.value.to);
-
-  if (to <= from) return 0;
-
-  const boat = props.boats.find((b) => b.id === form.value.boatId);
-  if (!boat || !boat.pricePerBlock) return 0;
-
-  const hours = (to - from) / (1000 * 60 * 60);
-  return (hours * boat.pricePerBlock).toFixed(2);
+  const allChecked = form.value.checklist.every(i => i.checked);
+  const validDates = form.value.from && form.value.to && new Date(form.value.to) > new Date(form.value.from);
+  const boatOK = !!form.value.boatId;
+  return allChecked && validDates && boatOK && availabilityError.value === '';
 });
 
-// console.log(form.value.boatId);
 
-// 4. Then utility functions
+watch(
+  [() => form.value.boatId, () => form.value.from, () => form.value.to],
+  (newValues) => {
+    debouncedCheckAvailability(newValues);
+  },
+  { deep: true }
+);
+
+const sessionKey = document.cookie.split('; ').find(r=>r.startsWith('session_key='))?.split('=')[1];
+
+function handleSubmit() {
+  isSubmitting.value = true;
+  const reservationData = {
+    FK_BoatId: form.value.boatId,
+    startDate: form.value.from,
+    endDate: form.value.to,
+    price: parseFloat(totalPrice.value),
+  };
+  emit("submit", reservationData);
+}
+
+onBeforeUnmount(() => debouncedCheckAvailability.cancel());
+
+
 const debouncedCheckAvailability = debounce(async ([boatId, from, to]) => {
   if (!boatId || !from || !to) {
     availabilityError.value = '';
@@ -110,341 +108,112 @@ watch(
   { deep: true }
 );
 
-//get user sessionkey from cookies
-const sessionKey = document.cookie
-  .split('; ')
-  .find(row => row.startsWith('session_key='))
-  ?.split('=')[1];
 
-// 6. Finally component methods
-function handleSubmit() {
-  console.log("Sessionkey:", sessionKey);
-  const fromDate = new Date(form.value.from);
-  const toDate = new Date(form.value.to);
-  const reservationData = {
-    FK_BoatId: form.value.boatId,
-    startDate: form.value.from,
-    endDate: form.value.to,
-    price: parseFloat(totalPrice.value),
-  };
 
-  emit("submit", reservationData);
-}
-onBeforeUnmount(() => {
-  debouncedCheckAvailability.cancel();
-  console.log("User", props.currentUser);
+const totalPrice = computed(() => {
+  if (!form.value.boatId || !form.value.from || !form.value.to) return 0;
+
+  const from = new Date(form.value.from);
+  const to = new Date(form.value.to);
+
+  if (to <= from) return 0;
+
+  const boat = props.boats.find((b) => b.id === form.value.boatId);
+  if (!boat || !boat.pricePerBlock) return 0;
+
+  const hours = (to - from) / (1000 * 60 * 60);
+  return (hours * boat.pricePerBlock).toFixed(2);
 });
+
+
 </script>
 
 <template>
-  <div v-if="show" class="modal-overlay">
-    <div class="modal">
-      <div class="modal-header">
-        <h2>Neue Reservation</h2>
-        <button @click="$emit('close')" class="close-btn">
-          <XMarkIcon class="icon" />
+  <div v-if="show" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4 overflow-hidden transform transition-transform scale-100">
+      
+      <header class="flex justify-between items-center px-6 py-4 border-b">
+        <h2 class="text-lg font-semibold text-gray-800">Neue Reservation</h2>
+        <button @click="$emit('close')" aria-label="Schliessen" class="p-2 rounded hover:bg-gray-100">
+          <XMarkIcon class="h-5 w-5 text-gray-600" />
         </button>
-      </div>
-
-      <div class="modal-body">
-        <!-- <div class="form-group">
-          <label>Title</label>
-          <input v-model="form.title" placeholder="Reservation title" />
-        </div> -->
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Von</label>
-            <input type="datetime-local" v-model="form.from" :min="new Date().toISOString().slice(0, 16)"
-              @change="checkAvailability">
+      </header>
+      
+      <div class="p-6 space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Von</label>
+            <input type="datetime-local" v-model="form.from"
+                   :min="new Date().toISOString().slice(0,16)"
+                   class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500"/>
           </div>
-          <div class="form-group">
-            <label>Bis</label>
-            <input type="datetime-local" v-model="form.to" :min="form.from || new Date().toISOString().slice(0, 16)"
-              @change="checkAvailability">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Bis</label>
+            <input type="datetime-local" v-model="form.to"
+                   :min="form.from || new Date().toISOString().slice(0,16)"
+                   class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500"/>
           </div>
         </div>
-        <div v-if="isCheckingAvailability" class="loading-message">
-          <span class="loader"></span> Überprüfe Verfügbarkeit...
+
+        <div v-if="isCheckingAvailability" class="flex items-center text-gray-600">
+          <svg class="animate-spin h-5 w-5 mr-2 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+          </svg>
+          Verfügbarkeit prüfen...
         </div>
 
-        <div v-if="availabilityError" class="error-message">
-          {{ availabilityError }}
-        </div>
+        <p v-if="availabilityError" class="text-red-600 bg-red-50 p-2 rounded-md">{{ availabilityError }}</p>
+        <p v-else-if="form.boatId && form.from && form.to" class="flex items-center text-green-600 bg-green-50 p-2 rounded-md">
+          <CheckIcon class="h-5 w-5 mr-2" /> Boot ist verfügbar
+        </p>
 
-        <div v-else-if="form.boatId && form.from && form.to" class="success-message">
-          <CheckIcon class="icon" /> Boot ist verfügbar
-        </div>
-        <div class="form-group">
-          <label>Boot</label>
-          <select v-model="form.boatId" @change="availabilityError = ''">
-            <option value="">Wähle ein Boot</option>
-            <option v-for="boat in boats" :key="boat.id" :value="boat.id" :disabled="boat.status === 'unavailable'">
-              {{ boat.name }} ({{ boat.numberplate }})
-              <span v-if="boat.status === 'unavailable'"> - Nicht verfügbar</span>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Boot</label>
+          <select v-model="form.boatId" @change="availabilityError = ''"
+                  class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500">
+            <option value="">– Wähle ein Boot –</option>
+            <option v-for="boat in props.boats" :key="boat.id" :value="boat.id" :disabled="boat.status!=='available'">
+              {{ boat.name }} ({{ boat.numberplate }}) <span v-if="boat.status!=='available'"> – nicht verfügbar</span>
             </option>
           </select>
         </div>
 
-        <div class="form-group">
-          <label>Totaler Preis</label>
-          <div class="price-display">CHF {{ totalPrice }}</div>
+        <div class="flex justify-between items-center">
+          <span class="text-sm font-medium text-gray-700">Totaler Preis</span>
+          <span class="text-lg font-semibold text-gray-900">CHF {{ totalPrice }}</span>
         </div>
 
-        <div class="checklist">
-          <h4>Voraussetzungen</h4>
-          <div v-for="(item, index) in form.checklist" :key="index" class="checklist-item"
-            @click="item.checked = !item.checked">
-            <div class="checkbox" :class="{ checked: item.checked }">
-              <CheckIcon v-if="item.checked" class="check-icon" />
+        <div class="space-y-3 pt-4">
+          <h4 class="text-sm font-medium text-gray-800">Voraussetzungen</h4>
+          <div v-for="(item, idx) in form.checklist" :key="idx"
+               @click="item.checked = !item.checked"
+               class="flex items-center space-x-2 cursor-pointer">
+            <div :class="['flex-none w-5 h-5 border rounded-md flex items-center justify-center', 
+                          item.checked ? 'bg-indigo-600 border-indigo-600' : 'bg-white border-gray-300']">
+              <CheckIcon v-if="item.checked" class="h-4 w-4 text-white"/>
             </div>
-            <span>{{ item.text }}</span>
+            <span class="text-sm text-gray-700">{{ item.text }}</span>
           </div>
         </div>
       </div>
-
-      <div class="modal-footer">
-        <button @click="$emit('close')" class="btn secondary">Abbrechen</button>
-        <button @click="handleSubmit" :disabled="isSubmitting || !canSubmit" class="btn primary">
-          <span v-if="isSubmitting">Buchen...</span>
-          <button v-else class="stripe-payment">
-            💳 Jetzt mit Stripe bezahlen
-          </button>
+      
+      <footer class="px-6 py-4 border-t flex justify-end gap-3">
+        <button @click="$emit('close')" class="py-2 px-4 font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+          Abbrechen
         </button>
-      </div>
+        <button @click="handleSubmit" :disabled="isSubmitting || !canSubmit"
+                class="relative inline-flex items-center justify-center py-2 px-6 font-medium text-white bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-lg shadow-lg
+                       hover:from-indigo-600 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
+          <svg v-if="isSubmitting" class="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+          </svg>
+          <span v-if="!isSubmitting">💳 Jetzt mit Stripe</span>
+          <span v-else>Wird abgeschlossen…</span>
+        </button>
+      </footer>
+
     </div>
   </div>
 </template>
-
-<style scoped>
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex !important;
-  opacity: 1 !important;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  /* High z-index to appear above everything */
-}
-
-.modal {
-  background: white;
-  border-radius: 8px;
-  width: 500px;
-  max-width: 90vw;
-  max-height: 90vh;
-  overflow-y: auto;
-  position: relative;
-  z-index: 1001;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 24px;
-  border-bottom: 1px solid #eee;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-}
-
-.icon {
-  width: 24px;
-  height: 24px;
-}
-
-.modal-body {
-  padding: 24px;
-}
-
-.form-group {
-  margin-bottom: 16px;
-}
-
-.form-row {
-  display: flex;
-  gap: 16px;
-}
-
-.form-row .form-group {
-  flex: 1;
-}
-
-label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 500;
-}
-
-input,
-select,
-textarea {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-.price-display {
-  padding: 8px 12px;
-  background: #f5f5f5;
-  border-radius: 4px;
-}
-
-.checklist {
-  margin: 24px 0;
-}
-
-.checklist-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 12px;
-  cursor: pointer;
-}
-
-.checkbox {
-  width: 20px;
-  height: 20px;
-  border: 2px solid #ddd;
-  border-radius: 4px;
-  margin-right: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.checkbox.checked {
-  background: #4caf50;
-  border-color: #4caf50;
-}
-
-.check-icon {
-  width: 14px;
-  height: 14px;
-  color: white;
-}
-
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  padding: 16px 24px;
-  border-top: 1px solid #eee;
-}
-
-.btn {
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.btn.primary {
-  background: #3498db;
-  color: white;
-  border: none;
-}
-
-.btn.primary:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
-
-.btn.secondary {
-  background: white;
-  border: 1px solid #ddd;
-}
-
-.error-message {
-  color: #ff4444;
-  margin: 10px 0;
-  padding: 10px;
-  background: #ffeeee;
-  border-radius: 4px;
-}
-
-.loading-message {
-  color: #666;
-  margin: 10px 0;
-  padding: 10px;
-  background: #f8f8f8;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-}
-
-.loader {
-  border: 2px solid #f3f3f3;
-  border-top: 2px solid #3498db;
-  border-radius: 50%;
-  width: 16px;
-  height: 16px;
-  animation: spin 1s linear infinite;
-  margin-right: 8px;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.success-message {
-  color: #4CAF50;
-  margin: 10px 0;
-  padding: 10px;
-  background: #f0fff0;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-}
-
-.success-message .icon {
-  width: 16px;
-  height: 16px;
-  margin-right: 8px;
-}
-
-.error-message {
-  color: #ff4444;
-  margin: 10px 0;
-  padding: 10px;
-  background: #ffeeee;
-  border-radius: 4px;
-}
-
-.stripe-payment {
-  background: linear-gradient(135deg, #6772e5, #5a67d8);
-  color: #fff;
-  border: none;
-  padding: 14px 24px;
-  font-size: 16px;
-  font-weight: 600;
-  border-radius: 12px;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.stripe-payment:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-  background: linear-gradient(135deg, #6b73ff, #667eea);
-}
-</style>
