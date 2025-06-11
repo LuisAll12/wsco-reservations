@@ -155,19 +155,19 @@ const calendars = [
     id: 'mine',
     name: 'Meine Reservierungen',
     backgroundColor: '#34d399',
-    borderColor: '#34d399'
+    borderColor: '#059669'
   },
   {
     id: 'others',
     name: 'Andere Reservierungen',
     backgroundColor: '#3b82f6',
-    borderColor: '#3b82f6'
+    borderColor: '#1d4ed8'
   },
   {
     id: 'cancelled',
     name: 'Storniert',
-    backgroundColor: '#fca5a5',
-    borderColor: '#fca5a5'
+    backgroundColor: '#FF6161',
+    borderColor: '#dc2626'
   }
 ];
 
