@@ -18,6 +18,12 @@ onMounted(async () => {
     const boat = await GetBoat(reservation.boat.id)
     reservation.boat = boat
   }
+
+  reservations.value.sort((a, b) => {
+    if (a.status === 'cancelled' && b.status !== 'cancelled') return 1
+    if (a.status !== 'cancelled' && b.status === 'cancelled') return -1
+    return 0
+  });
 })
 
 function canBeCheckedIn(reservation) {
@@ -169,7 +175,7 @@ function canBeCheckedOut(reservation) {
             disabled>
             <ClockIcon class="icon-button" />
             Reservierung kann in {{ Math.floor((new Date(reservation.endDate) - new Date()) / (1000 * 60 * 60))
-            }} Stunden {{ Math.ceil((new Date(reservation.endDate) - new Date()) / (1000 * 60)) % 60 }} Minuten
+            }} h {{ Math.ceil((new Date(reservation.endDate) - new Date()) / (1000 * 60)) % 60 }} min
             abgegeben werden
           </button>
           <button v-else-if="reservation.status === 'completed'" class="checkin-button" disabled>
