@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onBeforeUnmount } from "vue";
+import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
 import { debounce } from 'lodash';
 import { XMarkIcon, CheckIcon } from "@heroicons/vue/24/solid";
 import checkBoatAvailability from '../services/CheckBoatAvailability';
@@ -13,6 +13,7 @@ import {
 const availabilityError = ref("");
 const isCheckingAvailability = ref(false);
 const isSubmitting = ref(false);
+
 
 const form = ref({
   title: "",
@@ -47,8 +48,6 @@ watch(
   { deep: true }
 );
 
-const sessionKey = document.cookie.split('; ').find(r => r.startsWith('session_key='))?.split('=')[1];
-
 function handleSubmit() {
   isSubmitting.value = true;
   const reservationData = {
@@ -60,7 +59,20 @@ function handleSubmit() {
   emit("submit", reservationData);
 }
 
-onBeforeUnmount(() => debouncedCheckAvailability.cancel());
+onMounted(() => {
+  window.addEventListener('keydown', handleKeydown);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleKeydown);
+});
+
+function handleKeydown(event) {
+  console.log("Key pressed:", event.key);
+  if (event.key === 'Escape') {
+    emit('close');
+  }
+}
 
 
 const debouncedCheckAvailability = debounce(async ([boatId, from, to]) => {

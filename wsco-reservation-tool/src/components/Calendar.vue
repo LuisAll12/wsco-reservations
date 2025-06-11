@@ -1,15 +1,12 @@
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
-import Sidebar from './Sidebar.vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount  } from 'vue'
 import CalendarHeader from './CalendarHeader.vue'
 import WeekGrid from './WeekGrid.vue'
 import { startOfWeek, addDays } from 'date-fns'
 import { useRouter } from "vue-router";
 import { getReservations } from '../services/GetAllRes';
-import getBoats from '../services/GetAllBoats'
 import { getUserBySessionKey } from '../services/GetUserInfo'
 import NewReservationModal from './NewReservationModal.vue'
-import axios from "axios";
 
 const showReservationModal = ref(false)
 const router = useRouter();
@@ -18,7 +15,6 @@ const boats = ref([])
 const currentUser = ref(null);
 const isSubmitting = ref(false);
 
-const baseId = "appzBNlFfIJC6865x";
 
 // Mock-Daten
 const user = reactive({
@@ -33,10 +29,6 @@ const currentDate = ref(new Date())
 const selectedBoat = ref(null)
 
 const isSidebarOpen = ref(true);
-function toggleSidebar() {
-  isSidebarOpen.value = !isSidebarOpen.value;
-}
-
 
 const handleBoatChange = async (boatId) => {
   selectedBoat.value = boatId || null
