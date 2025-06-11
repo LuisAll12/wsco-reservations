@@ -106,13 +106,21 @@ const calendarOptions = {
     milestoneView: false,
     dayNames: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
     template: {
-      time: schedule => {
-        const start = new Date(schedule.start);
-        const h = String(start.getHours()).padStart(2, '0');
-        const m = String(start.getMinutes()).padStart(2, '0');
-        return `${h}:${m}`;
-      }
-    }
+  time: schedule => {
+    const start = new Date(schedule.start);
+    const h = String(start.getHours()).padStart(2, '0');
+    const m = String(start.getMinutes()).padStart(2, '0');
+    return `${h}:${m}`;
+  },
+  milestone(schedule) {
+    return `<span class="bg-red-500">${schedule.title}</span>`;
+  },
+  popupDetailDate(schedule) {
+    return schedule.start.toLocaleString();
+  },
+  
+}
+
   },
   day: {
     hourStart: 4,
@@ -166,8 +174,8 @@ const calendars = [
   {
     id: 'cancelled',
     name: 'Storniert',
-    backgroundColor: '#9ca3af',
-    borderColor: '#9ca3af'
+    backgroundColor: '#FF3F3F',
+    borderColor: '#b91c1c'
   }
 ];
 
@@ -245,6 +253,20 @@ function delayedRefresh() {
   height: calc(100vh - 48px);
   /* assuming 48px für controls oben */
   overflow: hidden;
+}
+
+:deep(.toastui-calendar-event[data-calendar-id="cancelled"]) {
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(255, 0, 0, 0.3) 0px,
+    rgba(255, 0, 0, 0.3) 6px,
+    transparent 6px,
+    transparent 12px
+  ) !important;
+  background-color: #f3f4f6 !important;
+  color: #b91c1c !important; /* dunkles Rot für Text */
+  border-radius: 4px;
+  font-weight: 600;
 }
 
 </style>
