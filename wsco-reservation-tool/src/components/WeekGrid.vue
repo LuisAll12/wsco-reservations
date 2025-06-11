@@ -23,7 +23,7 @@
       </div>
 
   <!-- Mitte: Legende -->
-  <div class="flex items-center gap-4">
+  <div class="hidden md:flex items-center gap-4">
     <template v-for="legend in calendars" :key="legend.id">
       <div class="flex items-center gap-1 text-sm text-gray-700">
         <span :style="{ backgroundColor: legend.backgroundColor }" class="w-3 h-3 rounded-full inline-block border border-gray-300"></span>
@@ -32,8 +32,28 @@
     </template>
   </div>
 
+  <!-- Mobile: Tooltip mit Dropdown -->
+  <div class="relative md:hidden">
+    <button @click="legendOpen = !legendOpen"
+      class="flex items-center gap-1 text-sm font-medium text-gray-700 px-3 py-1.5 rounded-md bg-white border border-gray-300 shadow-sm hover:bg-gray-100 transition">
+      <span>Legende</span>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+      </svg>
+    </button>
+
+    <div v-if="legendOpen"
+      class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-2">
+      <div v-for="legend in calendars" :key="legend.id" class="flex items-center px-3 py-1 text-sm text-gray-700">
+        <span :style="{ backgroundColor: legend.backgroundColor, borderColor: legend.borderColor }"
+          class="w-3 h-3 rounded-full inline-block border mr-2"></span>
+        {{ legend.name }}
+      </div>
+    </div>
+  </div>
+
   <!-- Rechts: Ansicht -->
-  <div class="text-sm text-gray-700 font-medium whitespace-nowrap">
+  <div class="text-sm text-gray-700 font-medium whitespace-nowrap hidden md:block">
     Ansicht: <span>{{ currentViewLabel }}</span>
   </div>
 </nav>
@@ -67,8 +87,7 @@ const selectedBoatId = ref(null);      // Filter: gewählte Boots-ID (oder null 
 const calendarRef = ref(null);
 const currentUserId = ref(null)
 const currentDate = ref(new Date());
-const selectedEvent = ref(null)
-const showModal = ref(false)
+const legendOpen = ref(false);
 
 
 const currentViewLabel = computed(() => {
@@ -249,6 +268,12 @@ function delayedRefresh() {
     refreshEvents(); // Jetzt korrekt
   }, 50);
 }
+
+document.addEventListener('click', (e) => {
+  if (!(e.target.closest('.relative.md\\:hidden'))) {
+    legendOpen.value = false;
+  }
+});
 </script>
 <style scoped>
 .calendar-container {
