@@ -2,9 +2,9 @@
   <div class="calendar-wrapper min-h-full flex flex-col bg-gray-50">
     <!-- UI-konforme Navigation -->
     <nav class="calendar-controls flex justify-between items-center px-6 py-3 bg-white border-b shadow-sm">
+      <!-- Links: Navigation -->
       <div class="flex items-center space-x-4">
-        <button @click="today"
-          class="flex items-center gap-2 px-3 py-1.5 rounded-md bg-gray-100 hover:bg-gray-200 text-sm font-medium transition">
+        <button @click="today" class="flex items-center gap-2 px-3 py-1.5 rounded-md bg-gray-100 hover:bg-gray-200 text-sm font-medium transition">
           <CalendarIcon class="w-4 h-4" />
           <span>Heute</span>
         </button>
@@ -22,10 +22,21 @@
         </button>
       </div>
 
-      <div class="text-sm text-gray-700 font-medium">
-        Ansicht: <span>{{ currentViewLabel }}</span>
+  <!-- Mitte: Legende -->
+  <div class="flex items-center gap-4">
+    <template v-for="legend in calendars" :key="legend.id">
+      <div class="flex items-center gap-1 text-sm text-gray-700">
+        <span :style="{ backgroundColor: legend.backgroundColor }" class="w-3 h-3 rounded-full inline-block border border-gray-300"></span>
+        <span>{{ legend.name }}</span>
       </div>
-    </nav>
+    </template>
+  </div>
+
+  <!-- Rechts: Ansicht -->
+  <div class="text-sm text-gray-700 font-medium whitespace-nowrap">
+    Ansicht: <span>{{ currentViewLabel }}</span>
+  </div>
+</nav>
 
     <!-- Kalender -->
     <div class="calendar-container flex-1 overflow-hidden">
