@@ -134,14 +134,23 @@ const calendarOptions = {
     const m = String(start.getMinutes()).padStart(2, '0');
     return `${h}:${m}`;
   },
-  milestone(schedule) {
-    return `<span class="bg-red-500">${schedule.title}</span>`;
+  popupDetailTitle(schedule) {
+    return `<strong style="font-size: 15px;">🚤 ${schedule.title}</strong>`;
   },
   popupDetailDate(schedule) {
-    return schedule.start.toLocaleString();
+    const start = new Date(schedule.start);
+    const end = new Date(schedule.end);
+    const dateStr = `${start.toLocaleDateString('de-DE')} ${start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} – ${end.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`;
+    return `<span style="font-size: 13px;">🕒 ${dateStr}</span>`;
   },
-  
+  popupDetailUser(schedule) {
+    return `<span style="font-size: 13px;">👤 Reserviert durch: ${schedule.reservedBy || 'Unbekannt'}</span>`;
+  },
+  popupDetailState(schedule) {
+    return `<span style="font-size: 13px;">📌 Status: ${schedule.calendarId === 'cancelled' ? 'Storniert' : 'Bestätigt'}</span>`;
+  }
 }
+
 
   },
   day: {
@@ -156,6 +165,16 @@ const calendarOptions = {
         const h = String(start.getHours()).padStart(2, '0');
         const m = String(start.getMinutes()).padStart(2, '0');
         return `${h}:${m}`;
+      },
+      popupDetailDate(schedule) {
+        const start = new Date(schedule.start);
+        const end = new Date(schedule.end);
+        return `${start.toLocaleDateString('de-DE', {
+          weekday: 'short',
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        })} ${start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} – ${end.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`;
       }
     }
   },
