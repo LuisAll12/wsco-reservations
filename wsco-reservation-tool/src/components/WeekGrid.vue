@@ -170,7 +170,7 @@ const calendars = [
   },
   {
     id: 'others',
-    name: 'Andere Reservierungen',
+    name: 'Fremde Reservierungen',
     backgroundColor: '#3b82f6',
     borderColor: '#1d4ed8'
   },
