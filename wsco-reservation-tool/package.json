@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@date-io/date-fns": "^3.2.1",
+    "@headlessui/vue": "^1.7.23",
     "@heroicons/vue": "^2.2.0",
     "@tailwindcss/postcss": "^4.1.8",
     "airtable": "^0.12.2",
