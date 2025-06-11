@@ -18,7 +18,7 @@ const form = ref({
     { text: "Ich erkläre mich mit den Regeln der Bootsnutzung einverstanden", checked: false },
     { text: "Ich bestätige, dass ich die erforderliche Lizenz besitze", checked: false },
     { text: "Ich werde jeden Schaden sofort melden", checked: false },
-    { text: "Ich akzeptieren die AGBs", checked: false },
+    { text: "Ich akzeptiere die AGBs", checked: false },
   ],
   notes: "",
 });
@@ -201,19 +201,15 @@ onBeforeUnmount(() => {
             <span>{{ item.text }}</span>
           </div>
         </div>
-        <div class="payment-info">
-          <h4>Hier zur Bezahlung</h4>
-          <button class="stripe-payment">
-            💳 Jetzt mit Stripe bezahlen
-          </button>
-        </div>
       </div>
 
       <div class="modal-footer">
         <button @click="$emit('close')" class="btn secondary">Abbrechen</button>
         <button @click="handleSubmit" :disabled="isSubmitting || !canSubmit" class="btn primary">
           <span v-if="isSubmitting">Buchen...</span>
-          <span v-else>Reservierung abschicken</span>
+          <button v-else class="stripe-payment">
+            💳 Jetzt mit Stripe bezahlen
+          </button>
         </button>
       </div>
     </div>
