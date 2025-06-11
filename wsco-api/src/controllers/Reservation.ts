@@ -154,6 +154,18 @@ export const setReservationAsCancelled = async (req: Request, res: Response): Pr
     }
 }
 
+export const finishReservation = async (req: Request, res: Response): Promise<void> => {
+    const id = req.params.id;
+
+    try {
+        await ReservationModel.markReservationAsCompleted(id);
+        res.status(200).json({ message: "success" });
+    } catch (error) {
+        res.status(409).json({ error: error });
+        return;
+    }
+}
+
 export const getReservationsTasklist = async (req: Request, res: Response): Promise<void> => {
     const id = req.params.id;
 

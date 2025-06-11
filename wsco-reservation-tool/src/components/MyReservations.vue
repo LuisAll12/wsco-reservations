@@ -18,6 +18,12 @@ onMounted(async () => {
     const boat = await GetBoat(reservation.boat.id)
     reservation.boat = boat
   }
+
+  reservations.value.sort((a, b) => {
+    if (a.status === 'cancelled' && b.status !== 'cancelled') return 1
+    if (a.status !== 'cancelled' && b.status === 'cancelled') return -1
+    return 0
+  });
 })
 
 function canBeCheckedIn(reservation) {
@@ -67,6 +73,9 @@ async function checkIn(id) {
   console.log('Tasklist:', tasklistItems.value);
 }
 
+async function finish(id) {
+  await fetch(`${import.meta.env.VITE_APP_BACKEND_BASEURL}/reservation/finish/${id}`, { method: "PUT", credentials: 'include' })
+}
 
 const taskStatus = ref([])
 
@@ -157,7 +166,8 @@ function canBeCheckedOut(reservation) {
             <ClockIcon class="icon-button" />
             Reservierung entgegennehmen
           </button>
-          <button v-else-if="reservation.status === 'checkedin' && canBeCheckedOut(reservation)" class="checkin-button">
+          <button v-else-if="reservation.status === 'checkedin' && canBeCheckedOut(reservation)"
+            @click="finish(reservation.id)" class="checkin-button">
             <ClockIcon class="icon-button" />
             Reservation Abgeben und Beenden
           </button>
@@ -165,7 +175,7 @@ function canBeCheckedOut(reservation) {
             disabled>
             <ClockIcon class="icon-button" />
             Reservierung kann in {{ Math.floor((new Date(reservation.endDate) - new Date()) / (1000 * 60 * 60))
-            }} Stunden {{ Math.ceil((new Date(reservation.endDate) - new Date()) / (1000 * 60)) % 60 }} Minuten
+            }} h {{ Math.ceil((new Date(reservation.endDate) - new Date()) / (1000 * 60)) % 60 }} min
             abgegeben werden
           </button>
           <button v-else-if="reservation.status === 'completed'" class="checkin-button" disabled>

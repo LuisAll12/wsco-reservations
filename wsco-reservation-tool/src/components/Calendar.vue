@@ -176,12 +176,12 @@ function validateReservation(boatId, from, to) {
 </script>
 
 <template>
-  <main class="main-content">
+  <main class="main-content min-h-full flex flex-col max-h-dvh">
     <CalendarHeader :user="user" :boats="boats" :current-date="currentDate" :selected-boat="selectedBoat"
       :currentUser="currentUser" @prev-week="prevWeek" @next-week="nextWeek" @new-reservation="handleNewReservation"
       @boat-change="handleBoatChange" />
 
-    <WeekGrid :days="weekDays" :reservations="reservations" :selected-boat="selectedBoat" :boats="boats"
+    <WeekGrid class="flex-1" :days="weekDays" :reservations="reservations" :selected-boat="selectedBoat" :boats="boats"
       :current-user-id="currentUser?.id" />
 
   </main>

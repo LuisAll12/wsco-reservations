@@ -18,6 +18,7 @@ const form = ref({
     { text: "Ich erkläre mich mit den Regeln der Bootsnutzung einverstanden", checked: false },
     { text: "Ich bestätige, dass ich die erforderliche Lizenz besitze", checked: false },
     { text: "Ich werde jeden Schaden sofort melden", checked: false },
+    { text: "Ich akzeptieren die AGBs", checked: false },
   ],
   notes: "",
 });

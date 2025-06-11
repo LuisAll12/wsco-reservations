@@ -12,6 +12,6 @@ router.use('/admin', admin);
 router.use('/auth', auth);
 router.use('/reservation', reservation);
 router.use('/boat', boat);
-router.use('/checklist', Checklist); // Assuming you will implement the checklist routes in the future
+router.use('/checklist', Checklist);
 
 export default router;

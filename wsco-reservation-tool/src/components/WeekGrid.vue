@@ -1,9 +1,10 @@
 <template>
-  <div class="calendar-wrapper h-screen flex flex-col bg-gray-50">
+  <div class="calendar-wrapper min-h-full flex flex-col bg-gray-50">
     <!-- UI-konforme Navigation -->
     <nav class="calendar-controls flex justify-between items-center px-6 py-3 bg-white border-b shadow-sm">
       <div class="flex items-center space-x-4">
-        <button @click="today" class="flex items-center gap-2 px-3 py-1.5 rounded-md bg-gray-100 hover:bg-gray-200 text-sm font-medium transition">
+        <button @click="today"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-md bg-gray-100 hover:bg-gray-200 text-sm font-medium transition">
           <CalendarIcon class="w-4 h-4" />
           <span>Heute</span>
         </button>
@@ -28,18 +29,9 @@
 
     <!-- Kalender -->
     <div class="calendar-container flex-1 overflow-hidden">
-      <TuiCalendar 
-        ref="calendarRef" 
-        class="w-full h-full" 
-        :view="currentView" 
-        :events="events" 
-        :calendars="calendars"
-        :use-detail-popup="true" 
-        :isReadOnly="true" 
-        :week="calendarOptions.week" 
-        :day="calendarOptions.day"
-        :timezone="calendarOptions.timezone" 
-        :theme="calendarOptions.theme"/>
+      <TuiCalendar ref="calendarRef" class="w-full h-full" :view="currentView" :events="events" :calendars="calendars"
+        :use-detail-popup="true" :isReadOnly="true" :week="calendarOptions.week" :day="calendarOptions.day"
+        :timezone="calendarOptions.timezone" :theme="calendarOptions.theme" />
     </div>
   </div>
 
@@ -50,7 +42,7 @@
 
 
 <script setup>
-import { ref, onMounted, watch, computed, nextTick  } from 'vue';
+import { ref, onMounted, watch, computed, nextTick } from 'vue';
 import TuiCalendar from 'toast-ui-calendar-vue3';
 import 'toast-ui-calendar-vue3/styles.css';
 import { getReservations } from '../services/GetAllRes.js'
@@ -174,15 +166,15 @@ const calendars = [
   {
     id: 'cancelled',
     name: 'Storniert',
-    backgroundColor: '#FF3F3F',
-    borderColor: '#b91c1c'
+    backgroundColor: '#fca5a5',
+    borderColor: '#fca5a5'
   }
 ];
 
 
 // Funktion, um basierend auf aktueller View den Zeitraum zu ermitteln und Events zu laden
 async function refreshEvents() {
-  
+
   const calInstance = calendarRef.value?.getInstance();
   if (!calInstance) return;
   const rangeStart = calInstance.getDateRangeStart();
@@ -209,7 +201,7 @@ async function refreshEvents() {
 onMounted(async () => {
   currentUserId.value = await getUserID();
   await refreshEvents();
-  calendarRef.value.getInstance().render(); 
+  calendarRef.value.getInstance().render();
 });
 
 watch(selectedBoatId, () => {
@@ -236,10 +228,10 @@ function delayedRefresh() {
     const calInstance = calendarRef.value?.getInstance();
     if (!calInstance) return;
 
-    const currentMoment = calInstance.getDate(); 
+    const currentMoment = calInstance.getDate();
     const currentJsDate = currentMoment.toDate();
 
-    currentDate.value = currentJsDate; 
+    currentDate.value = currentJsDate;
 
     console.log('New range:', calInstance.getDateRangeStart()?.toDate?.(), '-', calInstance.getDateRangeEnd()?.toDate?.());
 
