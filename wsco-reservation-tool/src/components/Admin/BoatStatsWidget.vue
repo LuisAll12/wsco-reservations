@@ -17,7 +17,7 @@
             class="inline-flex items-center justify-center px-2 py-1 text-xs font-semibold rounded-full"
             :class="boat.available ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
           >
-            {{ boat.available ? '✔ Verfügbar' : '✖ In Reparatur' }}
+            {{ boat.available == 'available' ? '✔ Verfügbar' : '✖ In Reparatur' }}
           </span>
         </div>
       </div>
@@ -39,12 +39,13 @@ onMounted(async () => {
   });
 
   const data = await res.json();
+  console.log("Boote:", data);
 
   boats.value = data.map(boat => ({
     id: boat.id,
     name: boat.name,
     numberplate: boat.numberplate,
-    available: boat.available // boolean
+    available: boat.status // boolean
   }));
 });
 </script>
