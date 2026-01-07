@@ -10,6 +10,7 @@ const MyReservations = () => import(/* webpackChunkName: "MyReservations" */ '..
 const BoatDetail = () => import(/* webpackChunkName: "BoatDetail" */ '../components/BoatDetail.vue');
 const Calendar = () => import(/* webpackChunkName: "Dashboard" */ '../components/Calendar.vue')
 const Settings = () => import(/* webpackChunkName: "Settings" */ '../components/Settings.vue');
+const Help = () => import(/* webpackChunkName: "Help" */ '../components/Help.vue');
 
 const routes = [
     {
@@ -45,7 +46,7 @@ const routes = [
             },
             {
                 path: 'hilfe',
-                component: MyReservations
+                component: Help
             },
             {
                 path: 'settings',
