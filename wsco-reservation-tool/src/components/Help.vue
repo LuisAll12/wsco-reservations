@@ -4,7 +4,7 @@
 
 <template>
     <h1>We are working on it</h1>
-    <video src="../assets/Cat Working GIF.gif"></video>
+    <img src="../assets/Cat Working GIF.gif"></img>
 </template>
 
 <style scoped>
